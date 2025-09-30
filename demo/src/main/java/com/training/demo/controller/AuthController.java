@@ -1,0 +1,50 @@
+package com.training.demo.controller;
+
+import com.training.demo.dto.request.Auth.LoginRequest;
+import com.training.demo.dto.request.Auth.RegisterRequest;
+import com.training.demo.dto.response.BaseResponse;
+import com.training.demo.service.AuthService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+@Slf4j
+@Validated
+public class AuthController {
+
+    private final AuthService authService;
+
+    /**
+     * Sử lí authenticate user
+     * @param request Username/Password
+     * @return AccessToken/RefreshToken
+     */
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest request) {
+        log.info("[AUTH] API login with username: {}", request.getUsername());
+        return ResponseEntity.ok(BaseResponse
+                .success(authService.authenticate(request)));
+    }
+
+    /**
+     * Đăng kí account
+     * @param request Info user
+     * @return Success
+     */
+    @PostMapping("/register")
+    ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
+        log.info("[AUTH] API register new account with username: {}", request.getUsername());
+        authService.register(request);
+        return ResponseEntity.ok(BaseResponse.success());
+    }
+
+}

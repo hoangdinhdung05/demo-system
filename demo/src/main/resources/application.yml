@@ -1,0 +1,42 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: demo-system
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/demo-system
+    username: root
+    password: 123456789
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  devtools:
+    add-properties: true
+
+jwt:
+  expiryMinutes: 5
+  expiryDay: 14
+  accessKey: p1zs6HE4bebUL6aVjJhSEtj/Bp4rhQPK3vUR2gpcA06muNhYO77Z9kzb3U5sDXBkdpEZwECJfm0tNuDRiVu29g==
+  refreshKey: vD/tpfdCt2JiqNX5VyXEx0SyxYFC06DjB9GoY6bER6lgyA2qlAGgCegeB9ZB+tfOf5yfw8ZX/SaZNkluZxtXZQ==
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+openapi:
+  service:
+    api-docs: demo-system
+    server: http://localhost:${server.port}
+    title: Demo System
+    version: 1.0.0
+
