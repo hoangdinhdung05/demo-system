@@ -1,6 +1,8 @@
 package com.training.demo.controller;
 
 import com.training.demo.dto.request.Auth.LoginRequest;
+import com.training.demo.dto.request.Auth.LogoutRequest;
+import com.training.demo.dto.request.Auth.RefreshTokenRequest;
 import com.training.demo.dto.request.Auth.RegisterRequest;
 import com.training.demo.dto.response.BaseResponse;
 import com.training.demo.service.AuthService;
@@ -41,10 +43,33 @@ public class AuthController {
      * @return Success
      */
     @PostMapping("/register")
-    ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
+    public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
         log.info("[AUTH] API register new account with username: {}", request.getUsername());
         authService.register(request);
         return ResponseEntity.ok(BaseResponse.success());
+    }
+
+    /**
+     * Sinh access và refresh token mới
+     * @param request RefreshToken
+     * @return ACCESS|REFRESH
+     */
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refresh(@RequestBody @Valid RefreshTokenRequest request) {
+        log.info("[AUTH] API refresh token");
+        return ResponseEntity.ok(BaseResponse.success(authService.refreshToken(request.getRefreshToken())));
+    }
+
+    /**
+     * Logout account
+     * @param request access|refresh
+     * @return void
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody @Valid LogoutRequest request) {
+        log.info("[AUTH] API logout");
+        authService.logout(request);
+        return ResponseEntity.noContent().build();
     }
 
 }

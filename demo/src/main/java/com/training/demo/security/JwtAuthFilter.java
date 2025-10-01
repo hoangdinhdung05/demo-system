@@ -2,7 +2,7 @@ package com.training.demo.security;
 
 import com.training.demo.config.SecurityConfig;
 import com.training.demo.exception.TokenException;
-import com.training.demo.service.TokenService;
+import com.training.demo.service.RedisService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +26,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
+    private final RedisService redisService;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
@@ -49,7 +50,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 // validate token
                 if (jwtTokenProvider.validateToken(token, true)) {
                     String username = jwtTokenProvider.getUsernameFromToken(token, true);
-                    String roles = jwtTokenProvider.getRolesFromToken(token);
+
+                    String redisKey = "access:" + username;
+                    var accessValue = redisService.get(redisKey, String.class);
+
+                    if (accessValue.isEmpty() || !accessValue.get().equals(token)) {
+                        throw new TokenException("Access token has been revoked or expired");
+                    }
 
                     //load user from DB (UserDetailsService)
                     var userDetails = userDetailsService.loadUserByUsername(username);

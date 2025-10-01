@@ -38,7 +38,7 @@ public class JwtProvider {
         refreshKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(refreshKeyBase64));
     }
 
-    public String generatedAccessToken(User user) {
+    public String generateAccessToken(User user) {
         log.info("Generating accessToken running");
 
         String roles = user.getUserHasRoles().stream()
@@ -55,6 +55,7 @@ public class JwtProvider {
 
     private String buildToken(String subject, String roles, Key key, Date expiryDate) {
         JwtBuilder builder = Jwts.builder()
+                .setId(java.util.UUID.randomUUID().toString())
                 .setSubject(subject)
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
@@ -67,7 +68,7 @@ public class JwtProvider {
         return builder.compact();
     }
 
-    private Date getAccessTokenExpiryDate() {
+    public Date getAccessTokenExpiryDate() {
         long expiryMillis = System.currentTimeMillis() + 1000 * 60 * expiryMinutes;
         return new Date(expiryMillis);
     }
@@ -106,6 +107,14 @@ public class JwtProvider {
     public String getRolesFromToken(String token) {
         Claims claims = extractAllClaims(token, true);
         return claims.get("roles", String.class);
+    }
+
+    public boolean isTokenExpired(String token, boolean isAccessToken) {
+        try {
+            return extractAllClaims(token, isAccessToken).getExpiration().before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
     }
 
     private Claims extractAllClaims(String token, boolean isAccessToken) {
