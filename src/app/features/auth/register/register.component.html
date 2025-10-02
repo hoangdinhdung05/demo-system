@@ -7,7 +7,6 @@
 
             <h3 class="mb-5">Đăng kí</h3>
 
-            <!-- Bọc toàn bộ input trong form -->
             <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
 
               <!-- Username -->
@@ -20,10 +19,14 @@
                 <div class="error" *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.hasError('minlength')">
                   Tên đăng nhập ít nhất 6 ký tự
                 </div>
+                <div class="error" *ngIf="registerForm.get('username')?.errors?.['serverError']">
+                  {{ registerForm.get('username')?.errors?.['serverError'] }}
+                </div>
               </div>
 
-            <div class="form-group mb-4 text-start">
-                <label for="username" class="form-label">Email</label>
+              <!-- Email -->
+              <div class="form-group mb-4 text-start">
+                <label for="email" class="form-label">Email</label>
                 <input type="email" id="email" class="form-control form-control-lg" formControlName="email" />
                 <div class="error" *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.hasError('required')">
                   Vui lòng nhập email
@@ -31,7 +34,10 @@
                 <div class="error" *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.hasError('email')">
                   Email không đúng định dạng
                 </div>
-            </div>
+                <div class="error" *ngIf="registerForm.get('email')?.errors?.['serverError']">
+                  {{ registerForm.get('email')?.errors?.['serverError'] }}
+                </div>
+              </div>
 
               <!-- Password -->
               <div class="form-group mb-4 text-start">
@@ -43,11 +49,9 @@
                 <div class="error" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.hasError('minlength')">
                   Mật khẩu ít nhất 6 ký tự
                 </div>
-              </div>
-
-              <!-- Server error -->
-              <div class="error server-error mb-3" *ngIf="errorMessage">
-                {{ errorMessage }}
+                <div class="error" *ngIf="registerForm.get('password')?.errors?.['serverError']">
+                  {{ registerForm.get('password')?.errors?.['serverError'] }}
+                </div>
               </div>
 
               <button class="btn btn-primary btn-lg w-100 mb-4" type="submit">
