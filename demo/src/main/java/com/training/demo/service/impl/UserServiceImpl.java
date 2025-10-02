@@ -1,6 +1,7 @@
 package com.training.demo.service.impl;
 
 import com.training.demo.dto.request.Auth.RegisterRequest;
+import com.training.demo.dto.response.User.UserResponse;
 import com.training.demo.entity.Role;
 import com.training.demo.entity.User;
 import com.training.demo.entity.UserHasRole;
@@ -17,6 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.training.demo.mapper.UserMapper.toUserResponse;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -25,7 +28,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
-
 
     /**
      * Register a new user account.
@@ -65,5 +67,22 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
         log.info("Registered new account successfully with username: {}", request.getUsername());
+    }
+
+    /**
+     * Xem thông tin cơ bản user theo id
+     *
+     * @param id id user cần xem
+     * @return Các thông tin cơ bản
+     */
+    @Override
+    public UserResponse getUserById(Long id) {
+        log.info("[UserService] Get user by userId: {}", id);
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        return toUserResponse(user);
+
     }
 }
