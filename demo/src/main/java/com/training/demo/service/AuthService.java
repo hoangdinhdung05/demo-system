@@ -3,6 +3,7 @@ package com.training.demo.service;
 import com.training.demo.dto.request.Auth.LoginRequest;
 import com.training.demo.dto.request.Auth.LogoutRequest;
 import com.training.demo.dto.request.Auth.RegisterRequest;
+import com.training.demo.dto.request.Auth.EmailOtpRequest;
 import com.training.demo.dto.response.Auth.AuthResponse;
 
 public interface AuthService {
@@ -21,6 +22,12 @@ public interface AuthService {
      * @param request Thông tin cở bản của Account
      */
     void register(RegisterRequest request);
+
+    /**
+     * User gửi mã OTP để active account sau khi Register
+     * @param request Email và OTP
+     */
+    void active(EmailOtpRequest request);
 
     /**
      * Sử dụng để get một access và một refresh token mới

@@ -1,6 +1,6 @@
 package com.training.demo.entity;
 
-import com.training.demo.utils.RoleType;
+import com.training.demo.utils.enums.RoleType;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.HashSet;

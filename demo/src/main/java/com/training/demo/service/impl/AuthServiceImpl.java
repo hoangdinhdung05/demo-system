@@ -3,6 +3,8 @@ package com.training.demo.service.impl;
 import com.training.demo.dto.request.Auth.LoginRequest;
 import com.training.demo.dto.request.Auth.LogoutRequest;
 import com.training.demo.dto.request.Auth.RegisterRequest;
+import com.training.demo.dto.request.Auth.EmailOtpRequest;
+import com.training.demo.dto.request.Otp.SendOtpRequest;
 import com.training.demo.dto.response.Auth.AuthResponse;
 import com.training.demo.entity.User;
 import com.training.demo.exception.BadRequestException;
@@ -11,8 +13,11 @@ import com.training.demo.exception.TokenException;
 import com.training.demo.repository.UserRepository;
 import com.training.demo.security.JwtProvider;
 import com.training.demo.service.AuthService;
+import com.training.demo.service.OtpService;
 import com.training.demo.service.RedisService;
 import com.training.demo.service.UserService;
+import com.training.demo.utils.enums.OtpType;
+import com.training.demo.utils.enums.UserStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,6 +40,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtProvider jwtProvider;
     private final UserService userService;
     private final RedisService redisService;
+    private final OtpService otpService;
 
     /**
      * Sử dụng cơ chế Spring Security để tiến hành Authenticate User
@@ -57,6 +63,10 @@ public class AuthServiceImpl implements AuthService {
             User user = userRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new NotFoundException("User not found"));
 
+            if (!user.isVerifyEmail() || user.getStatus().equals(UserStatus.INACTIVE)) {
+                throw new BadRequestException("Account is not activated or has been locked");
+            }
+
             return generateAndStoreTokens(user);
         } catch (AuthenticationException e) {
             throw new BadRequestException("Username or password incorrect");
@@ -72,6 +82,28 @@ public class AuthServiceImpl implements AuthService {
     public void register(RegisterRequest request) {
         log.info("[AuthService] Register new account with username: {}", request.getUsername());
         userService.register(request);
+        log.info("SendMail with OTP to username: {}", request.getUsername());
+
+        try {
+            otpService.sendOtp(SendOtpRequest.builder()
+                            .email(request.getEmail())
+                    .build(), OtpType.VERIFY_EMAIL);
+            log.info("Sendmail success");
+        } catch (Exception e) {
+            log.error("Sendmail register error: {}", e.getMessage(), e);
+            throw new BadRequestException("Sendmail register error");
+        }
+    }
+
+    /**
+     * User gửi mã OTP để active account sau khi Register
+     *
+     * @param request Email và OTP
+     */
+    @Override
+    public void active(EmailOtpRequest request) {
+        log.info("[AuthService] Active new account running");
+        otpService.verifyEmail(request);
     }
 
     /**

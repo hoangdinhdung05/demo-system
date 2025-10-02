@@ -9,8 +9,8 @@ import com.training.demo.exception.NotFoundException;
 import com.training.demo.repository.RoleRepository;
 import com.training.demo.repository.UserRepository;
 import com.training.demo.service.UserService;
-import com.training.demo.utils.RoleType;
-import com.training.demo.utils.UserStatus;
+import com.training.demo.utils.enums.RoleType;
+import com.training.demo.utils.enums.UserStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -53,6 +53,7 @@ public class UserServiceImpl implements UserService {
                 .email(request.getEmail().toLowerCase())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .status(UserStatus.ACTIVE)
+                .verifyEmail(false)
                 .build();
 
         UserHasRole userHasRole = UserHasRole.builder()

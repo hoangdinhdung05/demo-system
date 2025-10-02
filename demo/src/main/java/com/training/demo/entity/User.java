@@ -1,6 +1,6 @@
 package com.training.demo.entity;
 
-import com.training.demo.utils.UserStatus;
+import com.training.demo.utils.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.HashSet;
@@ -32,6 +32,9 @@ public class User extends BaseEntity {
     private String password;
 
     private UserStatus status;
+
+    @Column(name = "verify_email")
+    private boolean verifyEmail;
 
     @OneToMany(
             cascade = CascadeType.ALL,

@@ -40,7 +40,8 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public Object get(String key) {
         log.info("Get value by key: {}", key);
-        return redisTemplate.opsForValue().get(key);    }
+        return redisTemplate.opsForValue().get(key);
+    }
 
     /**
      * Lấy và convert về kiểu mong muốn
@@ -68,7 +69,8 @@ public class RedisServiceImpl implements RedisService {
             }
         }
 
-        return Optional.empty();    }
+        return Optional.empty();
+    }
 
     /**
      * Kiểm tra key có tồn tại trong Redis hay không

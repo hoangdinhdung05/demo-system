@@ -1,9 +1,6 @@
 package com.training.demo.controller;
 
-import com.training.demo.dto.request.Auth.LoginRequest;
-import com.training.demo.dto.request.Auth.LogoutRequest;
-import com.training.demo.dto.request.Auth.RefreshTokenRequest;
-import com.training.demo.dto.request.Auth.RegisterRequest;
+import com.training.demo.dto.request.Auth.*;
 import com.training.demo.dto.response.BaseResponse;
 import com.training.demo.service.AuthService;
 import jakarta.validation.Valid;
@@ -50,6 +47,18 @@ public class AuthController {
     }
 
     /**
+     * Active account sau khi register
+     * @param request email và otp
+     * @return Success
+     */
+    @PostMapping("/active")
+    public ResponseEntity<?> active(@RequestBody @Valid EmailOtpRequest request) {
+        log.info("[AUTH] API active new account with email: {}", request.getEmail());
+        authService.active(request);
+        return ResponseEntity.ok(BaseResponse.success());
+    }
+
+    /**
      * Sinh access và refresh token mới
      * @param request RefreshToken
      * @return ACCESS|REFRESH
@@ -71,5 +80,4 @@ public class AuthController {
         authService.logout(request);
         return ResponseEntity.noContent().build();
     }
-
 }

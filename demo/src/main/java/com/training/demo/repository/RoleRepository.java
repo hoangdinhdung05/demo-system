@@ -1,7 +1,7 @@
 package com.training.demo.repository;
 
 import com.training.demo.entity.Role;
-import com.training.demo.utils.RoleType;
+import com.training.demo.utils.enums.RoleType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
