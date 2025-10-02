@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment';
 import { LoginRequest } from './models/request/login-request';
 import { BaseResponse } from './models/response/base-response';
 import { AuthResponse } from './models/response/auth-response';
+import { RegisterRequest } from './models/request/register-request';
 
 
 @Injectable({
@@ -21,4 +22,13 @@ export class AuthService {
       request
     );
   }
+
+  register(request: RegisterRequest): Observable<BaseResponse<any>> {
+    return this.http.post<BaseResponse<any>>(
+      `${this.apiUrl}/register`,
+      request
+    );
+  }
+
+  
 }
