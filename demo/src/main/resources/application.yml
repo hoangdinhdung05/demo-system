@@ -31,6 +31,19 @@ spring:
       port: 6379
       timeout: 60000ms
 
+  #Mail config
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_ADMIN}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   devtools:
     add-properties: true
 
