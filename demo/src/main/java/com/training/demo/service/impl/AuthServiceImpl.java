@@ -11,6 +11,7 @@ import com.training.demo.exception.BadRequestException;
 import com.training.demo.exception.NotFoundException;
 import com.training.demo.exception.TokenException;
 import com.training.demo.repository.UserRepository;
+import com.training.demo.security.CustomUserDetails;
 import com.training.demo.security.JwtProvider;
 import com.training.demo.service.AuthService;
 import com.training.demo.service.OtpService;
@@ -60,8 +61,8 @@ public class AuthServiceImpl implements AuthService {
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            User user = userRepository.findByUsername(request.getUsername())
-                    .orElseThrow(() -> new NotFoundException("User not found"));
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            User user = userDetails.getUser();
 
             if (!user.isVerifyEmail() || user.getStatus().equals(UserStatus.INACTIVE)) {
                 throw new BadRequestException("Account is not activated or has been locked");

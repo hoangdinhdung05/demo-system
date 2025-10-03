@@ -24,12 +24,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Map;
+import java.util.Objects;
 import static com.training.demo.mapper.UserMapper.toUserResponse;
 
 @Service
@@ -118,6 +118,11 @@ public class UserServiceImpl implements UserService {
     public UserResponse getUser(Long id) {
         log.info("[UserService] Get user by userId: {}", id);
 
+        Long currentUserId = SecurityUtils.getCurrentUserId();
+
+        if (!Objects.equals(currentUserId, id) && !SecurityUtils.hasRole(RoleType.ADMIN.name())) {
+            throw new BadRequestException("You can only access your own user information");
+        }
         User user = getUserById(id);
         return toUserResponse(user);
     }
