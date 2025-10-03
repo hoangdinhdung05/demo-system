@@ -74,9 +74,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
             } catch (TokenException ex) {
                 log.warn("[JWT] {}", ex.getMessage()); // không in trace
-                throw ex;
             } catch (Exception ex) {
-                log.error("[JWT] Unexpected error: {}", ex.getMessage());
+//                log.error("[JWT] Unexpected error: {}", ex.getMessage());
                 throw new BadCredentialsException("Invalid authentication process");
             }
         }
