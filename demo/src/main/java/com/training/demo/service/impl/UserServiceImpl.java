@@ -181,12 +181,11 @@ public class UserServiceImpl implements UserService {
     /**
      * Admin tìm kiếm user với nhiều bộ lọc khác nhau
      *
-     * @param filters    các bộ lọc
-     * @param pageNumber trang hiện tại
-     * @param pageSize   kích thước trang
+     * @param filters  các bộ lọc
+     * @param pageable thông tin phân trang
      * @return danh sách user
      */
-    public PageResponse<UserResponse> searchUsersForAdmin(Map<String, String> filters, int pageNumber, int pageSize) {
+    public PageResponse<UserResponse> searchUsersForAdmin(Map<String, String> filters, Pageable pageable) {
         log.info("[UserService] Search users for admin with filters: {}", filters);
 
         GenericSpecificationsBuilder<User> builder = new GenericSpecificationsBuilder<>();
@@ -195,9 +194,7 @@ public class UserServiceImpl implements UserService {
 
         Specification<User> spec = builder.build();
 
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id").ascending());
         Page<User> result = userRepository.findAll(spec, pageable);
-
         // map entity -> DTO
         Page<UserResponse> mapped = result.map(UserMapper::toUserResponse);
 

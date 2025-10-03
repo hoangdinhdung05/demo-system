@@ -5,6 +5,7 @@ import com.training.demo.dto.request.User.AdminCreateUserRequest;
 import com.training.demo.dto.request.User.ChangePasswordRequest;
 import com.training.demo.dto.response.System.PageResponse;
 import com.training.demo.dto.response.User.UserResponse;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Map;
 
@@ -52,10 +53,10 @@ public interface UserService {
 
     /**
      * Admin tìm kiếm user với nhiều bộ lọc khác nhau
-     * @param filters các bộ lọc
-     * @param pageNumber trang hiện tại
-     * @param pageSize kích thước trang
+     *
+     * @param filters  các bộ lọc
+     * @param pageable thông tin phân trang
      * @return danh sách user
      */
-    PageResponse<UserResponse> searchUsersForAdmin(Map<String, String> filters, int pageNumber, int pageSize);
+    PageResponse<UserResponse> searchUsersForAdmin(Map<String, String> filters, Pageable pageable);
 }

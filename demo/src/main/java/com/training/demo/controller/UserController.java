@@ -7,12 +7,17 @@ import com.training.demo.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -86,17 +91,24 @@ public class UserController {
 
     /**
      * Admin tìm kiếm user với nhiều bộ lọc khác nhau
-     * @param filters các bộ lọc
-     * @param page trang hiện tại
-     * @param size kích thước trang
+     *
+     * @param filters  các bộ lọc
+     * @param pageable thông tin phân trang
      * @return danh sách user
      */
     @GetMapping("/filter")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> getUsers(
             @RequestParam Map<String, String> filters,
-            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-        log.info("[User] Search users for admin with filters: {}, page: {}, size: {}", filters, page, size);
-        return ResponseEntity.ok(BaseResponse.success(userService.searchUsersForAdmin(filters, page, size)));
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+
+        log.info("[User] Admin search users with filters: {}, pageable: {}", filters, pageable);
+
+        Map<String, String> realFilters = filters.entrySet().stream()
+                .filter(entry -> !List.of("page", "size", "sort").contains(entry.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        return ResponseEntity.ok(BaseResponse.success(userService.searchUsersForAdmin(realFilters, pageable)));
     }
+
 }
