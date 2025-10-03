@@ -1,6 +1,6 @@
 package com.training.demo.service;
 
-import com.training.demo.dto.EmailDTO;
+import com.training.demo.dto.response.Email.EmailDTO;
 
 import java.util.Map;
 

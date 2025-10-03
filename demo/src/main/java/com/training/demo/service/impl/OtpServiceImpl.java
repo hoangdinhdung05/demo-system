@@ -1,7 +1,7 @@
 package com.training.demo.service.impl;
 
 import com.training.demo.config.OtpProperties;
-import com.training.demo.dto.EmailDTO;
+import com.training.demo.dto.response.Email.EmailDTO;
 import com.training.demo.dto.request.Auth.EmailOtpRequest;
 import com.training.demo.dto.request.Otp.ResendOtpRequest;
 import com.training.demo.dto.request.Otp.SendOtpRequest;

@@ -1,6 +1,6 @@
 package com.training.demo.service.impl;
 
-import com.training.demo.dto.EmailDTO;
+import com.training.demo.dto.response.Email.EmailDTO;
 import com.training.demo.service.MailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

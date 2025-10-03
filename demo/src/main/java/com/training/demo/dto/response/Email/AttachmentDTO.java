@@ -1,4 +1,4 @@
-package com.training.demo.dto;
+package com.training.demo.dto.response.Email;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;

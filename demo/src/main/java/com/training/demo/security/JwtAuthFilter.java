@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -72,11 +73,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             } catch (TokenException ex) {
-                log.error("JWT validation failed: {}", ex.getMessage());
+                log.warn("[JWT] {}", ex.getMessage()); // không in trace
                 throw ex;
             } catch (Exception ex) {
-                log.error("Unexpected error during JWT authentication: {}", ex.getMessage());
-                throw new TokenException("Invalid authentication process");
+                log.error("[JWT] Unexpected error: {}", ex.getMessage());
+                throw new BadCredentialsException("Invalid authentication process");
             }
         }
         filterChain.doFilter(request, response);

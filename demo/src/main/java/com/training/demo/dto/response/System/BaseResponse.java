@@ -1,4 +1,4 @@
-package com.training.demo.dto.response;
+package com.training.demo.dto.response.System;
 
 import lombok.Builder;
 import lombok.Getter;

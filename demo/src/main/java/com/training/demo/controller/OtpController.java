@@ -1,7 +1,7 @@
 package com.training.demo.controller;
 
 import com.training.demo.dto.request.Otp.ResendOtpRequest;
-import com.training.demo.dto.response.BaseResponse;
+import com.training.demo.dto.response.System.BaseResponse;
 import com.training.demo.service.OtpService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
