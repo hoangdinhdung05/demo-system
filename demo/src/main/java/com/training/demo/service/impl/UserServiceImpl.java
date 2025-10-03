@@ -10,6 +10,8 @@ import com.training.demo.entity.User;
 import com.training.demo.entity.UserHasRole;
 import com.training.demo.exception.BadRequestException;
 import com.training.demo.exception.NotFoundException;
+import com.training.demo.helpers.FilterParser;
+import com.training.demo.helpers.GenericSpecificationsBuilder;
 import com.training.demo.mapper.UserMapper;
 import com.training.demo.repository.RoleRepository;
 import com.training.demo.repository.UserRepository;
@@ -21,10 +23,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.util.Map;
 import static com.training.demo.mapper.UserMapper.toUserResponse;
 
 @Service
@@ -172,6 +177,33 @@ public class UserServiceImpl implements UserService {
             userRepository.save(user);
         }
     }
+
+    /**
+     * Admin tìm kiếm user với nhiều bộ lọc khác nhau
+     *
+     * @param filters    các bộ lọc
+     * @param pageNumber trang hiện tại
+     * @param pageSize   kích thước trang
+     * @return danh sách user
+     */
+    public PageResponse<UserResponse> searchUsersForAdmin(Map<String, String> filters, int pageNumber, int pageSize) {
+        log.info("[UserService] Search users for admin with filters: {}", filters);
+
+        GenericSpecificationsBuilder<User> builder = new GenericSpecificationsBuilder<>();
+
+        FilterParser.parse(filters).forEach(builder::with);
+
+        Specification<User> spec = builder.build();
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id").ascending());
+        Page<User> result = userRepository.findAll(spec, pageable);
+
+        // map entity -> DTO
+        Page<UserResponse> mapped = result.map(UserMapper::toUserResponse);
+
+        return PageResponse.of(mapped);
+    }
+
 
     //========== PRIVATE METHOD ==========//
     private void validatePassword(ChangePasswordRequest request, User user) {

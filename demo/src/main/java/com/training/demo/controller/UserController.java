@@ -12,6 +12,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -80,5 +82,21 @@ public class UserController {
         log.info("[User] Admin create new user with username: {}", request.getUsername());
         userService.adminCreate(request);
         return ResponseEntity.ok(BaseResponse.success());
+    }
+
+    /**
+     * Admin tìm kiếm user với nhiều bộ lọc khác nhau
+     * @param filters các bộ lọc
+     * @param page trang hiện tại
+     * @param size kích thước trang
+     * @return danh sách user
+     */
+    @GetMapping("/filter")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> getUsers(
+            @RequestParam Map<String, String> filters,
+            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        log.info("[User] Search users for admin with filters: {}, page: {}, size: {}", filters, page, size);
+        return ResponseEntity.ok(BaseResponse.success(userService.searchUsersForAdmin(filters, page, size)));
     }
 }

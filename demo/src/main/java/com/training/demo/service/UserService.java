@@ -6,6 +6,8 @@ import com.training.demo.dto.request.User.ChangePasswordRequest;
 import com.training.demo.dto.response.System.PageResponse;
 import com.training.demo.dto.response.User.UserResponse;
 
+import java.util.Map;
+
 public interface UserService {
 
     /**
@@ -47,4 +49,13 @@ public interface UserService {
      * @param id userId cần xóa
      */
     void deleteUser(Long id);
+
+    /**
+     * Admin tìm kiếm user với nhiều bộ lọc khác nhau
+     * @param filters các bộ lọc
+     * @param pageNumber trang hiện tại
+     * @param pageSize kích thước trang
+     * @return danh sách user
+     */
+    PageResponse<UserResponse> searchUsersForAdmin(Map<String, String> filters, int pageNumber, int pageSize);
 }
