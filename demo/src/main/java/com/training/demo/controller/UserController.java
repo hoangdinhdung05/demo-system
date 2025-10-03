@@ -2,8 +2,10 @@ package com.training.demo.controller;
 
 import com.training.demo.dto.request.User.AdminCreateUserRequest;
 import com.training.demo.dto.request.User.ChangePasswordRequest;
+import com.training.demo.dto.request.User.UpdateUserRequest;
 import com.training.demo.dto.response.System.BaseResponse;
 import com.training.demo.service.UserService;
+import com.training.demo.utils.enums.UserStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -111,4 +112,28 @@ public class UserController {
         return ResponseEntity.ok(BaseResponse.success(userService.searchUsersForAdmin(realFilters, pageable)));
     }
 
+    /**
+     * Admin thay đổi trạng thái user
+     * @param id userId cần thay đổi
+     * @param status trạng thái mới
+     */
+    @PatchMapping("/{id}/change-status")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> changeUserStatus(@PathVariable Long id, @RequestParam UserStatus status) {
+        log.info("[User] Admin change status for userId: {}, new status: {}", id, status);
+        userService.changeUserStatus(id, status);
+        return ResponseEntity.ok(BaseResponse.success());
+    }
+
+    /**
+     * User cập nhật thông tin cá nhân của mình
+     * @param id userId cần cập nhật
+     * @param request thông tin mới
+     */
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UpdateUserRequest request) {
+        log.info("[User] Update user info for userId: {}", id);
+        userService.updateUser(id, request);
+        return ResponseEntity.ok(BaseResponse.success());
+    }
 }

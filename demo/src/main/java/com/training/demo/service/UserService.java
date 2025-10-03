@@ -3,8 +3,11 @@ package com.training.demo.service;
 import com.training.demo.dto.request.Auth.RegisterRequest;
 import com.training.demo.dto.request.User.AdminCreateUserRequest;
 import com.training.demo.dto.request.User.ChangePasswordRequest;
+import com.training.demo.dto.request.User.UpdateUserRequest;
 import com.training.demo.dto.response.System.PageResponse;
+import com.training.demo.dto.response.User.UpdateUserResponse;
 import com.training.demo.dto.response.User.UserResponse;
+import com.training.demo.utils.enums.UserStatus;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Map;
@@ -59,4 +62,19 @@ public interface UserService {
      * @return danh sách user
      */
     PageResponse<UserResponse> searchUsersForAdmin(Map<String, String> filters, Pageable pageable);
+
+    /**
+     * Admin thay đổi trạng thái user
+     * @param id userId cần thay đổi
+     * @param status trạng thái mới
+     */
+    void changeUserStatus(Long id, UserStatus status);
+
+    /**
+     * Cập nhật thông tin user
+     * @param id userId cần cập nhật
+     * @param request thông tin mới
+     * @return thông tin sau khi cập nhật
+     */
+    UpdateUserResponse updateUser(Long id, UpdateUserRequest request);
 }

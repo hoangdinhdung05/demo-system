@@ -3,7 +3,9 @@ package com.training.demo.service.impl;
 import com.training.demo.dto.request.Auth.RegisterRequest;
 import com.training.demo.dto.request.User.AdminCreateUserRequest;
 import com.training.demo.dto.request.User.ChangePasswordRequest;
+import com.training.demo.dto.request.User.UpdateUserRequest;
 import com.training.demo.dto.response.System.PageResponse;
+import com.training.demo.dto.response.User.UpdateUserResponse;
 import com.training.demo.dto.response.User.UserResponse;
 import com.training.demo.entity.Role;
 import com.training.demo.entity.User;
@@ -204,6 +206,57 @@ public class UserServiceImpl implements UserService {
         Page<UserResponse> mapped = result.map(UserMapper::toUserResponse);
 
         return PageResponse.of(mapped);
+    }
+
+    /**
+     * Admin thay đổi trạng thái user
+     *
+     * @param id     userId cần thay đổi
+     * @param status trạng thái mới
+     */
+    @Override
+    public void changeUserStatus(Long id, UserStatus status) {
+        log.info("[UserService] Change user status by userId: {}", id);
+        User user = getUserById(id);
+        if (user.getStatus().equals(status)) {
+            throw new BadRequestException("User already has status: " + status);
+        }
+        user.setStatus(status);
+        userRepository.save(user);
+    }
+
+    /**
+     * Cập nhật thông tin user
+     *
+     * @param id      userId cần cập nhật
+     * @param request thông tin mới
+     * @return thông tin sau khi cập nhật
+     */
+    @Override
+    public UpdateUserResponse updateUser(Long id, UpdateUserRequest request) {
+        log.info("[UserService] Update user by userId: {}", id);
+
+        Long currentUserId = SecurityUtils.getCurrentUserId();
+
+        if (!Objects.equals(currentUserId, id) && !SecurityUtils.hasRole(RoleType.ADMIN.name())) {
+            throw new BadRequestException("You can only update your own user information");
+        }
+
+        User user = getUserById(id);
+
+        if (request.getFirstName() != null && !request.getFirstName().isBlank()) {
+            user.setFirstName(request.getFirstName());
+        }
+
+        if (request.getLastName() != null && !request.getLastName().isBlank()) {
+            user.setLastName(request.getLastName());
+        }
+
+        User updatedUser = userRepository.save(user);
+        return UpdateUserResponse.builder()
+                .fistName(request.getFirstName())
+                .lastName(request.getLastName())
+                .build();
     }
 
 
