@@ -17,7 +17,7 @@ import { ToastComponent } from './toast/toast.component';
     ToastComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
   ],
   exports: [ 
     ButtonComponent,

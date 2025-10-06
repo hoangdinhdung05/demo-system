@@ -1,0 +1,44 @@
+.search-box input {
+  width: 260px;
+  border-radius: 8px;
+}
+
+.card {
+  overflow: hidden;
+}
+
+thead th {
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+  font-weight: 600;
+}
+
+tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.btn-outline-primary, .btn-outline-danger {
+  border-radius: 8px;
+  padding: 4px 8px;
+}
+
+.pagination .page-link {
+  border-radius: 6px !important;
+  margin: 0 2px;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.card-footer {
+  border-top: 1px solid #eee;
+}

@@ -12,15 +12,16 @@
 
     <div class="nav-section-title">Quản lí hệ thống</div>
 
-    <div class="nav-item">
+    <div class="nav-item" (click)="navigate('/admin')">
       <i class="fa-solid fa-house"></i>
       <span>Dashboard</span>
     </div>
 
-    <div class="nav-item">
+    <div class="nav-item" (click)="navigate('/admin/users')">
       <i class="fa-solid fa-user"></i>
       <span>User</span>
     </div>
+
   </nav>
 
   <div class="sidebar-promo">
