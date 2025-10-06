@@ -1,13 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  status: string;
-  joinDate: string;
-}
+import { PageResponse } from 'src/app/core/models/response/page-response';
+import { UserResponse } from 'src/app/core/models/response/user-response';
+import { UserService } from 'src/app/core/services/users/user.service';
 
 @Component({
   selector: 'app-users',
@@ -15,79 +9,71 @@ interface User {
   styleUrls: ['./users.component.css']
 })
 export class UsersComponent implements OnInit {
-  users: User[] = [];
-  filteredUsers: User[] = [];
-  paginatedUsers: User[] = [];
-  searchTerm: string = '';
 
-  // Pagination
-  currentPage = 1;
+  users: UserResponse[] = [];
+  totalPages = 0;
+  totalElements = 0;
+  currentPage = 0; // backend pageNumber bắt đầu từ 0
   pageSize = 5;
-  totalPages = 1;
+  loading = false;
+
+  constructor(private userService: UserService) {}
 
   ngOnInit(): void {
-    this.users = [
-      { id: 1, name: 'Mark Otto', email: 'mark@demo.com', role: 'Admin', status: 'Active', joinDate: '2024-05-12' },
-      { id: 2, name: 'Jacob Thornton', email: 'jacob@demo.com', role: 'User', status: 'Active', joinDate: '2024-07-01' },
-      { id: 3, name: 'Larry Bird', email: 'larry@demo.com', role: 'User', status: 'Inactive', joinDate: '2024-09-15' },
-      { id: 4, name: 'Anna Smith', email: 'anna@demo.com', role: 'User', status: 'Active', joinDate: '2024-10-01' },
-      { id: 5, name: 'John Doe', email: 'john@demo.com', role: 'User', status: 'Active', joinDate: '2024-11-11' },
-      { id: 6, name: 'Eva Green', email: 'eva@demo.com', role: 'Admin', status: 'Inactive', joinDate: '2024-11-15' },
-    ];
-
-    this.filteredUsers = [...this.users];
-    this.updatePagination();
+    this.loadUsers(0);
   }
 
-  onSearch() {
-    const term = this.searchTerm.toLowerCase();
-    this.filteredUsers = this.users.filter(u =>
-      u.name.toLowerCase().includes(term) ||
-      u.email.toLowerCase().includes(term)
-    );
-    this.currentPage = 1;
-    this.updatePagination();
-  }
-
-  updatePagination() {
-    this.totalPages = Math.ceil(this.filteredUsers.length / this.pageSize);
-    const start = (this.currentPage - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    this.paginatedUsers = this.filteredUsers.slice(start, end);
-  }
-
-  get totalPagesArray() {
-    return Array(this.totalPages).fill(0).map((_, i) => i + 1);
-  }
-
-  get startItem() {
-    return (this.currentPage - 1) * this.pageSize + 1;
-  }
-
-  get endItem() {
-    return Math.min(this.currentPage * this.pageSize, this.filteredUsers.length);
-  }
-
-  previousPage() {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.updatePagination();
-    }
+  loadUsers(page: number): void {
+    this.loading = true;
+    this.userService.getAllUsers(page, this.pageSize).subscribe({
+      next: (res) => {
+        if (res.success) {
+          const data: PageResponse<UserResponse> = res.data;
+          this.users = data.content;
+          this.currentPage = data.pageNumber;
+          this.totalPages = data.totalPages;
+          this.totalElements = data.totalElements;
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error loading users', err);
+        this.loading = false;
+      }
+    });
   }
 
   nextPage() {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      this.updatePagination();
+    if (this.currentPage < this.totalPages - 1) {
+      this.loadUsers(this.currentPage + 1);
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 0) {
+      this.loadUsers(this.currentPage - 1);
     }
   }
 
   goToPage(page: number) {
-    this.currentPage = page;
-    this.updatePagination();
+    this.loadUsers(page);
   }
 
-  onCreateUser() {
-    alert('Chức năng thêm người dùng sắp ra mắt 🚀');
+  viewUser(user: any) {
+  console.log('Xem chi tiết:', user);
+  // Có thể mở modal hoặc điều hướng sang trang chi tiết
+}
+
+editUser(user: any) {
+  console.log('Cập nhật:', user);
+  // Có thể mở form update hoặc điều hướng sang trang edit
+}
+
+deleteUser(user: any) {
+  if (confirm(`Bạn có chắc muốn xóa người dùng "${user.username}" không?`)) {
+    console.log('Đã xóa:', user);
+    // Gọi API xóa tại đây
   }
+}
+
 }

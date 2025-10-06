@@ -1,0 +1,25 @@
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { BaseResponse } from '../../models/response/base-response';
+import { PageResponse } from '../../models/response/page-response';
+import { UserResponse } from '../../models/response/user-response';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UserService {
+
+  private apiUrl = `${environment.apiUrl}/users`;
+  
+  constructor(private http: HttpClient) { }
+
+  getAllUsers(pageNumber: number, pageSize: number): Observable<BaseResponse<PageResponse<UserResponse>>> {
+    const params = new HttpParams()
+      .set('pageNumber', pageNumber)
+      .set('pageSize', pageSize);
+    
+    return this.http.get<BaseResponse<PageResponse<UserResponse>>>(this.apiUrl, { params });
+  }
+}
