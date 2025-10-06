@@ -15,7 +15,7 @@ import { ToastrModule } from 'ngx-toastr';
     AppComponent
   ],
   imports: [
-    BrowserAnimationsModule, // bắt buộc cho toastr
+    BrowserAnimationsModule,
     ToastrModule.forRoot(),
     BrowserModule,
     HttpClientModule,

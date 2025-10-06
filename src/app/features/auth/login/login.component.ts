@@ -28,7 +28,7 @@ export class LoginComponent {
   onSubmit() {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
-      this.toastr.warning('Vui lòng nhập đầy đủ thông tin!');
+      this.toastr.error('Vui lòng nhập đầy đủ thông tin!');
       return;
     }
 
@@ -42,7 +42,7 @@ export class LoginComponent {
         localStorage.setItem('refresh_token', refresh_token);
 
         this.toastr.success('Đăng nhập thành công!');
-        this.router.navigate(['/']); // Trang home
+        this.router.navigate(['/admin']); // Trang home
       },
       error: () => {
         this.toastr.error('Tên đăng nhập hoặc mật khẩu không đúng!');

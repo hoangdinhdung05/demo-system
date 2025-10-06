@@ -1,1 +1,87 @@
-<p>dashboard works!</p>
+<div class="dashboard-container">
+  <div class="container-fluid">
+    <h2 class="mb-4">Dashboard</h2>
+    
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="stat-card">
+          <div class="stat-header">Total Page Views</div>
+          <div class="stat-value">4,42,236</div>
+          <div class="stat-change positive">
+            <i class="bi bi-arrow-up"></i> 59.3%
+          </div>
+          <div class="stat-extra">You made an extra <strong>35,000</strong> this year</div>
+        </div>
+      </div>
+      
+      <div class="col-md-3">
+        <div class="stat-card">
+          <div class="stat-header">Total Users</div>
+          <div class="stat-value">78,250</div>
+          <div class="stat-change positive">
+            <i class="bi bi-arrow-up"></i> 70.5%
+          </div>
+          <div class="stat-extra">You made an extra <strong>8,900</strong> this year</div>
+        </div>
+      </div>
+      
+      <div class="col-md-3">
+        <div class="stat-card">
+          <div class="stat-header">Total Order</div>
+          <div class="stat-value">18,800</div>
+          <div class="stat-change negative">
+            <i class="bi bi-arrow-down"></i> 27.4%
+          </div>
+          <div class="stat-extra">You made an extra <strong>1,943</strong> this year</div>
+        </div>
+      </div>
+      
+      <div class="col-md-3">
+        <div class="stat-card">
+          <div class="stat-header">Total Sales</div>
+          <div class="stat-value">$35,078</div>
+          <div class="stat-change negative">
+            <i class="bi bi-arrow-down"></i> 27.4%
+          </div>
+          <div class="stat-extra">You made an extra <strong>$20,395</strong> this year</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-3">
+      <div class="col-md-8">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h5>Unique Visitor</h5>
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-secondary">Month</button>
+              <button class="btn btn-primary">Week</button>
+            </div>
+          </div>
+          <div class="chart-placeholder">
+            <!-- API data will be rendered here -->
+            <p class="text-center text-muted py-5">Chart data from API</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h5>Income Overview</h5>
+          </div>
+          <div class="income-stats">
+            <div class="income-header">This Week Statistics</div>
+            <div class="income-value">$7,650</div>
+          </div>
+          <div class="chart-placeholder">
+            <!-- API data will be rendered here -->
+            <p class="text-center text-muted py-3">Bar chart data from API</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
