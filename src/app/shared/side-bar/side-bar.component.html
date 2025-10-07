@@ -5,11 +5,6 @@
   </div>
 
   <nav class="sidebar-nav">
-    <!-- <div class="nav-item">
-      <i class="bi bi-card-list"></i>
-      <span>Register</span>
-    </div> -->
-
     <div class="nav-section-title">Quản lí hệ thống</div>
 
     <div class="nav-item" (click)="navigate('/admin')">
@@ -21,10 +16,15 @@
       <i class="fa-solid fa-user"></i>
       <span>User</span>
     </div>
-
   </nav>
 
-  <div class="sidebar-promo">
+  <!-- Logout button -->
+  <div class="nav-item logout" (click)="logout()">
+    <i class="fa-solid fa-right-from-bracket"></i>
+    <span>Logout</span>
+  </div>
 
+  <div class="sidebar-promo">
+    <!-- Optional promo content -->
   </div>
 </div>
