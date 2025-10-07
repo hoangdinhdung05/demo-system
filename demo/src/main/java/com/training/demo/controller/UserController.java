@@ -41,6 +41,17 @@ public class UserController {
     }
 
     /**
+     * Api get user info by userId
+     * @param id userId cần get
+     * @return Trả về thông tin cơ bản user
+     */
+    @GetMapping("/details/{id}")
+    public ResponseEntity<?> getUserDetails(@PathVariable Long id) {
+        log.info("[User] Get user details by userId: {}", id);
+        return ResponseEntity.ok(BaseResponse.success(userService.getUserDetails(id)));
+    }
+
+    /**
      * Lấy list user có phân trang
      * @param pageNumber Trang hiện tại
      * @param pageSize Kích thước trang
@@ -110,19 +121,6 @@ public class UserController {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         return ResponseEntity.ok(BaseResponse.success(userService.searchUsersForAdmin(realFilters, pageable)));
-    }
-
-    /**
-     * Admin thay đổi trạng thái user
-     * @param id userId cần thay đổi
-     * @param status trạng thái mới
-     */
-    @PatchMapping("/{id}/change-status")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
-    public ResponseEntity<?> changeUserStatus(@PathVariable Long id, @RequestParam UserStatus status) {
-        log.info("[User] Admin change status for userId: {}, new status: {}", id, status);
-        userService.changeUserStatus(id, status);
-        return ResponseEntity.ok(BaseResponse.success());
     }
 
     /**

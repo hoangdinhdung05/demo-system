@@ -5,11 +5,9 @@ import com.training.demo.dto.request.User.AdminCreateUserRequest;
 import com.training.demo.dto.request.User.ChangePasswordRequest;
 import com.training.demo.dto.request.User.UpdateUserRequest;
 import com.training.demo.dto.response.System.PageResponse;
-import com.training.demo.dto.response.User.UpdateUserResponse;
+import com.training.demo.dto.response.User.UserDetailsResponse;
 import com.training.demo.dto.response.User.UserResponse;
-import com.training.demo.utils.enums.UserStatus;
 import org.springframework.data.domain.Pageable;
-
 import java.util.Map;
 
 public interface UserService {
@@ -33,6 +31,13 @@ public interface UserService {
      * @return Các thông tin cơ bản
      */
     UserResponse getUser(Long id);
+
+    /**
+     * Xem thông tin chi tiết user theo id
+     * @param id id user cần xem
+     * @return Các thông tin chi tiết
+     */
+    UserDetailsResponse getUserDetails(Long id);
 
     /**
      * Lấy danh sách user có phân trang
@@ -64,17 +69,10 @@ public interface UserService {
     PageResponse<UserResponse> searchUsersForAdmin(Map<String, String> filters, Pageable pageable);
 
     /**
-     * Admin thay đổi trạng thái user
-     * @param id userId cần thay đổi
-     * @param status trạng thái mới
-     */
-    void changeUserStatus(Long id, UserStatus status);
-
-    /**
      * Cập nhật thông tin user
-     * @param id userId cần cập nhật
+     *
+     * @param id      userId cần cập nhật
      * @param request thông tin mới
-     * @return thông tin sau khi cập nhật
      */
-    UpdateUserResponse updateUser(Long id, UpdateUserRequest request);
+    void updateUser(Long id, UpdateUserRequest request);
 }

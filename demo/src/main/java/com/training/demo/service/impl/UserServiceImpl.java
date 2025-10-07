@@ -5,7 +5,7 @@ import com.training.demo.dto.request.User.AdminCreateUserRequest;
 import com.training.demo.dto.request.User.ChangePasswordRequest;
 import com.training.demo.dto.request.User.UpdateUserRequest;
 import com.training.demo.dto.response.System.PageResponse;
-import com.training.demo.dto.response.User.UpdateUserResponse;
+import com.training.demo.dto.response.User.UserDetailsResponse;
 import com.training.demo.dto.response.User.UserResponse;
 import com.training.demo.entity.Role;
 import com.training.demo.entity.User;
@@ -32,6 +32,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Map;
 import java.util.Objects;
+
+import static com.training.demo.mapper.UserMapper.toUserDetailsResponse;
 import static com.training.demo.mapper.UserMapper.toUserResponse;
 
 @Service
@@ -119,14 +121,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse getUser(Long id) {
         log.info("[UserService] Get user by userId: {}", id);
-
-        Long currentUserId = SecurityUtils.getCurrentUserId();
-
-        if (!Objects.equals(currentUserId, id) && !SecurityUtils.hasRole(RoleType.ADMIN.name())) {
-            throw new BadRequestException("You can only access your own user information");
-        }
-        User user = getUserById(id);
+        User user = getUserIfAuthorized(id);
         return toUserResponse(user);
+    }
+
+    /**
+     * Xem thông tin chi tiết user theo id
+     *
+     * @param id id user cần xem
+     * @return Các thông tin chi tiết
+     */
+    @Override
+    public UserDetailsResponse getUserDetails(Long id) {
+        log.info("[UserService] Get user details by userId: {}", id);
+        User user = getUserIfAuthorized(id);
+        return toUserDetailsResponse(user);
     }
 
     /**
@@ -209,40 +218,17 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Admin thay đổi trạng thái user
-     *
-     * @param id     userId cần thay đổi
-     * @param status trạng thái mới
-     */
-    @Override
-    public void changeUserStatus(Long id, UserStatus status) {
-        log.info("[UserService] Change user status by userId: {}", id);
-        User user = getUserById(id);
-        if (user.getStatus().equals(status)) {
-            throw new BadRequestException("User already has status: " + status);
-        }
-        user.setStatus(status);
-        userRepository.save(user);
-    }
-
-    /**
      * Cập nhật thông tin user
      *
      * @param id      userId cần cập nhật
      * @param request thông tin mới
-     * @return thông tin sau khi cập nhật
      */
+    @Transactional
     @Override
-    public UpdateUserResponse updateUser(Long id, UpdateUserRequest request) {
+    public void updateUser(Long id, UpdateUserRequest request) {
         log.info("[UserService] Update user by userId: {}", id);
 
-        Long currentUserId = SecurityUtils.getCurrentUserId();
-
-        if (!Objects.equals(currentUserId, id) && !SecurityUtils.hasRole(RoleType.ADMIN.name())) {
-            throw new BadRequestException("You can only update your own user information");
-        }
-
-        User user = getUserById(id);
+        User user = getUserIfAuthorized(id);
 
         if (request.getFirstName() != null && !request.getFirstName().isBlank()) {
             user.setFirstName(request.getFirstName());
@@ -252,13 +238,28 @@ public class UserServiceImpl implements UserService {
             user.setLastName(request.getLastName());
         }
 
-        User updatedUser = userRepository.save(user);
-        return UpdateUserResponse.builder()
-                .fistName(request.getFirstName())
-                .lastName(request.getLastName())
-                .build();
-    }
+        if (SecurityUtils.hasRole(RoleType.ADMIN.name())) {
+            if (request.getStatus() != null) {
+                user.setStatus(request.getStatus());
+            }
 
+            if (request.getRoles() != null && !request.getRoles().isEmpty()) {
+                user.getUserHasRoles().clear();
+                for (RoleType roleType : request.getRoles()) {
+                    Role role = roleRepository.findByName(roleType)
+                            .orElseThrow(() -> new NotFoundException("Role not found"));
+                    UserHasRole userHasRole = UserHasRole.builder()
+                            .user(user)
+                            .role(role)
+                            .build();
+                    user.getUserHasRoles().add(userHasRole);
+                }
+            }
+            user.setVerifyEmail(request.isVerifyEmail());
+        }
+
+        userRepository.save(user);
+    }
 
     //========== PRIVATE METHOD ==========//
     private void validatePassword(ChangePasswordRequest request, User user) {
@@ -286,5 +287,13 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByEmail(email)) {
             throw new BadRequestException("Email already exists");
         }
+    }
+
+    private User getUserIfAuthorized(Long id) {
+        Long currentUserId = SecurityUtils.getCurrentUserId();
+        if (!Objects.equals(currentUserId, id) && !SecurityUtils.hasRole(RoleType.ADMIN.name())) {
+            throw new BadRequestException("You can only access your own user information");
+        }
+        return getUserById(id);
     }
 }
