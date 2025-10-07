@@ -5,12 +5,12 @@ import { environment } from 'src/environments/environment';
 import { BaseResponse } from '../../models/response/base-response';
 import { PageResponse } from '../../models/response/page-response';
 import { UserResponse } from '../../models/response/user-response';
+import { AdminCreateUserRequest } from '../../models/request/Users/AdminCreateUserRequest';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-
   private apiUrl = `${environment.apiUrl}/users`;
   
   constructor(private http: HttpClient) { }
@@ -22,4 +22,8 @@ export class UserService {
     
     return this.http.get<BaseResponse<PageResponse<UserResponse>>>(this.apiUrl, { params });
   }
+
+  adminCreateUser(request: AdminCreateUserRequest): Observable<BaseResponse<any>> {
+    return this.http.post<BaseResponse<any>>(`${this.apiUrl}`, request);
+  }  
 }
