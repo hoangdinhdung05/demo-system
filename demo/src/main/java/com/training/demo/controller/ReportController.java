@@ -1,0 +1,37 @@
+package com.training.demo.controller;
+
+import com.training.demo.service.JasperReportService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/reports")
+@Slf4j
+public class ReportController {
+
+    private final JasperReportService reportService;
+
+    public ReportController(JasperReportService reportService) {
+        this.reportService = reportService;
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<byte[]> generateUserReport() {
+        log.info("[JasperReportController] Request to generate user report");
+
+        byte[] pdfBytes = reportService.generateUserReportPdf();
+
+        log.info("[JasperReportController] Returning PDF report, size: {} bytes", pdfBytes.length);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=users_report.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
+
+    }
+}
