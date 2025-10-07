@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AuthService } from 'src/app/core/auth.service';
 import { LoginRequest } from 'src/app/core/models/request/login-request';
 import { ToastrService } from 'ngx-toastr';
+import { jwtDecode } from 'jwt-decode';
 
 @Component({
   selector: 'app-login',
@@ -42,11 +43,25 @@ export class LoginComponent {
         localStorage.setItem('refresh_token', refresh_token);
 
         this.toastr.success('Đăng nhập thành công!');
-        this.router.navigate(['/admin']); // Trang home
+
+        // decode token để lấy role
+        const decoded: any = jwtDecode(access_token);
+        const role = decoded.roles; // hoặc path đúng với payload của bạn
+
+        console.log("ROLE:" + role);
+
+        if (role === 'ROLE_ADMIN') {
+          this.router.navigate(['/admin']);
+        } else if (role === 'ROLE_USER') {
+          this.router.navigate(['/']); // client home
+        } else {
+          this.router.navigate(['/auth/login']);
+        }
       },
       error: () => {
         this.toastr.error('Tên đăng nhập hoặc mật khẩu không đúng!');
       }
     });
   }
+
 }
