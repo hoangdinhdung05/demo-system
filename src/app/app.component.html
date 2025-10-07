@@ -1,6 +1,5 @@
-<!-- app.component.html -->
-<div class="wrapper">
-  <ng-container *ngIf="showLayout">
+<ng-container *ngIf="showLayout; else authLayout">
+  <div class="wrapper">
     <app-side-bar></app-side-bar>
     <div class="main-content">
       <app-header></app-header>
@@ -9,11 +8,11 @@
       </div>
       <app-footer></app-footer>
     </div>
-  </ng-container>
+  </div>
+</ng-container>
 
-  <ng-container *ngIf="!showLayout">
-    <router-outlet></router-outlet>
-  </ng-container>
-</div>
+<ng-template #authLayout>
+  <router-outlet></router-outlet>
+</ng-template>
 
 <app-toast></app-toast>
