@@ -1,0 +1,20 @@
+<div class="page-wrapper">
+  <div class="container mt-5" style="max-width: 400px;">
+    <h3 class="text-center mb-3">Kích hoạt tài khoản</h3>
+    <form [formGroup]="activeForm" (ngSubmit)="onSubmit()">
+      <div class="mb-3">
+        <input
+          id="otp"
+          type="text"
+          class="form-control"
+          formControlName="otp"
+          placeholder="Nhập mã OTP được gửi qua email"
+        />
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">
+        Xác nhận kích hoạt
+      </button>
+    </form>
+  </div>
+</div>

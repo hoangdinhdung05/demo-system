@@ -39,8 +39,11 @@ export class RegisterComponent {
     this.authService.register(request).subscribe({
       next: (res) => {
         if (res.success) {
-          this.toast.success('Đăng ký thành công! Vui lòng kích hoạt tài khoản.');
-          this.router.navigate(['/active']);
+          this.toast.success('Đăng ký thành công! Vui lòng kiểm tra email để nhận mã OTP.');
+
+          // 👉 Truyền email sang trang active
+          const email = this.registerForm.value.email;
+          this.router.navigate(['/auth/active'], { queryParams: { email } });
         } else {
           this.toast.error(res.message || 'Đăng ký thất bại!');
         }

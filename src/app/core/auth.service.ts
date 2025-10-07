@@ -30,5 +30,7 @@ export class AuthService {
     );
   }
 
-  
+  active(request: { email: string; otp: string }) {
+    return this.http.post<any>(`${this.apiUrl}/active`, request);
+  }
 }
