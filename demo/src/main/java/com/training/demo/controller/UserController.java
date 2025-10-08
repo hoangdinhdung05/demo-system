@@ -5,7 +5,6 @@ import com.training.demo.dto.request.User.ChangePasswordRequest;
 import com.training.demo.dto.request.User.UpdateUserRequest;
 import com.training.demo.dto.response.System.BaseResponse;
 import com.training.demo.service.UserService;
-import com.training.demo.utils.enums.UserStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -133,5 +132,12 @@ public class UserController {
         log.info("[User] Update user info for userId: {}", id);
         userService.updateUser(id, request);
         return ResponseEntity.ok(BaseResponse.success());
+    }
+
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+    @GetMapping("/count")
+    public ResponseEntity<?> count() {
+        log.info("[User] Count total users");
+        return ResponseEntity.ok(BaseResponse.success(userService.countUsers()));
     }
 }

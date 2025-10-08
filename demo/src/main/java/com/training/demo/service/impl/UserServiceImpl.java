@@ -261,6 +261,16 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    /**
+     * Lấy tổng số user trong hệ thống
+     *
+     * @return tổng số user
+     */
+    @Override
+    public long countUsers() {
+        return userRepository.count();
+    }
+
     //========== PRIVATE METHOD ==========//
     private void validatePassword(ChangePasswordRequest request, User user) {
         if (request.getNewPassword().equals(request.getOldPassword())) {

@@ -58,4 +58,10 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     """)
     List<ExportUserResponse> findAllWithRoles();
 
+    /**
+     * Đếm tổng số người dùng trong hệ thống
+     * @return Tổng số người dùng
+     */
+    @Query("SELECT COUNT(u) FROM User u")
+    long count();
 }

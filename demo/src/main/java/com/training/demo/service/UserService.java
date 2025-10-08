@@ -75,4 +75,10 @@ public interface UserService {
      * @param request thông tin mới
      */
     void updateUser(Long id, UpdateUserRequest request);
+
+    /**
+     * Lấy tổng số user trong hệ thống
+     * @return tổng số user
+     */
+    long countUsers();
 }
