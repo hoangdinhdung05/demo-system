@@ -41,7 +41,9 @@ export class UsersComponent implements OnInit {
     private toastr: ToastrService) {}
 
   ngOnInit(): void {
-    this.loadUsers(0);
+    this.loadUsers(this.currentPage > 0 && this.filteredUsers.length === 1 
+      ? this.currentPage - 1 
+      : this.currentPage);
 
     this.createUserForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(20)]],
@@ -159,15 +161,6 @@ submitCreateUser() {
     );
   }
 
-  // === Action buttons ===
-  viewUser(user: any) { console.log('View', user); }
-  editUser(user: any) { console.log('Edit', user); }
-  deleteUser(user: any) {
-    if (confirm(`Bạn có chắc muốn xóa người dùng "${user.username}" không?`)) {
-      console.log('Delete', user);
-    }
-  }
-
   exportUserReport() {
     this.loading = true;
     this.userService.exportUserReport().subscribe({
@@ -230,4 +223,30 @@ submitCreateUser() {
       }
     });
   }
+
+  deleteUser(user: any) {
+    if (!confirm(`Bạn có chắc muốn xóa người dùng "${user.username}" không?`)) {
+      return;
+    }
+
+    this.userService.deleteUser(user.id).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.toastr.success('Xóa người dùng thành công!', 'Thành công');
+          this.loadUsers(this.currentPage); // reload lại bảng
+        } else {
+          this.toastr.warning('Không thể xóa người dùng này!', 'Cảnh báo');
+        }
+      },
+      error: (err) => {
+        console.error('Error deleting user:', err);
+        if (err.error?.message) {
+          this.toastr.error(err.error.message, 'Lỗi');
+        } else {
+          this.toastr.error('Có lỗi xảy ra, vui lòng thử lại!', 'Lỗi');
+        }
+      }
+    });
+  }
+
 }

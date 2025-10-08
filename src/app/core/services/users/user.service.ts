@@ -32,6 +32,10 @@ export class UserService {
     return this.http.patch<BaseResponse<any>>(`${this.apiUrl}/${id}`, request);
   }
 
+  deleteUser(id: number): Observable<BaseResponse<any>> {
+    return this.http.delete<BaseResponse<any>>(`${this.apiUrl}/${id}`);
+  }
+
   exportUserReport(): Observable<Blob> {
     return this.http.get(`${environment.apiUrl}/reports/users`, {
       responseType: 'blob'
