@@ -51,7 +51,7 @@
                 <i *ngIf="!user.verifyEmail" class="bi bi-x-circle-fill text-danger fs-5"></i>
               </td>
               <td class="text-center">
-                <button class="btn btn-sm btn-outline-info me-1"><i class="bi bi-eye"></i></button>
+                <button class="btn btn-sm btn-outline-info me-1" (click)="openDetailsModal(user.id)"><i class="bi bi-eye"></i></button>
                 <button class="btn btn-warning btn-sm me-2" (click)="openEditModal(user)"><i class="bi bi-pencil-square"></i></button>
                 <button class="btn btn-sm btn-outline-danger" (click)="deleteUser(user)"><i class="bi bi-trash"></i></button>
               </td>
@@ -212,6 +212,30 @@
           <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- ========== User Details Modal ========== -->
+<div class="modal fade" #detailsUserModal tabindex="-1" aria-labelledby="detailsUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title" id="detailsUserModalLabel">Thông tin chi tiết người dùng</h5>
+        <button type="button" class="btn-close" (click)="closeDetailsModal()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedUserDetails">
+        <p><strong>ID:</strong> {{ selectedUserDetails.id }}</p>
+        <p><strong>Họ tên:</strong> {{ selectedUserDetails.firstName }} {{ selectedUserDetails.lastName }}</p>
+        <p><strong>Username:</strong> {{ selectedUserDetails.username }}</p>
+        <p><strong>Email:</strong> {{ selectedUserDetails.email }}</p>
+        <p><strong>Trạng thái:</strong> {{ selectedUserDetails.status }}</p>
+        <p><strong>Đã xác thực email:</strong> {{ selectedUserDetails.verifyEmail ? 'Có' : 'Chưa' }}</p>
+        <p><strong>Vai trò:</strong> {{ selectedUserDetails.roles?.join(', ') }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeDetailsModal()">Đóng</button>
+      </div>
     </div>
   </div>
 </div>

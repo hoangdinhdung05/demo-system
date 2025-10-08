@@ -4,9 +4,10 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { BaseResponse } from '../../models/response/base-response';
 import { PageResponse } from '../../models/response/page-response';
-import { UserResponse } from '../../models/response/user-response';
+import { UserResponse } from '../../models/response/User/user-response';
 import { AdminCreateUserRequest } from '../../models/request/Users/AdminCreateUserRequest';
 import { UpdateUserRequest } from '../../models/request/Users/UpdateUserRequest';
+import { UserDetailsResponse } from '../../models/response/User/UserDetailsRespomse';
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +23,10 @@ export class UserService {
       .set('pageSize', pageSize);
     
     return this.http.get<BaseResponse<PageResponse<UserResponse>>>(this.apiUrl, { params });
+  }
+
+  getUserDetails(id: number): Observable<BaseResponse<UserDetailsResponse>> {
+    return this.http.get<BaseResponse<UserDetailsResponse>>(`${this.apiUrl}/details/${id}`);
   }
 
   adminCreateUser(request: AdminCreateUserRequest): Observable<BaseResponse<any>> {

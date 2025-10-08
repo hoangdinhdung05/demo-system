@@ -35,6 +35,10 @@ export class UsersComponent implements OnInit {
   selectedUser: any = null;
   editModalInstance: any;
 
+  @ViewChild('detailsUserModal') detailsUserModal!: ElementRef;
+  detailsModalInstance: any;
+  selectedUserDetails: any = null;
+
 
   constructor(private userService: UserService, 
     private fb: FormBuilder, 
@@ -247,6 +251,28 @@ submitCreateUser() {
         }
       }
     });
+  }
+
+  openDetailsModal(userId: number) {
+    this.userService.getUserDetails(userId).subscribe({
+      next: res => {
+        if (res.success) {
+          this.selectedUserDetails = res.data;
+          this.detailsModalInstance = new bootstrap.Modal(this.detailsUserModal.nativeElement);
+          this.detailsModalInstance.show();
+        } else {
+          this.toastr.warning('Không tìm thấy thông tin người dùng', 'Cảnh báo');
+        }
+      },
+      error: err => {
+        console.error('Lỗi khi lấy chi tiết user:', err);
+        this.toastr.error('Không thể tải thông tin chi tiết!', 'Lỗi');
+      }
+    });
+  }
+
+  closeDetailsModal() {
+    if (this.detailsModalInstance) this.detailsModalInstance.hide();
   }
 
 }
