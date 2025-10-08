@@ -184,6 +184,11 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(Long id) {
         log.info("[UserService] Delete user by userId: {}", id);
 
+        User currentUser = SecurityUtils.getCurrentUserDetails().getUser(); // Lấy user đang đăng nhập
+        if (currentUser.getId().equals(id)) {
+            throw new BadRequestException("You cannot delete your own account");
+        }
+
         User user = getUserById(id);
 
         if (user.getStatus().equals(UserStatus.INACTIVE)) {
