@@ -6,6 +6,7 @@ import { BaseResponse } from '../../models/response/base-response';
 import { PageResponse } from '../../models/response/page-response';
 import { UserResponse } from '../../models/response/user-response';
 import { AdminCreateUserRequest } from '../../models/request/Users/AdminCreateUserRequest';
+import { UpdateUserRequest } from '../../models/request/Users/UpdateUserRequest';
 
 @Injectable({
   providedIn: 'root'
@@ -26,6 +27,10 @@ export class UserService {
   adminCreateUser(request: AdminCreateUserRequest): Observable<BaseResponse<any>> {
     return this.http.post<BaseResponse<any>>(`${this.apiUrl}`, request);
   }  
+
+  updateUser(id: number, request: UpdateUserRequest): Observable<BaseResponse<any>> {
+    return this.http.patch<BaseResponse<any>>(`${this.apiUrl}/${id}`, request);
+  }
 
   exportUserReport(): Observable<Blob> {
     return this.http.get(`${environment.apiUrl}/reports/users`, {

@@ -52,7 +52,7 @@
               </td>
               <td class="text-center">
                 <button class="btn btn-sm btn-outline-info me-1" (click)="viewUser(user)"><i class="bi bi-eye"></i></button>
-                <button class="btn btn-sm btn-outline-warning me-1" (click)="editUser(user)"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-warning btn-sm me-2" (click)="openEditModal(user)"><i class="bi bi-pencil-square"></i></button>
                 <button class="btn btn-sm btn-outline-danger" (click)="deleteUser(user)"><i class="bi bi-trash"></i></button>
               </td>
             </tr>
@@ -156,6 +156,62 @@
           <button type="submit" class="btn btn-primary" [disabled]="createUserForm.invalid">Tạo</button>
         </form>
       </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal Edit User -->
+<div class="modal fade" #editUserModal tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form [formGroup]="editUserForm" (ngSubmit)="submitEditUser()">
+        <div class="modal-header">
+          <h5 class="modal-title">Chỉnh sửa người dùng</h5>
+          <button type="button" class="btn-close" (click)="closeEditModal()" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">First Name</label>
+            <input type="text" formControlName="firstName" class="form-control" />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Last Name</label>
+            <input type="text" formControlName="lastName" class="form-control" />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Trạng thái</label>
+            <select class="form-select" formControlName="status">
+              <option value="ACTIVE">ACTIVE</option>
+              <option value="INACTIVE">INACTIVE</option>
+            </select>
+          </div>
+
+          <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" formControlName="verifyEmail" id="verifyEmailEdit">
+            <label for="verifyEmailEdit" class="form-check-label">Đã xác thực email</label>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Roles</label>
+            <div *ngFor="let role of roleOptions">
+              <input type="checkbox"
+                     [value]="role"
+                     (change)="onRoleChange($event)"
+                     [checked]="editUserForm.value.roles?.includes(role)" />
+              {{ role }}
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Đóng</button>
+          <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

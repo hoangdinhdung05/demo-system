@@ -30,6 +30,12 @@ export class UsersComponent implements OnInit {
   backendErrors: { [key: string]: string } = {};
 
 
+  @ViewChild('editUserModal') editUserModal!: ElementRef;
+  editUserForm!: FormGroup;
+  selectedUser: any = null;
+  editModalInstance: any;
+
+
   constructor(private userService: UserService, 
     private fb: FormBuilder, 
     private toastr: ToastrService) {}
@@ -42,6 +48,14 @@ export class UsersComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d).+$/)]],
       roles: [[]] // mảng chứa các role được chọn
+    });
+
+    this.editUserForm = this.fb.group({
+      firstName: [''],
+      lastName: [''],
+      status: ['ACTIVE'],
+      verifyEmail: [false],
+      roles: [[]]
     });
   }
 
@@ -178,6 +192,41 @@ submitCreateUser() {
         console.error('Export report error:', err);
         this.toastr.error('Không thể xuất báo cáo PDF!', 'Lỗi');
         this.loading = false;
+      }
+    });
+  }
+
+  openEditModal(user: any) {
+    this.selectedUser = user;
+    this.editUserForm.patchValue({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      status: user.status,
+      verifyEmail: user.verifyEmail,
+      roles: user.roles || []
+    });
+
+    this.editModalInstance = new bootstrap.Modal(this.editUserModal.nativeElement);
+    this.editModalInstance.show();
+  }
+
+  closeEditModal() {
+    if (this.editModalInstance) this.editModalInstance.hide();
+  }
+
+  submitEditUser() {
+    if (this.editUserForm.invalid || !this.selectedUser) return;
+
+    const request = this.editUserForm.value;
+    this.userService.updateUser(this.selectedUser.id, request).subscribe({
+      next: res => {
+        this.toastr.success('Cập nhật người dùng thành công!', 'Thành công');
+        this.closeEditModal();
+        this.loadUsers(this.currentPage);
+      },
+      error: err => {
+        console.error('Update error:', err);
+        this.toastr.error(err.error?.message || 'Có lỗi xảy ra khi cập nhật!', 'Lỗi');
       }
     });
   }
