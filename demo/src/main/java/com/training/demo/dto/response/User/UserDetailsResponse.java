@@ -3,6 +3,8 @@ package com.training.demo.dto.response.User;
 import com.training.demo.utils.enums.UserStatus;
 import lombok.Builder;
 import lombok.Getter;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
@@ -14,6 +16,8 @@ public class UserDetailsResponse {
     private String email;
     private UserStatus status;
     private boolean verifyEmail;
+    private List<String> roles;
+    private LocalDateTime createdAt;
 
     public String getFullName() {
         return firstName + " " + lastName;

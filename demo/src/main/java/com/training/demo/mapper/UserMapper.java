@@ -24,6 +24,9 @@ public class UserMapper {
                 .email(user.getEmail())
                 .status(user.getStatus())
                 .verifyEmail(user.isVerifyEmail())
+                .roles(user.getRoles().stream()
+                        .map(role -> role.getName().name()) // ví dụ ADMIN, USER
+                        .toList())
                 .build();
     }
 
