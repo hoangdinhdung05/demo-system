@@ -8,6 +8,8 @@ import { UserResponse } from '../../models/response/User/user-response';
 import { AdminCreateUserRequest } from '../../models/request/Users/AdminCreateUserRequest';
 import { UpdateUserRequest } from '../../models/request/Users/UpdateUserRequest';
 import { UserDetailsResponse } from '../../models/response/User/UserDetailsRespomse';
+import { map } from 'rxjs/operators';
+
 
 @Injectable({
   providedIn: 'root'
@@ -45,5 +47,10 @@ export class UserService {
     return this.http.get(`${environment.apiUrl}/reports/users`, {
       responseType: 'blob'
     });
+  }
+
+  countUser(): Observable<number> {
+    return this.http.get<BaseResponse<number>>(`${this.apiUrl}/count`)
+      .pipe(map(res => res.data));
   }
 }
