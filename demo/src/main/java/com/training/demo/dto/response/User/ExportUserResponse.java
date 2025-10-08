@@ -6,4 +6,6 @@ public interface ExportUserResponse {
     String getLastName();
     String getUsername();
     String getEmail();
+    String getStatus();
+    String getRoleName();
 }

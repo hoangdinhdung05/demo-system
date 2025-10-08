@@ -8,13 +8,10 @@ import net.sf.jasperreports.engine.type.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class JasperReportGenerator {
 
     public JasperPrint generateUserReport(List<ExportUserResponse> users) throws JRException {
-
-        // 1️⃣ Thiết kế tổng thể
         JasperDesign jasperDesign = new JasperDesign();
         jasperDesign.setName("user_report");
         jasperDesign.setPageWidth(595);
@@ -25,13 +22,15 @@ public class JasperReportGenerator {
         jasperDesign.setTopMargin(20);
         jasperDesign.setBottomMargin(20);
 
-        // 2️⃣ Khai báo các field tương ứng DTO
+        // ====== Fields ======
         String[][] fields = {
                 {"id", "java.lang.Long"},
                 {"firstName", "java.lang.String"},
                 {"lastName", "java.lang.String"},
                 {"username", "java.lang.String"},
-                {"email", "java.lang.String"}
+                {"email", "java.lang.String"},
+                {"status", "java.lang.String"},
+                {"roleName", "java.lang.String"}
         };
         for (String[] f : fields) {
             JRDesignField field = new JRDesignField();
@@ -40,7 +39,7 @@ public class JasperReportGenerator {
             jasperDesign.addField(field);
         }
 
-        // 3️⃣ Title
+        // ====== Title ======
         JRDesignBand titleBand = new JRDesignBand();
         titleBand.setHeight(50);
 
@@ -54,46 +53,48 @@ public class JasperReportGenerator {
         titleText.setVerticalTextAlign(VerticalTextAlignEnum.MIDDLE);
         titleText.setFontSize(20f);
         titleText.setBold(true);
-        titleText.setForecolor(new Color(60, 60, 60));
+        titleText.setForecolor(new Color(40, 40, 40));
 
         titleBand.addElement(titleText);
         jasperDesign.setTitle(titleBand);
 
-        // 4️⃣ Column Header
+        // ====== Column Header ======
         JRDesignBand columnHeader = new JRDesignBand();
         columnHeader.setHeight(25);
 
         int x = 0;
-        columnHeader.addElement(createHeaderCell("ID", x, 40));
-        x += 40;
-        columnHeader.addElement(createHeaderCell("First Name", x, 100));
-        x += 100;
-        columnHeader.addElement(createHeaderCell("Last Name", x, 100));
-        x += 100;
-        columnHeader.addElement(createHeaderCell("Username", x, 150));
-        x += 150;
-        columnHeader.addElement(createHeaderCell("Email", x, 165));
-
+        columnHeader.addElement(createHeaderCell("ID", x, 35)); x += 35;
+        columnHeader.addElement(createHeaderCell("First Name", x, 90)); x += 90;
+        columnHeader.addElement(createHeaderCell("Last Name", x, 90)); x += 90;
+        columnHeader.addElement(createHeaderCell("Username", x, 90)); x += 90;
+        columnHeader.addElement(createHeaderCell("Email", x, 130)); x += 130;
+        columnHeader.addElement(createHeaderCell("Status", x, 60)); x += 60;
+        columnHeader.addElement(createHeaderCell("Role", x, 60));
         jasperDesign.setColumnHeader(columnHeader);
 
-        // 5️⃣ Detail Band
+        // ====== Detail ======
         JRDesignBand detailBand = new JRDesignBand();
         detailBand.setHeight(20);
 
         int dx = 0;
-        detailBand.addElement(createDetailCell("$F{id}", dx, 40, HorizontalTextAlignEnum.CENTER));
-        dx += 40;
-        detailBand.addElement(createDetailCell("$F{firstName}", dx, 100, HorizontalTextAlignEnum.CENTER));
-        dx += 100;
-        detailBand.addElement(createDetailCell("$F{lastName}", dx, 100, HorizontalTextAlignEnum.CENTER));
-        dx += 100;
-        detailBand.addElement(createDetailCell("$F{username}", dx, 150, HorizontalTextAlignEnum.CENTER));
-        dx += 150;
-        detailBand.addElement(createDetailCell("$F{email}", dx, 165, HorizontalTextAlignEnum.CENTER));
+        detailBand.addElement(createDetailCell("($F{id} == null) ? \"—\" : String.valueOf($F{id})", dx, 35)); dx += 35;
+        detailBand.addElement(createDetailCell("($F{firstName} == null) ? \"—\" : $F{firstName}", dx, 90)); dx += 90;
+        detailBand.addElement(createDetailCell("($F{lastName} == null) ? \"—\" : $F{lastName}", dx, 90)); dx += 90;
+        detailBand.addElement(createDetailCell("($F{username} == null) ? \"—\" : $F{username}", dx, 90)); dx += 90;
+        detailBand.addElement(createDetailCell("($F{email} == null) ? \"—\" : $F{email}", dx, 130)); dx += 130;
+
+        // STATUS có conditional color
+        JRDesignTextField statusField = createDetailCell("($F{status} == null) ? \"—\" : $F{status}", dx, 60);
+        applyConditionalStatusColor(jasperDesign, statusField);
+        detailBand.addElement(statusField);
+        dx += 60;
+
+        // ROLE
+        detailBand.addElement(createDetailCell("($F{roleName} == null) ? \"—\" : $F{roleName}", dx, 60));
 
         ((JRDesignSection) jasperDesign.getDetailSection()).addBand(detailBand);
 
-        // 6️⃣ Footer
+        // ====== Footer ======
         JRDesignBand footerBand = new JRDesignBand();
         footerBand.setHeight(25);
 
@@ -102,33 +103,20 @@ public class JasperReportGenerator {
         footerText.setY(0);
         footerText.setWidth(555);
         footerText.setHeight(20);
-        footerText.setExpression(new JRDesignExpression("\"Created by: \" + $P{createdBy}"));
+        footerText.setExpression(new JRDesignExpression("\"Generated by Admin | Page \" + $V{PAGE_NUMBER}"));
         footerText.setHorizontalTextAlign(HorizontalTextAlignEnum.RIGHT);
         footerText.setVerticalTextAlign(VerticalTextAlignEnum.MIDDLE);
-        footerText.setFontSize(10f);
+        footerText.setFontSize(9f);
         footerText.setForecolor(Color.DARK_GRAY);
 
         footerBand.addElement(footerText);
         jasperDesign.setPageFooter(footerBand);
 
-        // 7️⃣ Parameter
-        JRDesignParameter createdByParam = new JRDesignParameter();
-        createdByParam.setName("createdBy");
-        createdByParam.setValueClass(String.class);
-        jasperDesign.addParameter(createdByParam);
-
-        // 8️⃣ Compile
+        // ====== Compile & Fill ======
         JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
-
-        // 9️⃣ Fill data
         JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(users);
-        Map<String, Object> params = new HashMap<>();
-        params.put("createdBy", "Admin");
-
-        return JasperFillManager.fillReport(jasperReport, params, dataSource);
+        return JasperFillManager.fillReport(jasperReport, new HashMap<>(), dataSource);
     }
-
-    // ==================== HELPER ====================
 
     private JRDesignStaticText createHeaderCell(String text, int x, int width) {
         JRDesignStaticText header = new JRDesignStaticText();
@@ -141,32 +129,51 @@ public class JasperReportGenerator {
         header.setVerticalTextAlign(VerticalTextAlignEnum.MIDDLE);
         header.setFontSize(12f);
         header.setBold(true);
-        header.setForecolor(Color.BLACK);
-        header.setBackcolor(new Color(224, 235, 255)); // xanh nhạt dễ nhìn
+        header.setBackcolor(new Color(220, 230, 250));
         header.setMode(ModeEnum.OPAQUE);
-
         header.getLineBox().getPen().setLineWidth(0.5f);
-        header.getLineBox().getPen().setLineStyle(LineStyleEnum.SOLID);
-        header.getLineBox().getPen().setLineColor(Color.GRAY);
         return header;
     }
 
-    private JRDesignTextField createDetailCell(String expression, int x, int width, HorizontalTextAlignEnum align) {
+    private JRDesignTextField createDetailCell(String expression, int x, int width) {
         JRDesignTextField field = new JRDesignTextField();
         field.setX(x);
         field.setY(0);
         field.setWidth(width);
         field.setHeight(20);
         field.setExpression(new JRDesignExpression(expression));
-        field.setHorizontalTextAlign(align);
+        field.setHorizontalTextAlign(HorizontalTextAlignEnum.CENTER);
         field.setVerticalTextAlign(VerticalTextAlignEnum.MIDDLE);
-        field.setFontSize(11f);
-        field.setStretchWithOverflow(true);
-
+        field.setFontSize(10.5f);
         field.getLineBox().getPen().setLineWidth(0.25f);
-        field.getLineBox().getPen().setLineStyle(LineStyleEnum.SOLID);
-        field.getLineBox().getPen().setLineColor(new Color(200, 200, 200));
-
+        field.getLineBox().getPen().setLineColor(new Color(180, 180, 180));
         return field;
+    }
+
+    private void applyConditionalStatusColor(JasperDesign design, JRDesignTextField field) throws JRException {
+        JRDesignStyle style = new JRDesignStyle();
+        style.setName("StatusStyle");
+
+        JRDesignConditionalStyle active = new JRDesignConditionalStyle();
+        active.setConditionExpression(new JRDesignExpression("$F{status} != null && $F{status}.equals(\"ACTIVE\")"));
+        active.setBackcolor(new Color(198, 239, 206));
+        active.setMode(ModeEnum.OPAQUE);
+
+        JRDesignConditionalStyle inactive = new JRDesignConditionalStyle();
+        inactive.setConditionExpression(new JRDesignExpression("$F{status} != null && $F{status}.equals(\"INACTIVE\")"));
+        inactive.setBackcolor(new Color(255, 235, 156));
+        inactive.setMode(ModeEnum.OPAQUE);
+
+        JRDesignConditionalStyle banned = new JRDesignConditionalStyle();
+        banned.setConditionExpression(new JRDesignExpression("$F{status} != null && $F{status}.equals(\"BANNED\")"));
+        banned.setBackcolor(new Color(244, 204, 204));
+        banned.setMode(ModeEnum.OPAQUE);
+
+        style.addConditionalStyle(active);
+        style.addConditionalStyle(inactive);
+        style.addConditionalStyle(banned);
+        design.addStyle(style);
+
+        field.setStyle(style);
     }
 }

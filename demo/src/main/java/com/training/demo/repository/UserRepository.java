@@ -44,8 +44,18 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
      * Lấy tất cả người dùng kèm theo vai trò của họ
      * @return Danh sách người dùng với vai trò
      */
-    @Query("SELECT u.id AS id, u.firstName AS firstName, u.lastName AS lastName, " +
-            "u.username AS username, u.email AS email FROM User u")
+    @Query("""
+    SELECT u.id AS id,
+           u.firstName AS firstName,
+           u.lastName AS lastName,
+           u.username AS username,
+           u.email AS email,
+           u.status AS status,
+           r.name AS roleName
+    FROM User u
+    JOIN u.userHasRoles uhr
+    JOIN uhr.role r
+    """)
     List<ExportUserResponse> findAllWithRoles();
 
 }
