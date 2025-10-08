@@ -26,4 +26,10 @@ export class UserService {
   adminCreateUser(request: AdminCreateUserRequest): Observable<BaseResponse<any>> {
     return this.http.post<BaseResponse<any>>(`${this.apiUrl}`, request);
   }  
+
+  exportUserReport(): Observable<Blob> {
+    return this.http.get(`${environment.apiUrl}/reports/users`, {
+      responseType: 'blob'
+    });
+  }
 }

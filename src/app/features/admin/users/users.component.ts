@@ -136,8 +136,6 @@ submitCreateUser() {
   });
 }
 
-
-
   // === Search client-side ===
   filterUsers() {
     const text = this.searchText.toLowerCase();
@@ -154,5 +152,33 @@ submitCreateUser() {
     if (confirm(`Bạn có chắc muốn xóa người dùng "${user.username}" không?`)) {
       console.log('Delete', user);
     }
+  }
+
+  exportUserReport() {
+    this.loading = true;
+    this.userService.exportUserReport().subscribe({
+      next: (blob) => {
+        const file = new Blob([blob], { type: 'application/pdf' });
+        const fileURL = URL.createObjectURL(file);
+
+        // Tự động mở PDF trong tab mới
+        window.open(fileURL, '_blank');
+
+        // Nếu muốn download thẳng thay vì mở tab:
+        // const link = document.createElement('a');
+        // link.href = fileURL;
+        // link.download = 'users_report.pdf';
+        // link.click();
+        // URL.revokeObjectURL(fileURL);
+
+        this.toastr.success('Xuất báo cáo PDF thành công!', 'Thành công');
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Export report error:', err);
+        this.toastr.error('Không thể xuất báo cáo PDF!', 'Lỗi');
+        this.loading = false;
+      }
+    });
   }
 }
