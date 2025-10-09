@@ -13,10 +13,28 @@
       <div class="col-auto">
         <div class="d-flex align-items-center gap-3">
 
-          <div class="user-profile">
-            <img src="https://via.placeholder.com/40" alt="User" class="user-avatar">
-            <span class="ms-2 d-none d-md-inline">John Doe</span>
+      <div class="user-profile" *ngIf="user; else loadingUser">
+        <!-- Nếu có avatar thì hiển thị ảnh, nếu null thì hiển thị chữ cái đầu -->
+        <ng-container *ngIf="user.avatar; else noAvatar">
+          <img [src]="user.avatar" alt="User" class="user-avatar">
+        </ng-container>
+
+        <ng-template #noAvatar>
+          <div class="user-avatar-fallback">
+            {{ userInitial }}
           </div>
+        </ng-template>
+
+        <span class="ms-2 d-none d-md-inline">{{ user.username }}</span>
+      </div>
+
+      <ng-template #loadingUser>
+        <div class="user-profile">
+          <div class="user-avatar-fallback">?</div>
+          <span class="ms-2 d-none d-md-inline">Loading...</span>
+        </div>
+      </ng-template>
+
         </div>
       </div>
     </div>
