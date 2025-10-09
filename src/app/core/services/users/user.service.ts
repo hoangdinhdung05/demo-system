@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -9,6 +9,7 @@ import { AdminCreateUserRequest } from '../../models/request/Users/AdminCreateUs
 import { UpdateUserRequest } from '../../models/request/Users/UpdateUserRequest';
 import { UserDetailsResponse } from '../../models/response/User/UserDetailsRespomse';
 import { map } from 'rxjs/operators';
+import { ChangePasswordRequest } from '../../models/request/Users/ChangePasswordRequest';
 
 
 @Injectable({
@@ -52,5 +53,12 @@ export class UserService {
   countUser(): Observable<number> {
     return this.http.get<BaseResponse<number>>(`${this.apiUrl}/count`)
       .pipe(map(res => res.data));
+  }
+
+  changePassword(request: ChangePasswordRequest): Observable<BaseResponse<any>> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`
+    });
+    return this.http.post<BaseResponse<any>>(`${environment.apiUrl}/change-password`, request, { headers });
   }
 }

@@ -16,9 +16,4 @@ export class SideBarComponent {
   navigate(path: string) {
     this.router.navigate([path]);
   }
-
-  logout() {
-    this.authService.logout();       // gọi logout xóa token + logout API
-    this.router.navigate(['/auth/login']); // chuyển về trang login
-  }
 }

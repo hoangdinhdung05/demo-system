@@ -79,25 +79,3 @@
     transform: translateX(-100%);
   }
 }
-
-.nav-item.logout {
-  margin: 0; /* đồng bộ với nav-item khác */
-  padding: 12px 20px;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  color: #333; /* giống text nav-item */
-  font-weight: 500;
-  border-top: 1px solid #e0e0e0; /* tạo separation */
-}
-
-.nav-item.logout i {
-  margin-right: 12px;
-  font-size: 1.1rem;
-  color: #666; /* giống icon nav-item */
-}
-
-.nav-item.logout:hover {
-  background-color: #f5f5f9; /* giống hover nav-item */
-}
