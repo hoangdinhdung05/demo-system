@@ -44,16 +44,16 @@ public class JwtProvider {
         String roles = user.getUserHasRoles().stream()
                 .map(role -> "ROLE_" + role.getRole().getName())
                 .collect(Collectors.joining(","));
-        return buildToken(user.getUsername(), roles, accessKey, getAccessTokenExpiryDate());
+        return buildToken(user.getUsername(), roles, accessKey, getAccessTokenExpiryDate(), user.getId());
     }
 
     public String generateRefreshToken(String username) {
         log.info("Generating refreshToken running");
 
-        return buildToken(username, null, refreshKey, getRefreshTokenExpiryDate());
+        return buildToken(username, null, refreshKey, getRefreshTokenExpiryDate(), null);
     }
 
-    private String buildToken(String subject, String roles, Key key, Date expiryDate) {
+    private String buildToken(String subject, String roles, Key key, Date expiryDate, Long userId) {
         JwtBuilder builder = Jwts.builder()
                 .setId(java.util.UUID.randomUUID().toString())
                 .setSubject(subject)
@@ -63,6 +63,10 @@ public class JwtProvider {
 
         if (roles != null) {
             builder.claim("roles", roles);
+        }
+
+        if (userId != null) {
+            builder.claim("userId", userId);
         }
 
         return builder.compact();
