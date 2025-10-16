@@ -1,6 +1,6 @@
 export interface UserDetailsResponse {
     id: number;
-    avatar: string;
+    avatarUrl: string;
     firstName: string;
     lastName: string;
     username: string;

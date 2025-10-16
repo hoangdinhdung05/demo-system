@@ -17,10 +17,9 @@
           <!-- 👤 User menu -->
           <div class="user-menu-wrapper">
             <div class="user-profile" (click)="toggleMenu()">
-              <ng-container *ngIf="user?.avatar; else noAvatar">
-                <img [src]="user?.avatar" alt="User" class="user-avatar" />
+              <ng-container *ngIf="avatarUrl; else noAvatar">
+                <img [src]="avatarUrl" alt="User" class="user-avatar" />
               </ng-container>
-
               <ng-template #noAvatar>
                 <div class="user-avatar-fallback">{{ userInitial }}</div>
               </ng-template>
@@ -37,6 +36,13 @@
               <div class="dropdown-header">
                 <strong>{{ user?.firstName }} {{ user?.lastName }}</strong><br />
                 <small class="text-muted">{{ user?.email }}</small>
+              </div>
+              <div class="dropdown-upload">
+                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="$event.stopPropagation(); triggerAvatarSelect()">
+                  <i class="bi bi-camera"></i> Đổi avatar
+                </button>
+                <!-- hidden file input -->
+                <input #avatarInput type="file" accept="image/*" style="display:none" (change)="onAvatarSelected($event)" />
               </div>
               <ul>
                 <li (click)="viewProfile()">

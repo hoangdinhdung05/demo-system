@@ -3,4 +3,5 @@ export interface UserResponse {
   username: string;
   status: string;
   verifyEmail: boolean;
+  avatarUrl: string;
 }

@@ -6,6 +6,8 @@ import { UserDetailsResponse } from 'src/app/core/models/response/User/UserDetai
 import { UserService } from 'src/app/core/services/users/user.service';
 import { UpdateUserRequest } from 'src/app/core/models/request/Users/UpdateUserRequest';
 import { ChangePasswordRequest } from 'src/app/core/models/request/Users/ChangePasswordRequest';
+import { ViewChild, ElementRef } from '@angular/core';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-header',
@@ -17,6 +19,9 @@ export class HeaderComponent implements OnInit {
   userInitial: string = '';
   isMenuOpen = false;
 
+  userId: number = 0;
+  @ViewChild('avatarInput') avatarInput?: ElementRef<HTMLInputElement>;
+
   showProfileModal = false;
   showEditModal = false;
   showChangePasswordModal = false;
@@ -24,6 +29,8 @@ export class HeaderComponent implements OnInit {
   oldPassword: string = '';
   newPassword: string = '';
   confirmPassword: string = '';
+
+  avatarUrl: string = '';
 
 
   constructor(
@@ -41,6 +48,7 @@ export class HeaderComponent implements OnInit {
     }
 
     const userId = this.decodeUserIdFromToken(token);
+    this.userId = userId;
     this.loadUserDetails(userId);
   }
 
@@ -59,10 +67,22 @@ export class HeaderComponent implements OnInit {
     this.userService.getUserDetails(userId).subscribe({
       next: (res) => {
         this.user = res.data;
+
+        console.log('User details:', this.user);
+
         this.userInitial = this.getUserInitial(this.user.username);
+        this.avatarUrl = this.buildAvatarSrc(this.user.avatarUrl);
       },
       error: (err) => console.error('Lỗi khi lấy thông tin user:', err)
     });
+  }
+
+  private buildAvatarSrc(avatarUrl?: string | null): string {
+    if (!avatarUrl) return '';
+    // Nếu BE đã trả absolute (http/https), dùng luôn
+    if (/^https?:\/\//i.test(avatarUrl)) return avatarUrl;
+    // Nếu BE trả đường dẫn tương đối kiểu /avatars/xxx.jpg
+    return `${environment.url}${avatarUrl.startsWith('/') ? '' : '/'}${avatarUrl}`;
   }
 
   private getUserInitial(username: string): string {
@@ -129,6 +149,31 @@ export class HeaderComponent implements OnInit {
     this.userService.changePassword(request).subscribe({
       next: (res) => this.toastr.success('Đổi mật khẩu thành công'),
       error: (err) => this.toastr.error('Đổi mật khẩu thất bại')
+    });
+  }
+
+  triggerAvatarSelect(): void {
+    if (this.avatarInput) {
+      this.avatarInput.nativeElement.click();
+    }
+  }
+
+  onAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    if (!file) return;
+
+    this.userService.uploadAvatar(this.userId, file).subscribe({
+      next: () => {
+        this.toastr.success('Upload avatar thành công');
+        // reload user details to get new avatar url
+        if (this.userId) this.loadUserDetails(this.userId);
+      },
+      error: (err) => {
+        console.error('Lỗi upload avatar', err);
+        this.toastr.error('Upload avatar thất bại');
+      }
     });
   }
 }

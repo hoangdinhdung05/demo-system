@@ -61,4 +61,18 @@ export class UserService {
     });
     return this.http.post<BaseResponse<any>>(`${environment.apiUrl}/change-password`, request, { headers });
   }
+
+  /**
+   * Upload avatar file for a user. Accepts a File object and posts as multipart/form-data.
+   */
+  uploadAvatar(id: number, file: File): Observable<BaseResponse<any>> {
+    const form = new FormData();
+    form.append('file', file);
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`
+    });
+
+    return this.http.post<BaseResponse<any>>(`${this.apiUrl}/${id}/avatar`, form, { headers });
+  }
 }

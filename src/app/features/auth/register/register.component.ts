@@ -49,7 +49,23 @@ export class RegisterComponent {
         }
       },
       error: (err) => {
-        this.toast.error(err.error?.message || 'Có lỗi xảy ra!');
+        if (err.error && err.error.errors) {
+          // Lấy object lỗi từ backend
+          const errors = err.error.errors;
+
+          // Nếu là object { password: "...", username: "..." }
+          const messages = Object.values(errors).join('\n');
+          this.toast.error(messages);
+
+        } else if (err.error && err.error.message) {
+          // Nếu backend chỉ trả message
+          this.toast.error(err.error.message);
+
+        } else {
+          this.toast.error('Có lỗi xảy ra!');
+        }
+
+        console.error('Register error:', err);
       }
     });
   }
