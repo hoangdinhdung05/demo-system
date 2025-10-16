@@ -15,6 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -134,10 +137,29 @@ public class UserController {
         return ResponseEntity.ok(BaseResponse.success());
     }
 
+    /**
+     * Số lượng user
+     * @return Total
+     */
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     @GetMapping("/count")
     public ResponseEntity<?> count() {
         log.info("[User] Count total users");
         return ResponseEntity.ok(BaseResponse.success(userService.countUsers()));
+    }
+
+    /**
+     * Upload avatar
+     * @param id userid
+     * @param file ảnh
+     * @return success
+     * @throws IOException error
+     */
+    @PostMapping("/{id}/avatar")
+    public ResponseEntity<?> uploadAvatar(@PathVariable Long id,
+                                          @RequestParam("file") MultipartFile file) throws IOException {
+        log.info("[User] Upload avatar for user: {}", id);
+        userService.uploadAvatar(id, file);
+        return ResponseEntity.ok(BaseResponse.success());
     }
 }

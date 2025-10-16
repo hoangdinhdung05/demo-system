@@ -36,13 +36,13 @@ public class GlobalExceptionHandle {
     // Lỗi validate body (ví dụ @Valid trong @RequestBody)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationException(MethodArgumentNotValidException ex) {
-        log.error("[ValidationException] {}", ex.getMessage());
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String field = ((FieldError) error).getField();
             String message = error.getDefaultMessage();
             errors.put(field, message);
         });
+        log.error("[ValidationException] Validation failed: {}", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(BaseResponse.failure("Validation failed", errors));
     }

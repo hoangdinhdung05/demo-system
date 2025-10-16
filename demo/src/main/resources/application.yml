@@ -10,8 +10,8 @@ spring:
   #Config database
   datasource:
     url: jdbc:mysql://localhost:3306/demo-system
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    username: root
+    password: 123456789
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   #Config jpa
@@ -35,8 +35,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${MAIL_ADMIN}
-    password: ${MAIL_PASSWORD}
+    username: hoangdinhdung0205@gmail.com
+    password: motu mzui skpn xuzg
     properties:
       mail:
         smtp:
@@ -51,8 +51,8 @@ spring:
 jwt:
   expiryMinutes: 5
   expiryDay: 14
-  accessKey: ${ACCESS_KEY}
-  refreshKey: ${REFRESH_KEY}
+  accessKey: p1zs6HE4bebUL6aVjJhSEtj/Bp4rhQPK3vUR2gpcA06muNhYO77Z9kzb3U5sDXBkdpEZwECJfm0tNuDRiVu29g==
+  refreshKey: vD/tpfdCt2JiqNX5VyXEx0SyxYFC06DjB9GoY6bER6lgyA2qlAGgCegeB9ZB+tfOf5yfw8ZX/SaZNkluZxtXZQ==
 
 #Config value redis
 otp:

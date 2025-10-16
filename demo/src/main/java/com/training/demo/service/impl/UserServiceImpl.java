@@ -30,6 +30,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Objects;
 
@@ -274,6 +280,42 @@ public class UserServiceImpl implements UserService {
     @Override
     public long countUsers() {
         return userRepository.count();
+    }
+
+    /**
+     * Upload avatar
+     *
+     * @param userId userId
+     * @param file   ảnh
+     * @return string
+     * @throws IOException error
+     */
+    @Override
+    public String uploadAvatar(Long userId, MultipartFile file) throws IOException {
+        log.info("[UserService] Upload avatar by userId: {}", userId);
+
+        User user = getUserIfAuthorized(userId);
+        if (file.isEmpty()) {
+            throw new BadRequestException("File is empty");
+        }
+
+        Path avatarDir = Paths.get("C:\\demo-system\\avatars");
+        if (!Files.exists(avatarDir)) {
+            Files.createDirectories(avatarDir);
+        }
+
+        String filename = "avatar_" + userId + "_" + System.currentTimeMillis() + ".jpg";
+        Path targetPath = avatarDir.resolve(filename);
+
+        // Lưu file
+        Files.write(targetPath, file.getBytes());
+
+        // Cập nhật URL trong DB
+        String avatarUrl = "/avatars/" + filename;
+        user.setAvatarUrl(avatarUrl);
+        userRepository.save(user);
+
+        return avatarUrl;
     }
 
     //========== PRIVATE METHOD ==========//

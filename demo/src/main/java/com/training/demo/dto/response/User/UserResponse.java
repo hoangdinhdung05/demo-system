@@ -11,4 +11,5 @@ public class UserResponse {
     private String username;
     private UserStatus status;
     private boolean verifyEmail;
+    private String avatarUrl;
 }

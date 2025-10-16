@@ -8,6 +8,9 @@ import com.training.demo.dto.response.System.PageResponse;
 import com.training.demo.dto.response.User.UserDetailsResponse;
 import com.training.demo.dto.response.User.UserResponse;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.util.Map;
 
 public interface UserService {
@@ -81,4 +84,13 @@ public interface UserService {
      * @return tổng số user
      */
     long countUsers();
+
+    /**
+     * Upload avatar
+     * @param userId userId
+     * @param file ảnh
+     * @return string
+     * @throws IOException error
+     */
+    String uploadAvatar(Long userId, MultipartFile file) throws IOException;
 }

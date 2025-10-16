@@ -16,6 +16,7 @@ public class UserDetailsResponse {
     private String email;
     private UserStatus status;
     private boolean verifyEmail;
+    private String avatarUrl;
     private List<String> roles;
     private LocalDateTime createdAt;
 

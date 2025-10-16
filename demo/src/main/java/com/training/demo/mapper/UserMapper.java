@@ -12,6 +12,7 @@ public class UserMapper {
                 .username(user.getUsername())
                 .status(user.getStatus())
                 .verifyEmail(user.isVerifyEmail())
+                .avatarUrl(user.getAvatarUrl())
                 .build();
     }
 
@@ -24,6 +25,7 @@ public class UserMapper {
                 .email(user.getEmail())
                 .status(user.getStatus())
                 .verifyEmail(user.isVerifyEmail())
+                .avatarUrl(user.getAvatarUrl())
                 .roles(user.getRoles().stream()
                         .map(role -> role.getName().name()) // ví dụ ADMIN, USER
                         .toList())

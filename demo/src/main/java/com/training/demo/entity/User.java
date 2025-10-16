@@ -36,6 +36,9 @@ public class User extends BaseEntity {
     @Column(name = "verify_email")
     private boolean verifyEmail;
 
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
     @OneToMany(
             cascade = CascadeType.ALL,
             fetch = FetchType.EAGER,
