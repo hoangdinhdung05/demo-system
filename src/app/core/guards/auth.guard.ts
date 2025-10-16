@@ -1,23 +1,14 @@
-import { Injectable } from "@angular/core";
-import { CanActivate, Router } from '@angular/router';
+import { Injectable } from '@angular/core';
+import { CanMatch, Route, UrlSegment, Router, UrlTree } from '@angular/router';
+import { AuthService } from '../auth.service';
 
-//Bảo vệ router
-@Injectable({
-    providedIn: 'root'
-})
-export class AuthGuard implements CanActivate {
+@Injectable({ providedIn: 'root' })
+export class AuthGuard implements CanMatch {
+  constructor(private auth: AuthService, private router: Router) {}
 
-    constructor(private router: Router) {}
-
-    canActivate(): boolean {
-        const token = localStorage.getItem('access_token');
-
-        console.log(token);
-
-        if (!token) {
-            this.router.navigate(['/auth/login']);
-            return false;
-        }
-        return true;
-    }
+  canMatch(_route: Route, _segments: UrlSegment[]): boolean | UrlTree {
+    return this.auth.isAuthenticated()
+      ? true
+      : this.router.createUrlTree(['/auth/login']);
+  }
 }
