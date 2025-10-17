@@ -26,7 +26,7 @@ public class ProductController {
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(@ModelAttribute ProductRequest request) {
-        return ResponseEntity.ok(productService.createProduct(request));
+        return ResponseEntity.ok(BaseResponse.success(productService.createProduct(request)));
     }
 
     /**
@@ -39,7 +39,7 @@ public class ProductController {
     @PatchMapping("/{id}")
     public ResponseEntity<?> updateProduct(@PathVariable Long id, @RequestBody ProductRequest request) {
         log.info("[Product] Update product with id: {}", id);
-        return ResponseEntity.ok(BaseResponse.success(productService.updateProduct(id, request)));
+        return ResponseEntity.ok(BaseResponse.success(BaseResponse.success(productService.updateProduct(id, request))));
     }
 
     /**

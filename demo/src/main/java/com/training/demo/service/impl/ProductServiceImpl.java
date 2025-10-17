@@ -13,6 +13,7 @@ import com.training.demo.service.ProductService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import static com.training.demo.mapper.ProductMapper.toProductResponse;
@@ -191,7 +192,7 @@ public class ProductServiceImpl implements ProductService {
 
         var pageable = org.springframework.data.domain.PageRequest.of(
                 page, size,
-                org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt")
+                org.springframework.data.domain.Sort.by(Sort.Direction.ASC, "createdAt")
                         .and(org.springframework.data.domain.Sort.by("id"))
         );
 
