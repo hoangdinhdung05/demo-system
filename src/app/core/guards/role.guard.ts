@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router, ActivatedRouteSnapshot } from '@angular/router';
+import { CanActivate, Router, ActivatedRouteSnapshot, UrlTree } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { ToastrService } from 'ngx-toastr';
 
@@ -12,21 +12,21 @@ export class RoleGuard implements CanActivate {
     private toastr: ToastrService
   ) {}
 
-  canActivate(route: ActivatedRouteSnapshot): boolean {
-    const expectedRole = route.data['role'];
-    const userRole = this.authService.getUserRole();
+  canActivate(route: ActivatedRouteSnapshot): boolean | UrlTree {
+    const expected = route.data['role'];
+    const expectedRoles: string[] = Array.isArray(expected) ? expected : (typeof expected === 'string' ? [expected] : []);
+    const userRoles = this.authService.getRoles();
 
-    // Chưa có role => chưa đăng nhập
-    if (!userRole) {
-      this.router.navigate(['/auth/login']);
-      return false;
+    // Not logged in
+    if (!userRoles || !userRoles.length) {
+      return this.router.createUrlTree(['/auth/login']);
     }
 
-    // Đăng nhập rồi nhưng sai quyền
-    if (userRole !== expectedRole) {
+    // If any of user's roles matches expected roles, allow
+    const allowed = userRoles.some(r => expectedRoles.includes(r));
+    if (!allowed) {
       this.toastr.warning('Bạn không có quyền truy cập vào trang này!');
-      this.router.navigate(['/']); // quay về client/home
-      return false;
+      return this.router.createUrlTree(['/']);
     }
 
     return true;

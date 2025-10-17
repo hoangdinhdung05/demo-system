@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { AuthService } from 'src/app/core/auth.service';
 import { LoginRequest } from 'src/app/core/models/request/login-request';
 import { ToastrService } from 'ngx-toastr';
-import { jwtDecode } from 'jwt-decode';
+ 
 
 @Component({
   selector: 'app-login',
@@ -38,21 +38,17 @@ export class LoginComponent {
       next: (response) => {
         const access_token = response.data.accessToken;
         const refresh_token = response.data.refreshToken;
-
-        localStorage.setItem('access_token', access_token);
-        localStorage.setItem('refresh_token', refresh_token);
-
+        // AuthService.login() already saves tokens via tap; use helper to read roles
         this.toastr.success('Đăng nhập thành công!');
 
-        // decode token để lấy role
-        const decoded: any = jwtDecode(access_token);
-        const role = decoded.roles; // hoặc path đúng với payload của bạn
+        const roles = this.authService.getRoles();
+        const firstRole = roles.length ? roles[0] : null;
 
-        console.log("ROLE:" + role);
+        console.log('ROLE:', roles);
 
-        if (role === 'ROLE_ADMIN') {
+        if (roles.includes('ROLE_ADMIN') || firstRole === 'ROLE_ADMIN') {
           this.router.navigate(['/admin']);
-        } else if (role === 'ROLE_USER') {
+        } else if (roles.includes('ROLE_USER') || firstRole === 'ROLE_USER') {
           this.router.navigate(['/']); // client home
         } else {
           this.router.navigate(['/auth/login']);
