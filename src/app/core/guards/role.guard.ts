@@ -26,7 +26,7 @@ export class RoleGuard implements CanActivate {
     const allowed = userRoles.some(r => expectedRoles.includes(r));
     if (!allowed) {
       this.toastr.warning('Bạn không có quyền truy cập vào trang này!');
-      return this.router.createUrlTree(['/']);
+        return this.router.createUrlTree(['/forbidden']);
     }
 
     return true;

@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
 import { ForbiddenComponent } from './shared/pages/forbidden/forbidden.component';
+import { NotFoundComponent } from './shared/pages/not-found/not-found.component';
 
 const routes: Routes = [
   {
@@ -20,7 +21,8 @@ const routes: Routes = [
     loadChildren: () => import('./features/client/client.module').then(m => m.ClientModule),
     },
   { path: 'forbidden', component: ForbiddenComponent },
-  { path: '**', redirectTo: 'auth/login' },
+  { path: '404', component: NotFoundComponent },
+  { path: '**', pathMatch: 'full', redirectTo: '404' },
 ];
 
 @NgModule({

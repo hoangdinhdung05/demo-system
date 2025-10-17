@@ -27,28 +27,16 @@ export class AppComponent {
           return;
         }
 
-        // kiểm tra role từ token
-        const role = this.authService.getUserRole();
-        if (role === 'ROLE_ADMIN') {
-          this.showAdminLayout = true;
-          this.showClientLayout = false;
+        // Decide layout based on current URL. Avoid forcing navigation to another route
+        // so users (including admins) can still visit client pages if the app allows.
+        const isAdminPath = url.startsWith('/admin');
+        const isClientPath = url === '/' || (!isAdminPath && !isAuthRoute && !url.startsWith('/auth'));
 
-          // nếu user cố tình vào /user hoặc / → redirect admin dashboard
-          if (!url.startsWith('/admin')) {
-            this.router.navigate(['/admin']);
-          }
-        } else if (role === 'ROLE_USER') {
-          this.showAdminLayout = false;
-          this.showClientLayout = true;
+        this.showAdminLayout = isAdminPath;
+        this.showClientLayout = isClientPath;
 
-          // nếu user cố tình vào /admin → redirect home
-          if (url.startsWith('/admin')) {
-            this.router.navigate(['/']);
-          }
-        } else {
-          // không login → redirect auth
-          this.router.navigate(['/auth/login']);
-        }
+        // If user is not authenticated and not on auth route, let guards handle redirects.
+        // We don't perform extra navigation here to avoid redirect loops.
       });
   }
 }
