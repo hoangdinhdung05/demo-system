@@ -30,6 +30,7 @@
           <thead class="table-light">
             <tr>
               <th class="text-center">#</th>
+              <th class="text-center">ID</th>
               <th class="text-center">Username</th>
               <th class="text-center">Status</th>
               <th class="text-center">Active Email</th>
@@ -39,6 +40,7 @@
           <tbody>
             <tr *ngFor="let user of filteredUsers; let i = index">
               <td class="text-center">{{ i + 1 + (currentPage * pageSize) }}</td>
+              <td class="text-center">{{ user.id }}</td>
               <td class="text-center">{{ user.username }}</td>
               <td class="text-center">
                 <span class="badge"
