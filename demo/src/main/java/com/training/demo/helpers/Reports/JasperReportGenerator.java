@@ -1,11 +1,13 @@
 package com.training.demo.helpers.Reports;
 
+import com.training.demo.dto.response.Product.ExportProductResponse;
 import com.training.demo.dto.response.User.ExportUserResponse;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.design.*;
 import net.sf.jasperreports.engine.type.*;
 import java.awt.*;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 
@@ -118,6 +120,151 @@ public class JasperReportGenerator {
         return JasperFillManager.fillReport(jasperReport, new HashMap<>(), dataSource);
     }
 
+    public JasperPrint generateProductReport(List<ExportProductResponse> products) throws JRException {
+        JasperDesign jasperDesign = new JasperDesign();
+        jasperDesign.setName("product_report");
+        jasperDesign.setPageWidth(595);
+        jasperDesign.setPageHeight(842);
+        jasperDesign.setColumnWidth(555);
+        jasperDesign.setLeftMargin(20);
+        jasperDesign.setRightMargin(20);
+        jasperDesign.setTopMargin(20);
+        jasperDesign.setBottomMargin(20);
+
+        // ====== Fields ======
+        String[][] fields = {
+                {"id", "java.lang.Long"},
+                {"name", "java.lang.String"},
+                {"description", "java.lang.String"},
+                {"price", "java.lang.Double"},
+                {"quantity", "java.lang.Integer"},
+                {"categoryName", "java.lang.String"},
+                {"productImageUrl", "java.lang.String"}
+        };
+        for (String[] f : fields) {
+            JRDesignField field = new JRDesignField();
+            field.setName(f[0]);
+            field.setValueClassName(f[1]);
+            jasperDesign.addField(field);
+        }
+
+        // ====== Title ======
+        JRDesignBand titleBand = new JRDesignBand();
+        titleBand.setHeight(50);
+
+        JRDesignStaticText titleText = new JRDesignStaticText();
+        titleText.setX(0);
+        titleText.setY(10);
+        titleText.setWidth(555);
+        titleText.setHeight(30);
+        titleText.setText("PRODUCT CATALOG REPORT");
+        titleText.setHorizontalTextAlign(HorizontalTextAlignEnum.CENTER);
+        titleText.setVerticalTextAlign(VerticalTextAlignEnum.MIDDLE);
+        titleText.setFontSize(20f);
+        titleText.setBold(true);
+        titleText.setForecolor(new Color(40, 40, 40));
+
+        titleBand.addElement(titleText);
+        jasperDesign.setTitle(titleBand);
+
+        // ====== Column Header ======
+        JRDesignBand columnHeader = new JRDesignBand();
+        columnHeader.setHeight(25);
+
+        int x = 0;
+        columnHeader.addElement(createHeaderCell("Image", x, 60)); x += 60;
+        columnHeader.addElement(createHeaderCell("ID", x, 35)); x += 35;
+        columnHeader.addElement(createHeaderCell("Name", x, 100)); x += 100;
+        columnHeader.addElement(createHeaderCell("Description", x, 120)); x += 120;
+        columnHeader.addElement(createHeaderCell("Price", x, 70)); x += 70;
+        columnHeader.addElement(createHeaderCell("Qty", x, 50)); x += 50;
+        columnHeader.addElement(createHeaderCell("Category", x, 120));
+        jasperDesign.setColumnHeader(columnHeader);
+
+        // ====== Detail ======
+        JRDesignBand detailBand = new JRDesignBand();
+        detailBand.setHeight(65);
+
+        int dx = 0;
+
+        // Image
+        JRDesignImage imageElement = new JRDesignImage(jasperDesign);
+        imageElement.setX(dx);
+        imageElement.setY(5);
+        imageElement.setWidth(60);
+        imageElement.setHeight(55);
+        imageElement.setScaleImage(ScaleImageEnum.RETAIN_SHAPE);
+        imageElement.setHorizontalImageAlign(HorizontalImageAlignEnum.CENTER);
+        imageElement.setOnErrorType(OnErrorTypeEnum.BLANK);
+
+        // Sử dụng expression đơn giản hơn - chỉ trả về string URL
+        imageElement.setExpression(new JRDesignExpression("$F{productImageUrl}"));
+
+        imageElement.getLineBox().getPen().setLineWidth(0.5f);
+        imageElement.getLineBox().getPen().setLineColor(new Color(180, 180, 180));
+        detailBand.addElement(imageElement);
+        dx += 60;
+
+        // ID
+        detailBand.addElement(createProductDetailCell("($F{id} == null) ? \"—\" : String.valueOf($F{id})", dx, 35, 65));
+        dx += 35;
+
+        // Name
+        detailBand.addElement(createProductDetailCell("($F{name} == null) ? \"—\" : $F{name}", dx, 100, 65));
+        dx += 100;
+
+        // Description
+        JRDesignTextField descField = createProductDetailCell("($F{description} == null) ? \"—\" : $F{description}", dx, 120, 65);
+        descField.setStretchType(StretchTypeEnum.RELATIVE_TO_TALLEST_OBJECT);
+        descField.setFontSize(9f);
+        detailBand.addElement(descField);
+        dx += 120;
+
+        // Price
+        detailBand.addElement(createProductDetailCell(
+                "($F{price} == null) ? \"—\" : String.format(\"$%.2f\", $F{price})",
+                dx, 70, 65
+        ));
+        dx += 70;
+
+        // Quantity
+        JRDesignTextField qtyField = createProductDetailCell(
+                "($F{quantity} == null) ? \"—\" : String.valueOf($F{quantity})",
+                dx, 50, 65
+        );
+        applyConditionalQuantityColor(jasperDesign, qtyField);
+        detailBand.addElement(qtyField);
+        dx += 50;
+
+        // Category
+        detailBand.addElement(createProductDetailCell("($F{categoryName} == null) ? \"—\" : $F{categoryName}", dx, 120, 65));
+
+        ((JRDesignSection) jasperDesign.getDetailSection()).addBand(detailBand);
+
+        // ====== Footer ======
+        JRDesignBand footerBand = new JRDesignBand();
+        footerBand.setHeight(25);
+
+        JRDesignTextField footerText = new JRDesignTextField();
+        footerText.setX(0);
+        footerText.setY(0);
+        footerText.setWidth(555);
+        footerText.setHeight(20);
+        footerText.setExpression(new JRDesignExpression("\"Generated by Admin | Page \" + $V{PAGE_NUMBER}"));
+        footerText.setHorizontalTextAlign(HorizontalTextAlignEnum.RIGHT);
+        footerText.setVerticalTextAlign(VerticalTextAlignEnum.MIDDLE);
+        footerText.setFontSize(9f);
+        footerText.setForecolor(Color.DARK_GRAY);
+
+        footerBand.addElement(footerText);
+        jasperDesign.setPageFooter(footerBand);
+
+        // ====== Compile & Fill ======
+        JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(products);
+        return JasperFillManager.fillReport(jasperReport, new HashMap<>(), dataSource);
+    }
+
     private JRDesignStaticText createHeaderCell(String text, int x, int width) {
         JRDesignStaticText header = new JRDesignStaticText();
         header.setX(x);
@@ -150,6 +297,21 @@ public class JasperReportGenerator {
         return field;
     }
 
+    private JRDesignTextField createProductDetailCell(String expression, int x, int width, int height) {
+        JRDesignTextField field = new JRDesignTextField();
+        field.setX(x);
+        field.setY(0);
+        field.setWidth(width);
+        field.setHeight(height);
+        field.setExpression(new JRDesignExpression(expression));
+        field.setHorizontalTextAlign(HorizontalTextAlignEnum.CENTER);
+        field.setVerticalTextAlign(VerticalTextAlignEnum.MIDDLE);
+        field.setFontSize(10f);
+        field.getLineBox().getPen().setLineWidth(0.25f);
+        field.getLineBox().getPen().setLineColor(new Color(180, 180, 180));
+        return field;
+    }
+
     private void applyConditionalStatusColor(JasperDesign design, JRDesignTextField field) throws JRException {
         JRDesignStyle style = new JRDesignStyle();
         style.setName("StatusStyle");
@@ -172,6 +334,39 @@ public class JasperReportGenerator {
         style.addConditionalStyle(active);
         style.addConditionalStyle(inactive);
         style.addConditionalStyle(banned);
+        design.addStyle(style);
+
+        field.setStyle(style);
+    }
+
+    private void applyConditionalQuantityColor(JasperDesign design, JRDesignTextField field) throws JRException {
+        JRDesignStyle style = new JRDesignStyle();
+        style.setName("QuantityStyle");
+
+        // Low stock (< 10): Red background
+        JRDesignConditionalStyle lowStock = new JRDesignConditionalStyle();
+        lowStock.setConditionExpression(new JRDesignExpression("$F{quantity} != null && $F{quantity} < 10"));
+        lowStock.setBackcolor(new Color(244, 204, 204));
+        lowStock.setForecolor(new Color(139, 0, 0));
+        lowStock.setMode(ModeEnum.OPAQUE);
+        lowStock.setBold(true);
+
+        // Medium stock (10-50): Yellow background
+        JRDesignConditionalStyle mediumStock = new JRDesignConditionalStyle();
+        mediumStock.setConditionExpression(new JRDesignExpression("$F{quantity} != null && $F{quantity} >= 10 && $F{quantity} <= 50"));
+        mediumStock.setBackcolor(new Color(255, 235, 156));
+        mediumStock.setMode(ModeEnum.OPAQUE);
+
+        // High stock (> 50): Green background
+        JRDesignConditionalStyle highStock = new JRDesignConditionalStyle();
+        highStock.setConditionExpression(new JRDesignExpression("$F{quantity} != null && $F{quantity} > 50"));
+        highStock.setBackcolor(new Color(198, 239, 206));
+        highStock.setForecolor(new Color(0, 100, 0));
+        highStock.setMode(ModeEnum.OPAQUE);
+
+        style.addConditionalStyle(lowStock);
+        style.addConditionalStyle(mediumStock);
+        style.addConditionalStyle(highStock);
         design.addStyle(style);
 
         field.setStyle(style);

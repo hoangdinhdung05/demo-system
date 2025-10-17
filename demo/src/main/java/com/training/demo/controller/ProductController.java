@@ -62,8 +62,8 @@ public class ProductController {
      * @return paginated product responses
      */
     @GetMapping
-    public ResponseEntity<?> getAllProducts(@RequestParam int page, @RequestParam int size) {
-        log.info("[Product] Get all products");
+    public ResponseEntity<?> getAll(@RequestParam(defaultValue = "0") int page,
+                                              @RequestParam(defaultValue = "10") int size) {        log.info("[Product] Get all products");
         return ResponseEntity.ok(BaseResponse.success(productService.getAllProducts(page, size)));
     }
 

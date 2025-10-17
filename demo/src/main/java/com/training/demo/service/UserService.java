@@ -87,10 +87,10 @@ public interface UserService {
 
     /**
      * Upload avatar
+     *
      * @param userId userId
-     * @param file ảnh
-     * @return string
+     * @param file   ảnh
      * @throws IOException error
      */
-    String uploadAvatar(Long userId, MultipartFile file) throws IOException;
+    void uploadAvatar(Long userId, MultipartFile file) throws IOException;
 }

@@ -28,12 +28,25 @@ public class ReportController {
 
         byte[] pdfBytes = reportService.generateUserReportPdf();
 
-        log.info("[JasperReportController] Returning PDF report, size: {} bytes", pdfBytes.length);
+        log.info("[JasperReportController] Returning PDF report users, size: {} bytes", pdfBytes.length);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=users_report.pdf")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfBytes);
+    }
 
+    @GetMapping("/products")
+    public ResponseEntity<byte[]> exportProductsPdf() {
+        log.info("[JasperReportController] Request to generate products report");
+
+        byte[] pdfBytes = reportService.generateProductReportPdf();
+
+        log.info("[JasperReportController] Returning PDF report products, size: {} bytes", pdfBytes.length);
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=products.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
     }
 }
