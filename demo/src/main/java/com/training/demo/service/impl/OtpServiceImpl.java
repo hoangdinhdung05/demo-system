@@ -158,8 +158,10 @@ public class OtpServiceImpl implements OtpService {
 
     private void checkSendAllowed(String email, OtpType type) {
         String otpKey = OtpRedisKeyUtil.otpKey(email, type);
+
+        // Nếu OTP key còn tồn tại thì nghĩa là OTP chưa hết hạn
         if (redisService.exists(otpKey)) {
-            throw new NotFoundException("Otp key not found");
+            throw new BadRequestException("OTP already sent. Please wait before requesting again.");
         }
 
         String countKey = otpCountKey(email, type);

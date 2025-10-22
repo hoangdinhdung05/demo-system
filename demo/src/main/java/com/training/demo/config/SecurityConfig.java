@@ -40,6 +40,7 @@ public class SecurityConfig {
             "/api/auth/refresh-token",
             "/api/auth/logout",
             "/api/auth/active",
+            "/api/otp/**",
             "/avatars/**",
             "/uploads/**",
             "/products/**",
