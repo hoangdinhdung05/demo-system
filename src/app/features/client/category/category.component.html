@@ -5,6 +5,16 @@
   <!-- Main Content -->
   <main class="main-content">
     <div class="container">
+      <!-- Page Header -->
+      <div class="page-header" *ngIf="categoryName">
+        <h1>{{ categoryName }}</h1>
+        <p>Khám phá các sản phẩm trong danh mục {{ categoryName }}</p>
+      </div>
+      <div class="page-header" *ngIf="!categoryName">
+        <h1>Tất cả sản phẩm</h1>
+        <p>Khám phá toàn bộ sản phẩm của chúng tôi</p>
+      </div>
+
       <div class="content-wrapper">
         <!-- Sidebar Filter -->
         <aside class="sidebar">

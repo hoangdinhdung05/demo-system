@@ -1,0 +1,73 @@
+<header class="client-header">
+  <div class="container">
+    <div class="header-content">
+      <!-- Logo -->
+      <div class="logo" (click)="navigateToHome()">
+        <img src="/assets/logo.png" alt="Logo" class="logo-img" />
+        <span class="logo-text">Demo Store</span>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="nav-menu">
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a (click)="navigateToHome()" class="nav-link">Home</a>
+          </li>
+          <li class="nav-item">
+            <a (click)="navigateToCategory()" class="nav-link">Category</a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Auth Section -->
+      <div class="auth-section">
+        <!-- Not logged in -->
+        <div *ngIf="!isLoggedIn" class="auth-buttons">
+          <button (click)="navigateToLogin()" class="btn btn-outline">Đăng nhập</button>
+          <button (click)="navigateToRegister()" class="btn btn-primary">Đăng ký</button>
+        </div>
+
+        <!-- Logged in - User Avatar -->
+        <div *ngIf="isLoggedIn" class="user-menu-wrapper">
+          <div class="user-profile" (click)="toggleMenu()">
+            <ng-container *ngIf="avatarUrl; else noAvatar">
+              <img [src]="avatarUrl" alt="User" class="user-avatar" />
+            </ng-container>
+            <ng-template #noAvatar>
+              <div class="user-avatar-fallback">{{ userInitial }}</div>
+            </ng-template>
+            <span class="user-name">{{ user?.username || user?.firstName }}</span>
+            <i class="fas fa-chevron-down arrow-icon"></i>
+          </div>
+
+          <!-- Dropdown Menu -->
+          <div class="dropdown-menu-custom" *ngIf="isMenuOpen" (click)="$event.stopPropagation()">
+            <div class="dropdown-header">
+              <strong>{{ user?.firstName }} {{ user?.lastName }}</strong><br />
+              <small class="text-muted">{{ user?.email }}</small>
+            </div>
+            <ul class="dropdown-list">
+              <li (click)="viewProfile()">
+                <i class="fas fa-user"></i> Thông tin tài khoản
+              </li>
+              <li (click)="editProfile()">
+                <i class="fas fa-edit"></i> Chỉnh sửa thông tin
+              </li>
+              <li (click)="changePassword()">
+                <i class="fas fa-lock"></i> Đổi mật khẩu
+              </li>
+              <li (click)="logout()" class="logout">
+                <i class="fas fa-sign-out-alt"></i> Đăng xuất
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Menu Toggle -->
+      <div class="mobile-menu-toggle d-md-none">
+        <i class="fas fa-bars"></i>
+      </div>
+    </div>
+  </div>
+</header>

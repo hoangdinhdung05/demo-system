@@ -1,0 +1,162 @@
+<div class="product-list-container">
+  <!-- Header with view controls -->
+  <div class="list-header">
+    <div class="results-info">
+      <h3>Sản phẩm ({{ filteredProducts.length }})</h3>
+    </div>
+    <div class="view-controls">
+      <button 
+        class="view-btn" 
+        [class.active]="viewMode === 'grid'"
+        (click)="viewMode = 'grid'"
+      >
+        <i class="fas fa-th"></i>
+      </button>
+      <button 
+        class="view-btn" 
+        [class.active]="viewMode === 'list'"
+        (click)="viewMode = 'list'"
+      >
+        <i class="fas fa-list"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- No products message -->
+  <div *ngIf="filteredProducts.length === 0" class="no-products">
+    <i class="fas fa-search"></i>
+    <h4>Không tìm thấy sản phẩm nào</h4>
+    <p>Thử thay đổi bộ lọc hoặc tìm kiếm với từ khóa khác</p>
+  </div>
+
+  <!-- Products Grid View -->
+  <div *ngIf="viewMode === 'grid' && filteredProducts.length > 0" class="products-grid">
+    <div *ngFor="let product of filteredProducts" class="product-card">
+      <!-- Sale Badge -->
+      <div *ngIf="product.isOnSale" class="sale-badge">
+        -{{ product.salePercentage }}%
+      </div>
+      
+      <!-- Out of Stock Badge -->
+      <div *ngIf="!product.inStock" class="stock-badge">
+        Hết hàng
+      </div>
+
+      <!-- Product Image -->
+      <div class="product-image" (click)="viewProductDetails(product)">
+        <img [src]="product.imageUrl" [alt]="product.name" />
+        <div class="image-overlay">
+          <button class="quick-view-btn">
+            <i class="fas fa-eye"></i> Xem nhanh
+          </button>
+        </div>
+      </div>
+
+      <!-- Product Info -->
+      <div class="product-info">
+        <div class="product-category">{{ product.category }}</div>
+        <h4 class="product-name" (click)="viewProductDetails(product)">
+          {{ product.name }}
+        </h4>
+        <p class="product-description">{{ product.description }}</p>
+        
+        <!-- Rating -->
+        <div class="product-rating">
+          <div class="stars">
+            <i 
+              *ngFor="let star of getStarArray(product.rating); let i = index"
+              class="fas fa-star"
+              [class.filled]="star === 1"
+            ></i>
+          </div>
+          <span class="rating-text">{{ product.rating }} ({{ product.reviewCount }})</span>
+        </div>
+
+        <!-- Price -->
+        <div class="product-price">
+          <span class="current-price">${{ product.price }}</span>
+          <span *ngIf="product.originalPrice" class="original-price">
+            ${{ product.originalPrice }}
+          </span>
+        </div>
+
+        <!-- Actions -->
+        <div class="product-actions">
+          <button 
+            class="btn-add-cart" 
+            [disabled]="!product.inStock"
+            (click)="addToCart(product)"
+          >
+            <i class="fas fa-shopping-cart"></i>
+            {{ product.inStock ? 'Thêm vào giỏ' : 'Hết hàng' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products List View -->
+  <div *ngIf="viewMode === 'list' && filteredProducts.length > 0" class="products-list">
+    <div *ngFor="let product of filteredProducts" class="product-item">
+      <!-- Sale Badge -->
+      <div *ngIf="product.isOnSale" class="sale-badge">
+        -{{ product.salePercentage }}%
+      </div>
+      
+      <!-- Out of Stock Badge -->
+      <div *ngIf="!product.inStock" class="stock-badge">
+        Hết hàng
+      </div>
+
+      <!-- Product Image -->
+      <div class="product-image" (click)="viewProductDetails(product)">
+        <img [src]="product.imageUrl" [alt]="product.name" />
+      </div>
+
+      <!-- Product Details -->
+      <div class="product-details">
+        <div class="product-main-info">
+          <div class="product-category">{{ product.category }}</div>
+          <h4 class="product-name" (click)="viewProductDetails(product)">
+            {{ product.name }}
+          </h4>
+          <p class="product-description">{{ product.description }}</p>
+          
+          <!-- Rating -->
+          <div class="product-rating">
+            <div class="stars">
+              <i 
+                *ngFor="let star of getStarArray(product.rating); let i = index"
+                class="fas fa-star"
+                [class.filled]="star === 1"
+              ></i>
+            </div>
+            <span class="rating-text">{{ product.rating }} ({{ product.reviewCount }} đánh giá)</span>
+          </div>
+        </div>
+
+        <div class="product-price-action">
+          <!-- Price -->
+          <div class="product-price">
+            <span class="current-price">${{ product.price }}</span>
+            <span *ngIf="product.originalPrice" class="original-price">
+              ${{ product.originalPrice }}
+            </span>
+          </div>
+
+          <!-- Actions -->
+          <div class="product-actions">
+            <button 
+              class="btn-add-cart" 
+              [disabled]="!product.inStock"
+              (click)="addToCart(product)"
+            >
+              <i class="fas fa-shopping-cart"></i>
+              {{ product.inStock ? 'Thêm vào giỏ' : 'Hết hàng' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
