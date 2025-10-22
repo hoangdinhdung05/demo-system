@@ -74,6 +74,20 @@
   margin-bottom: 0.75rem;
 }
 
+.loading-categories {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6c757d;
+  font-size: 0.9rem;
+  padding: 1rem 0;
+  justify-content: center;
+}
+
+.loading-categories i {
+  color: #007bff;
+}
+
 .checkbox-container {
   display: flex;
   align-items: center;

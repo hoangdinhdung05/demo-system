@@ -19,8 +19,8 @@ export class ProductService {
 
   getAllProducts(pageNumber: number, pageSize: number): Observable<BaseResponse<PageResponse<ProductResponse>>> {
     const params = new HttpParams()
-      .set('pageNumber', pageNumber)
-      .set('pageSize', pageSize);
+      .set('pageNumber', String(pageNumber))
+      .set('pageSize', String(pageSize));
     return this.http.get<BaseResponse<PageResponse<ProductResponse>>>(this.apiUrl, { params });
   }
 

@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 import { ClientRoutingModule } from './client-routing.module';
 import { HomeComponent } from './home/home.component';
@@ -22,6 +23,7 @@ import { ProductListComponent } from './components/product-list/product-list.com
   imports: [
     CommonModule,
     FormsModule,
+    HttpClientModule,
     ClientRoutingModule
   ]
 })

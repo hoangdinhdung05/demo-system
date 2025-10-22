@@ -6,24 +6,24 @@
   <main class="main-content">
     <div class="container">
       <!-- Page Header -->
-      <div class="page-header" *ngIf="categoryName">
-        <h1>{{ categoryName }}</h1>
-        <p>Khám phá các sản phẩm trong danh mục {{ categoryName }}</p>
+      <div class="page-header" *ngIf="categoryName || categoryId">
+        <h1>{{ categoryName || 'Danh mục #' + categoryId }}</h1>
+        <p>Khám phá các sản phẩm trong danh mục này</p>
       </div>
-      <div class="page-header" *ngIf="!categoryName">
+      <div class="page-header" *ngIf="!categoryName && !categoryId">
         <h1>Tất cả sản phẩm</h1>
         <p>Khám phá toàn bộ sản phẩm của chúng tôi</p>
       </div>
 
       <div class="content-wrapper">
-        <!-- Sidebar Filter -->
-        <aside class="sidebar">
+        <!-- Sidebar Filter - Temporarily disabled -->
+        <!-- <aside class="sidebar">
           <app-product-filter (filterChange)="onFilterChange($event)"></app-product-filter>
-        </aside>
+        </aside> -->
 
         <!-- Product List -->
         <section class="product-section">
-          <app-product-list [filters]="currentFilters"></app-product-list>
+          <app-product-list></app-product-list>
         </section>
       </div>
     </div>

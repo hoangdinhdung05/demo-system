@@ -1,6 +1,9 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/auth.service';
+import { UserService } from '../../../../core/services/users/user.service';
+import { UserDetailsResponse } from '../../../../core/models/response/User/UserDetailsRespomse';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-client-header',
@@ -9,13 +12,18 @@ import { AuthService } from '../../../../core/auth.service';
 })
 export class ClientHeaderComponent implements OnInit {
   isLoggedIn = false;
-  user: any = null;
+  user: UserDetailsResponse | null = null;
   isMenuOpen = false;
   avatarUrl: string | null = null;
   userInitial = '';
+  isLoadingUser = false;
+  
+  // Search functionality
+  searchSuggestions: string[] = [];
 
   constructor(
     private authService: AuthService,
+    private userService: UserService,
     private router: Router
   ) {}
 
@@ -33,18 +41,51 @@ export class ClientHeaderComponent implements OnInit {
   checkAuthStatus(): void {
     this.isLoggedIn = this.authService.isAuthenticated();
     if (this.isLoggedIn) {
-      // Get user info from token (you may need to fetch from API)
-      const userId = this.authService.getUserId();
-      const roles = this.authService.getRoles();
-      this.user = { 
-        id: userId, 
-        roles: roles,
-        username: 'User', // This should be fetched from API
-        firstName: 'User',
-        lastName: ''
-      };
-      this.userInitial = this.user?.firstName?.charAt(0) || 'U';
+      this.loadCurrentUser();
     }
+  }
+
+  loadCurrentUser(): void {
+    this.isLoadingUser = true;
+    this.userService.getCurrentUser().subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.user = response.data;
+          this.avatarUrl = this.getAvatarUrl(this.user.avatarUrl);
+          this.userInitial = this.user.firstName?.charAt(0) || this.user.username?.charAt(0) || 'U';
+        }
+        this.isLoadingUser = false;
+      },
+      error: (error) => {
+        console.error('Error loading current user:', error);
+        // Fallback to basic user info from token
+        const userId = this.authService.getUserId();
+        const roles = this.authService.getRoles();
+        if (userId) {
+          this.user = { 
+            id: userId, 
+            username: 'User',
+            firstName: 'User',
+            lastName: '',
+            email: '',
+            status: '',
+            verifyEmail: false,
+            avatarUrl: ''
+          };
+          this.userInitial = 'U';
+        }
+        this.isLoadingUser = false;
+      }
+    });
+  }
+
+  getAvatarUrl(avatarUrl?: string): string | null {
+    if (!avatarUrl) {
+      return null;
+    }
+    
+    // Use the same approach as admin page
+    return `${environment.assetBase}${avatarUrl.startsWith('/') ? '' : '/'}${avatarUrl}`;
   }
 
   toggleMenu(): void {
@@ -65,6 +106,10 @@ export class ClientHeaderComponent implements OnInit {
 
   navigateToCategory(): void {
     this.router.navigate(['/client/category']);
+  }
+
+  navigateToCategoryById(categoryId: number): void {
+    this.router.navigate(['/client/category', categoryId]);
   }
 
   logout(): void {
@@ -88,5 +133,19 @@ export class ClientHeaderComponent implements OnInit {
   changePassword(): void {
     // TODO: Implement change password
     this.isMenuOpen = false;
+  }
+
+  // Search functionality
+  performSearch(query: string): void {
+    if (query.trim()) {
+      console.log('Searching for:', query);
+      // TODO: Implement search functionality
+      // this.router.navigate(['/client/search'], { queryParams: { q: query } });
+    }
+  }
+
+  selectSuggestion(suggestion: string): void {
+    this.performSearch(suggestion);
+    this.searchSuggestions = [];
   }
 }

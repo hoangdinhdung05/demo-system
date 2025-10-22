@@ -32,6 +32,10 @@ export class UserService {
     return this.http.get<BaseResponse<UserDetailsResponse>>(`${this.apiUrl}/details/${id}`);
   }
 
+  getCurrentUser(): Observable<BaseResponse<UserDetailsResponse>> {
+    return this.http.get<BaseResponse<UserDetailsResponse>>(`${this.apiUrl}/current`);
+  }
+
   adminCreateUser(request: AdminCreateUserRequest): Observable<BaseResponse<any>> {
     return this.http.post<BaseResponse<any>>(`${this.apiUrl}`, request);
   }  

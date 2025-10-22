@@ -9,21 +9,30 @@ import { FilterOptions } from '../components/product-filter/product-filter.compo
 })
 export class CategoryComponent implements OnInit {
   currentFilters: FilterOptions | null = null;
+  categoryId: number | null = null;
   categoryName: string = '';
 
   constructor(private route: ActivatedRoute) { }
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
-      this.categoryName = params['category'] || '';
-      // Pre-filter by category if specified
-      if (this.categoryName) {
-        this.currentFilters = {
-          categories: [this.categoryName],
-          priceRange: { min: 0, max: 1000 },
-          sortBy: 'name',
-          inStock: false
-        };
+      const categoryParam = params['category'];
+      if (categoryParam) {
+        // Try to parse as number (ID), if that fails treat as name
+        const parsedId = parseInt(categoryParam);
+        if (!isNaN(parsedId)) {
+          this.categoryId = parsedId;
+          // Pre-filter by category ID
+          this.currentFilters = {
+            categories: [this.categoryId],
+            priceRange: { min: 0, max: 1000 },
+            sortBy: 'name',
+            inStock: false
+          };
+        } else {
+          this.categoryName = categoryParam;
+          // You might want to fetch category ID by name from API
+        }
       }
     });
   }

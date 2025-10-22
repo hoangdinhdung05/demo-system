@@ -1,10 +1,16 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { CategoryService } from '../../../../core/services/categories/category.service';
+import { CategoryResponse } from '../../../../core/models/response/Category/CategoryResponse';
 
 export interface FilterOptions {
-  categories: string[];
+  categories: number[];
   priceRange: { min: number; max: number };
   sortBy: string;
   inStock: boolean;
+}
+
+interface CategoryWithCount extends CategoryResponse {
+  count?: number;
 }
 
 @Component({
@@ -15,16 +21,11 @@ export interface FilterOptions {
 export class ProductFilterComponent implements OnInit {
   @Output() filterChange = new EventEmitter<FilterOptions>();
 
-  categories = [
-    { id: 1, name: 'Electronics', count: 45 },
-    { id: 2, name: 'Clothing', count: 32 },
-    { id: 3, name: 'Books', count: 28 },
-    { id: 4, name: 'Home & Garden', count: 19 },
-    { id: 5, name: 'Sports', count: 15 }
-  ];
+  categories: CategoryWithCount[] = [];
+  isLoadingCategories = false;
 
-  selectedCategories: string[] = [];
-  priceRange = { min: 0, max: 1000 };
+  selectedCategories: number[] = [];
+  priceRange = { min: 0, max: 10000 };
   sortBy = 'name';
   inStock = false;
 
@@ -36,17 +37,43 @@ export class ProductFilterComponent implements OnInit {
     { value: 'newest', label: 'Mới nhất' }
   ];
 
-  constructor() { }
+  constructor(private categoryService: CategoryService) { }
 
   ngOnInit(): void {
+    this.loadCategories();
     this.emitFilterChange();
   }
 
-  onCategoryChange(categoryName: string, isChecked: boolean): void {
+  loadCategories(): void {
+    this.isLoadingCategories = true;
+    console.log('Loading categories for filter...');
+    
+    this.categoryService.getAllCategories(0, 100).subscribe({
+      next: (response) => {
+        console.log('Category service response:', response);
+        if (response.success && response.data) {
+          this.categories = response.data.content.map(category => ({
+            ...category,
+            count: 0 // You might want to add a separate API call to get product counts per category
+          }));
+          console.log('Categories loaded:', this.categories);
+        } else {
+          console.error('Category API response not successful or no data:', response);
+        }
+        this.isLoadingCategories = false;
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.isLoadingCategories = false;
+      }
+    });
+  }
+
+  onCategoryChange(categoryId: number, isChecked: boolean): void {
     if (isChecked) {
-      this.selectedCategories.push(categoryName);
+      this.selectedCategories.push(categoryId);
     } else {
-      const index = this.selectedCategories.indexOf(categoryName);
+      const index = this.selectedCategories.indexOf(categoryId);
       if (index > -1) {
         this.selectedCategories.splice(index, 1);
       }
@@ -54,12 +81,12 @@ export class ProductFilterComponent implements OnInit {
     this.emitFilterChange();
   }
 
-  toggleCategory(categoryName: string): void {
-    const index = this.selectedCategories.indexOf(categoryName);
+  toggleCategory(categoryId: number): void {
+    const index = this.selectedCategories.indexOf(categoryId);
     if (index > -1) {
       this.selectedCategories.splice(index, 1);
     } else {
-      this.selectedCategories.push(categoryName);
+      this.selectedCategories.push(categoryId);
     }
     this.emitFilterChange();
   }
@@ -78,7 +105,7 @@ export class ProductFilterComponent implements OnInit {
 
   clearFilters(): void {
     this.selectedCategories = [];
-    this.priceRange = { min: 0, max: 1000 };
+    this.priceRange = { min: 0, max: 10000 };
     this.sortBy = 'name';
     this.inStock = false;
     this.emitFilterChange();
