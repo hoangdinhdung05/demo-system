@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
     <div class="container py-5 text-center">
       <h1 class="mb-3">404 - Page not found</h1>
       <p>Trang bạn tìm không tồn tại hoặc đã bị di chuyển.</p>
-      <a routerLink="/" class="btn btn-primary mt-3">Về trang chủ</a>
+      <a routerLink="/ng" class="btn btn-primary mt-3">Về trang chủ</a>
     </div>
   `
 })
