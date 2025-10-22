@@ -81,8 +81,15 @@
             </button>
           </div>
 
-          <div class="action-item user-menu" *ngIf="isLoggedIn">
-            <button class="action-btn user-btn" (click)="toggleMenu()">
+          <div class="action-item user-menu"
+              *ngIf="isLoggedIn"
+              (mouseenter)="openUserMenu()"
+              (mouseleave)="closeUserMenu()">
+
+            <button class="action-btn user-btn"
+                    (click)="toggleUserMenu($event)"
+                    aria-haspopup="true"
+                    [attr.aria-expanded]="isMenuOpen">
               <div class="user-avatar" *ngIf="avatarUrl; else userInitials">
                 <img [src]="avatarUrl" [alt]="user?.firstName" />
               </div>
@@ -90,10 +97,14 @@
                 <div class="user-initial">{{ userInitial }}</div>
               </ng-template>
               <span class="user-name">{{ user?.firstName || 'User' }}</span>
-              <i class="fas fa-chevron-down"></i>
+              <i class="fas fa-chevron-down" [class.rotated]="isMenuOpen"></i>
             </button>
-            
-            <div class="user-dropdown" [class.show]="isMenuOpen">
+
+            <!-- Dropdown -->
+            <div class="user-dropdown"
+                [class.show]="isMenuOpen"
+                role="menu"
+                (click)="$event.stopPropagation()">
               <div class="user-info">
                 <div class="user-avatar-large" *ngIf="avatarUrl; else userInitialsLarge">
                   <img [src]="avatarUrl" [alt]="user?.firstName" />
@@ -106,11 +117,16 @@
                   <p>{{ user?.email }}</p>
                 </div>
               </div>
+
               <div class="dropdown-divider"></div>
-              <ul class="dropdown-menu">
-                <li><a href="#" (click)="viewProfile()"><i class="fas fa-user"></i> Hồ sơ</a></li>
-                <li><a href="#" (click)="logout()" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
-              </ul>
+                <ul class="user-dropdown-list">
+                  <li><button type="button" class="dropdown-link" (click)="onAction('profile')"><i class="fas fa-user"></i> Thông tin cá nhân</button></li>
+                  <li><button type="button" class="dropdown-link" (click)="onAction('orders')"><i class="fas fa-shopping-cart"></i> Đơn hàng của tôi</button></li>
+                  <li><button type="button" class="dropdown-link" (click)="onAction('editProfile')"><i class="fas fa-edit"></i> Chỉnh sửa hồ sơ</button></li>
+                  <li><button type="button" class="dropdown-link" (click)="onAction('changePassword')"><i class="fas fa-key"></i> Đổi mật khẩu</button></li>
+                  <li><button type="button" class="dropdown-link" (click)="onAction('settings')"><i class="fas fa-cog"></i> Cài đặt</button></li>
+                  <li><button type="button" class="dropdown-link logout-btn" (click)="onAction('logout')"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button></li>
+                </ul>
             </div>
           </div>
         </div>
@@ -123,12 +139,42 @@
     <div class="container">
       <div class="nav-content">
         <!-- Categories Menu -->
-        <div class="categories-menu">
-          <button class="categories-btn">
+        <div class="categories-menu" 
+             (mouseenter)="onCategoriesMouseEnter()" 
+             (mouseleave)="onCategoriesMouseLeave()">
+          <button class="categories-btn" (click)="toggleCategoriesMenu()">
             <i class="fas fa-bars"></i>
             <span>Danh mục</span>
-            <i class="fas fa-chevron-down"></i>
+            <i class="fas fa-chevron-down" [class.rotated]="isCategoriesOpen"></i>
           </button>
+          
+          <!-- Categories Dropdown -->
+          <div class="categories-dropdown" [class.show]="isCategoriesOpen">
+            <div class="dropdown-header">
+              <h4>Danh mục sản phẩm</h4>
+            </div>
+            <div class="categories-list" *ngIf="!isLoadingCategories; else loadingTemplate">
+              <a *ngFor="let category of categories" 
+                 class="category-item"
+                 (click)="navigateToCategoryById(category.id)">
+                <i class="fas fa-tag category-icon"></i>
+                <span class="category-name">{{ category.name }}</span>
+                <i class="fas fa-chevron-right arrow-icon"></i>
+              </a>
+            </div>
+            <ng-template #loadingTemplate>
+              <div class="loading-categories">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Đang tải danh mục...</span>
+              </div>
+            </ng-template>
+            <div class="dropdown-footer">
+              <a (click)="navigateToCategory()" class="view-all-btn">
+                Xem tất cả danh mục
+                <i class="fas fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
         </div>
 
         <!-- Main Menu -->
