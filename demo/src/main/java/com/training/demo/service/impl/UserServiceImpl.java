@@ -119,6 +119,18 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * Xem thông tin cơ bản của user hiện tại
+     *
+     * @return Các thông tin cơ bản
+     */
+    @Override
+    public UserDetailsResponse getCurrentUserDetails() {
+        log.info("[UserService] Get current user details");
+        User user = SecurityUtils.getCurrentUserDetails().getUser();
+        return toUserDetailsResponse(user);
+    }
+
+    /**
      * Xem thông tin cơ bản user theo id
      *
      * @param id id user cần xem

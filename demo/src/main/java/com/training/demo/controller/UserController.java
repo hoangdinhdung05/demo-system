@@ -104,6 +104,16 @@ public class UserController {
     }
 
     /**
+     * Xem thông tin cơ bản của user hiện tại
+     * @return Các thông tin cơ bản
+     */
+    @GetMapping("/current")
+    public ResponseEntity<?> getCurrentUser() {
+        log.info("[User] Get current user");
+        return ResponseEntity.ok(BaseResponse.success(userService.getCurrentUserDetails()));
+    }
+
+    /**
      * Admin tìm kiếm user với nhiều bộ lọc khác nhau
      *
      * @param filters  các bộ lọc

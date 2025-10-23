@@ -29,6 +29,12 @@ public interface UserService {
     void adminCreate(AdminCreateUserRequest request);
 
     /**
+     * Xem thông tin cơ bản của user hiện tại
+     * @return Các thông tin cơ bản
+     */
+    UserDetailsResponse getCurrentUserDetails();
+
+    /**
      * Xem thông tin cơ bản user theo id
      * @param id id user cần xem
      * @return Các thông tin cơ bản
