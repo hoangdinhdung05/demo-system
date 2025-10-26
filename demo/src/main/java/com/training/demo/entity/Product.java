@@ -2,6 +2,7 @@ package com.training.demo.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.math.BigDecimal;
 
 @Entity
 @Table(
@@ -26,7 +27,7 @@ public class Product extends BaseEntity {
     private String description;
 
     @Column(name = "price", nullable = false)
-    private double price;
+    private BigDecimal price;
 
     @Column(name = "quantity", nullable = false)
     private int quantity;

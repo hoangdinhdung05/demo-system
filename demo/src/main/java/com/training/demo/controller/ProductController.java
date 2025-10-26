@@ -5,10 +5,15 @@ import com.training.demo.dto.response.System.BaseResponse;
 import com.training.demo.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -63,9 +68,36 @@ public class ProductController {
      */
     @GetMapping
     public ResponseEntity<?> getAll(@RequestParam(defaultValue = "0") int page,
-                                              @RequestParam(defaultValue = "10") int size) {        log.info("[Product] Get all products");
+                                    @RequestParam(defaultValue = "10") int size) {
+        log.info("[Product] Get all products");
         return ResponseEntity.ok(BaseResponse.success(productService.getAllProducts(page, size)));
     }
+
+    /**
+     * Search products with filters and pagination
+     * @param q search keyword
+     * @param categoryId category ID filter
+     * @param categoryIds list of category IDs filter
+     * @param minPrice minimum price filter
+     * @param maxPrice maximum price filter
+     * @param inStock stock availability filter
+     * @param pageable pagination information
+     * @return paginated product responses matching the search criteria
+     */
+    @GetMapping("/search")
+    public ResponseEntity<?> search(@RequestParam(required = false) String q,
+                                    @RequestParam(required = false) Long categoryId,
+                                    @RequestParam(required = false) List<Long> categoryIds,
+                                    @RequestParam(required = false) BigDecimal minPrice,
+                                    @RequestParam(required = false) BigDecimal maxPrice,
+                                    @RequestParam(required = false) Boolean inStock,
+                                    @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        log.info("[Product] Search products with filters");
+        return ResponseEntity.ok(BaseResponse.success(
+                productService.search(q, categoryId, categoryIds, minPrice, maxPrice, inStock, pageable)
+        ));
+    }
+
 
     /**
      * Get product by id

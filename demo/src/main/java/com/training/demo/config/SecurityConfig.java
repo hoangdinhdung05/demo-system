@@ -42,6 +42,7 @@ public class SecurityConfig {
             "/api/auth/active",
             "/api/otp/**",
             "/api/products/**",
+            "/api/products/search/**",
             "/api/categories/**",
             "/avatars/**",
             "/uploads/**",

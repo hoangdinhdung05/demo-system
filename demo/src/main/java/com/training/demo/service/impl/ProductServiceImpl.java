@@ -8,14 +8,19 @@ import com.training.demo.entity.Product;
 import com.training.demo.exception.BadRequestException;
 import com.training.demo.repository.CategoryRepository;
 import com.training.demo.repository.ProductRepository;
+import com.training.demo.repository.specification.ProductSpecs;
 import com.training.demo.service.FileService;
 import com.training.demo.service.ProductService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
+import java.math.BigDecimal;
+import java.util.List;
 import static com.training.demo.mapper.ProductMapper.toProductResponse;
 
 @Service
@@ -212,6 +217,61 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
+     * Search products with filters and pagination
+     *
+     * @param q           search keyword
+     * @param categoryId  category ID filter
+     * @param categoryIds list of category IDs filter
+     * @param minPrice    minimum price filter
+     * @param maxPrice    maximum price filter
+     * @param inStock     stock availability filter
+     * @param pageable    pagination information
+     * @return paginated product responses matching the search criteria
+     */
+    @Override
+    public PageResponse<ProductResponse> search(String q,
+                                                Long categoryId,
+                                                List<Long> categoryIds,
+                                                BigDecimal minPrice,
+                                                BigDecimal maxPrice,
+                                                Boolean inStock,
+                                                Pageable pageable) {
+        log.info("[ProductService] Searching products with filters: q={}, categoryId={}, categoryIds={}, minPrice={}, maxPrice={}, inStock={}",
+                q, categoryId, categoryIds, minPrice, maxPrice, inStock);
+
+        // Validate khoảng giá
+        if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
+            throw new BadRequestException("minPrice must be <= maxPrice");
+        }
+
+        Specification<Product> spec = Specification
+                .where(ProductSpecs.keyword(q))
+                .and(ProductSpecs.categoryId(categoryId))
+                .and(ProductSpecs.categoryIds(categoryIds))
+                .and(ProductSpecs.minPrice(minPrice))
+                .and(ProductSpecs.maxPrice(maxPrice))
+                .and(ProductSpecs.priceBetween(minPrice, maxPrice))
+                .and(ProductSpecs.inStock(inStock));
+
+        // dùng @EntityGraph của repository để tránh N+1
+        Page<Product> page = productRepository.findAll(spec, pageable);
+
+        var items = page.getContent()
+                .stream()
+                .map(com.training.demo.mapper.ProductMapper::toProductResponse)
+                .toList();
+
+        return PageResponse.<ProductResponse>builder()
+                .pageNumber(page.getNumber())
+                .pageSize(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .content(items)
+                .build();
+    }
+
+
+    /**
      * Count total products
      *
      * @return total number of products
@@ -239,7 +299,7 @@ public class ProductServiceImpl implements ProductService {
         if (req == null) throw new BadRequestException("Request body must not be null");
         if (req.getName() == null || req.getName().isBlank())
             throw new BadRequestException("Product name must not be blank");
-        if (req.getPrice() == null || req.getPrice() < 0)
+        if (req.getPrice() == null || req.getPrice().compareTo(BigDecimal.ZERO) < 0)
             throw new BadRequestException("Price must be >= 0");
         if (req.getQuantity() == null || req.getQuantity() < 0)
             throw new BadRequestException("Quantity must be >= 0");
@@ -253,7 +313,7 @@ public class ProductServiceImpl implements ProductService {
         if (req == null) throw new BadRequestException("Request body must not be null");
         if (req.getName() != null && req.getName().isBlank())
             throw new BadRequestException("Product name must not be blank");
-        if (req.getPrice() != null && req.getPrice() < 0)
+        if (req.getPrice() != null && req.getPrice().compareTo(BigDecimal.ZERO) < 0)
             throw new BadRequestException("Price must be >= 0");
         if (req.getQuantity() != null && req.getQuantity() < 0)
             throw new BadRequestException("Quantity must be >= 0");

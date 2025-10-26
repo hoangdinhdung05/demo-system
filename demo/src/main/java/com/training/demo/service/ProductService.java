@@ -3,6 +3,9 @@ package com.training.demo.service;
 import com.training.demo.dto.request.Product.ProductRequest;
 import com.training.demo.dto.response.Product.ProductResponse;
 import com.training.demo.dto.response.System.PageResponse;
+import org.springframework.data.domain.Pageable;
+import java.math.BigDecimal;
+import java.util.List;
 
 public interface ProductService {
 
@@ -40,6 +43,25 @@ public interface ProductService {
      * @return paginated product responses
      */
     PageResponse<?> getAllProducts(int page, int size);
+
+    /**
+     * Search products with filters and pagination
+     * @param q search keyword
+     * @param categoryId category ID filter
+     * @param categoryIds list of category IDs filter
+     * @param minPrice minimum price filter
+     * @param maxPrice maximum price filter
+     * @param inStock stock availability filter
+     * @param pageable pagination information
+     * @return paginated product responses matching the search criteria
+     */
+    PageResponse<?> search(String q,
+                           Long categoryId,
+                           List<Long> categoryIds,
+                           BigDecimal minPrice,
+                           BigDecimal maxPrice,
+                           Boolean inStock,
+                           Pageable pageable);
 
     /**
      * Count total products

@@ -2,14 +2,18 @@ package com.training.demo.repository;
 
 import com.training.demo.dto.response.Product.ExportProductResponse;
 import com.training.demo.entity.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product,Long> {
+public interface ProductRepository extends JpaRepository<Product,Long>, JpaSpecificationExecutor<Product> {
 
     /**
      * Check if a product exists by name
@@ -42,4 +46,7 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
     ON p.category.id = c.id
     """)
     List<ExportProductResponse> findAllProjectedWithCategory();
+
+    @EntityGraph(attributePaths = "category")
+    Page<Product> findAll(Specification<Product> spec, Pageable pageable);
 }

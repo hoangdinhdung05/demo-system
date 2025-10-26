@@ -197,11 +197,11 @@ public class OtpServiceImpl implements OtpService {
     }
 
     private void validateOtp(String email, String inputOtp, OtpType type) {
-        String key = "OTP:" + email + ":" + type.name();
-        Optional<OtpPayload> payload = redisService.get(key, OtpPayload.class);
+        String otpKey = OtpRedisKeyUtil.otpKey(email, type);
+        Optional<OtpPayload> payload = redisService.get(otpKey, OtpPayload.class);
 
         if (payload.isEmpty()) {
-            log.error("OTP not found in Redis for key={}", key);
+            log.error("OTP not found in Redis for key={}", otpKey);
             throw new NotFoundException("OTP expired or not found.");
         }
 
