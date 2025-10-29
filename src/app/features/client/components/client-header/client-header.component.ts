@@ -134,11 +134,11 @@ export class ClientHeaderComponent implements OnInit {
   }
 
   navigateToCategory(): void {
-    this.router.navigate(['/client/category']);
+    this.router.navigate(['/category']);
   }
 
   navigateToCategoryById(categoryId: number): void {
-    this.router.navigate(['/client/category', categoryId]);
+    this.router.navigate(['/category', categoryId]);
   }
 
   logout(): void {
@@ -146,31 +146,27 @@ export class ClientHeaderComponent implements OnInit {
     this.isLoggedIn = false;
     this.user = null;
     this.isMenuOpen = false;
-    this.router.navigate(['/client']);
+    this.router.navigate(['/']);
   }
 
   viewProfile(): void {
-    // TODO: Navigate to profile view page
+    this.router.navigate(['/profile']);
     this.isMenuOpen = false;
-    console.log('Navigate to profile view');
   }
 
   editProfile(): void {
-    // TODO: Navigate to profile edit page
+    this.router.navigate(['/edit-profile']);
     this.isMenuOpen = false;
-    console.log('Navigate to profile edit');
   }
 
   changePassword(): void {
-    // TODO: Navigate to change password page
+    this.router.navigate(['/change-password']);
     this.isMenuOpen = false;
-    console.log('Navigate to change password');
   }
 
   viewOrders(): void {
-    // TODO: Navigate to orders page
+    this.router.navigate(['/orders']);
     this.isMenuOpen = false;
-    console.log('Navigate to orders');
   }
 
   viewWishlist(): void {
@@ -198,9 +194,8 @@ export class ClientHeaderComponent implements OnInit {
   }
 
   viewSettings(): void {
-    // TODO: Navigate to settings page
+    this.router.navigate(['/settings']);
     this.isMenuOpen = false;
-    console.log('Navigate to settings');
   }
 
   // Search functionality

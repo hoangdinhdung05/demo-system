@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 
 import { ClientRoutingModule } from './client-routing.module';
@@ -10,6 +10,12 @@ import { ClientHeaderComponent } from './components/client-header/client-header.
 import { ClientFooterComponent } from './components/client-footer/client-footer.component';
 import { ProductFilterComponent } from './components/product-filter/product-filter.component';
 import { ProductListComponent } from './components/product-list/product-list.component';
+import { ProfileComponent } from './profile/profile.component';
+import { OrdersComponent } from './orders/orders.component';
+import { EditProfileComponent } from './edit-profile/edit-profile.component';
+import { ChangePasswordComponent } from './change-password/change-password.component';
+import { SettingsComponent } from './settings/settings.component';
+import { ClientLayoutComponent } from './client-layout.component';
 
 @NgModule({
   declarations: [
@@ -18,11 +24,18 @@ import { ProductListComponent } from './components/product-list/product-list.com
     ClientHeaderComponent,
     ClientFooterComponent,
     ProductFilterComponent,
-    ProductListComponent
+    ProductListComponent,
+    ProfileComponent,
+    OrdersComponent,
+    EditProfileComponent,
+    ChangePasswordComponent,
+    SettingsComponent,
+    ClientLayoutComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     HttpClientModule,
     ClientRoutingModule
   ]
