@@ -60,7 +60,7 @@ export class ProductListComponent implements OnInit {
           // Debug: Log detailed product structure
           if (this.allProducts.length > 0) {
             console.log('First product structure:', JSON.stringify(this.allProducts[0], null, 2));
-            console.log('Product categoryResponse:', this.allProducts[0].categoryResponse);
+            console.log('Product category:', this.allProducts[0].category);
             console.log('Product price:', this.allProducts[0].price, typeof this.allProducts[0].price);
           }
 

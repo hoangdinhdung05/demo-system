@@ -7,5 +7,5 @@ export interface ProductResponse {
     price: number;
     quantity: number;
     productImageUrl?: string;
-    categoryResponse: CategoryResponse | null;
+    category: CategoryResponse | null;
 }

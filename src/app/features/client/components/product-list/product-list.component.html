@@ -64,7 +64,7 @@
 
       <!-- Product Info -->
       <div class="product-info">
-        <div class="product-category">{{ product.categoryResponse?.name || 'Chưa phân loại' }}</div>
+        <div class="product-category">{{ product.category?.name || 'Chưa phân loại' }}</div>
         <h4 class="product-name" (click)="viewProductDetails(product)">
           {{ product.name }}
         </h4>
@@ -126,7 +126,7 @@
       <!-- Product Details -->
       <div class="product-details">
         <div class="product-main-info">
-          <div class="product-category">{{ product.categoryResponse?.name || 'Chưa phân loại' }}</div>
+          <div class="product-category">{{ product.category?.name || 'Chưa phân loại' }}</div>
           <h4 class="product-name" (click)="viewProductDetails(product)">
             {{ product.name }}
           </h4>
