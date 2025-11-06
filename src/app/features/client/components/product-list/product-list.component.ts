@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { ProductService } from '../../../../core/services/products/product.service';
 import { ProductResponse } from '../../../../core/models/response/Product/ProductResponse';
 import { environment } from '../../../../../environments/environment';
@@ -21,10 +22,25 @@ export class ProductListComponent implements OnInit {
   totalElements = 0;
   totalPages = 0;
 
-  constructor(private productService: ProductService) { }
+  isSearching = false;
+  searchQuery = '';
+
+
+  constructor(
+    private productService: ProductService,
+    private route: ActivatedRoute
+  ) { }
 
   ngOnInit(): void {
-    this.loadProducts();
+    // Listen to query params changes
+    this.route.queryParams.subscribe(params => {
+      const searchQuery = params['search'];
+      if (searchQuery) {
+        this.searchProducts(searchQuery);
+      } else {
+        this.loadProducts();
+      }
+    });
   }
 
   loadProducts(): void {
@@ -91,5 +107,36 @@ export class ProductListComponent implements OnInit {
 
   getStarArray(rating: number = 4.5): number[] {
     return Array(5).fill(0).map((_, i) => i < Math.floor(rating) ? 1 : 0);
+  }
+
+  searchProducts(name: string): void {
+    if (!name.trim()) {
+      // Nếu rỗng → load lại toàn bộ danh sách mặc định
+      this.isSearching = false;
+      this.loadProducts();
+      return;
+    }
+
+    this.isLoading = true;
+    this.isSearching = true;
+    this.searchQuery = name;
+
+    this.productService.searchByName(name).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.displayedProducts = res.data;
+          this.totalElements = res.data.length;
+          this.totalPages = 1;
+        } else {
+          this.displayedProducts = [];
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Search error:', err);
+        this.displayedProducts = [];
+        this.isLoading = false;
+      }
+    });
   }
 }

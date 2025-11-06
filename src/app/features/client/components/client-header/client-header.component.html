@@ -47,10 +47,41 @@
                 placeholder="Tìm kiếm sản phẩm..." 
                 class="search-input"
                 #searchInput
+                (input)="onSearchInput(searchInput.value)"
+                (keyup.enter)="performSearch(searchInput.value)"
+                (focus)="searchInput.value && (showSuggestions = true)"
               />
               <button class="search-btn" (click)="performSearch(searchInput.value)">
-                <i class="fas fa-search"></i>
+                <i class="fas fa-search" *ngIf="!isSearching"></i>
+                <i class="fas fa-spinner fa-spin" *ngIf="isSearching"></i>
               </button>
+            </div>
+
+            <!-- Search Suggestions Dropdown -->
+            <div class="search-suggestions" *ngIf="showSuggestions && searchSuggestions.length > 0">
+              <div 
+                *ngFor="let product of searchSuggestions" 
+                class="suggestion-item"
+                (click)="selectSuggestion(product)"
+              >
+                <img 
+                  [src]="getProductImageUrl(product)" 
+                  [alt]="product.name"
+                  class="suggestion-image"
+                />
+                <div class="suggestion-info">
+                  <div class="suggestion-name">{{ product.name }}</div>
+                  <div class="suggestion-price">${{ product.price }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- No results message -->
+            <div class="search-suggestions" *ngIf="showSuggestions && searchSuggestions.length === 0 && !isSearching && searchInput.value">
+              <div class="no-results">
+                <i class="fas fa-search"></i>
+                <span>Không tìm thấy sản phẩm</span>
+              </div>
             </div>
           </div>
         </div>

@@ -1,10 +1,14 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { AuthService } from '../../../../core/auth.service';
 import { UserService } from '../../../../core/services/users/user.service';
 import { CategoryService } from '../../../../core/services/categories/category.service';
+import { ProductService } from '../../../../core/services/products/product.service';
 import { UserDetailsResponse } from '../../../../core/models/response/User/UserDetailsRespomse';
 import { CategoryResponse } from '../../../../core/models/response/Category/CategoryResponse';
+import { ProductResponse } from '../../../../core/models/response/Product/ProductResponse';
 import { environment } from '../../../../../environments/environment';
 
 @Component({
@@ -26,18 +30,56 @@ export class ClientHeaderComponent implements OnInit {
   isLoadingCategories = false;
   
   // Search functionality
-  searchSuggestions: string[] = [];
+  searchSuggestions: ProductResponse[] = [];
+  searchQuery$ = new Subject<string>();
+  isSearching = false;
+  showSuggestions = false;
 
   constructor(
     private authService: AuthService,
     private userService: UserService,
     private categoryService: CategoryService,
+    private productService: ProductService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.checkAuthStatus();
     this.loadCategories();
+    this.setupSearchAutocomplete();
+  }
+
+  setupSearchAutocomplete(): void {
+    this.searchQuery$.pipe(
+      debounceTime(300), // Đợi 300ms sau khi user ngừng gõ
+      distinctUntilChanged(), // Chỉ search nếu giá trị thay đổi
+      switchMap(query => {
+        if (!query || query.trim().length < 2) {
+          this.searchSuggestions = [];
+          this.showSuggestions = false;
+          return [];
+        }
+        this.isSearching = true;
+        return this.productService.searchByName(query.trim());
+      })
+    ).subscribe({
+      next: (response) => {
+        if (response && response.success && response.data) {
+          this.searchSuggestions = response.data.slice(0, 5); // Giới hạn 5 gợi ý
+          this.showSuggestions = this.searchSuggestions.length > 0;
+        } else {
+          this.searchSuggestions = [];
+          this.showSuggestions = false;
+        }
+        this.isSearching = false;
+      },
+      error: (error) => {
+        console.error('Search error:', error);
+        this.searchSuggestions = [];
+        this.showSuggestions = false;
+        this.isSearching = false;
+      }
+    });
   }
 
   @HostListener('document:click', ['$event'])
@@ -52,6 +94,11 @@ export class ClientHeaderComponent implements OnInit {
     // Check if click is outside categories menu
     if (this.isCategoriesOpen && !target.closest('.categories-menu')) {
       this.isCategoriesOpen = false;
+    }
+
+    // Check if click is outside search suggestions
+    if (this.showSuggestions && !target.closest('.search-section')) {
+      this.showSuggestions = false;
     }
   }
 
@@ -199,17 +246,29 @@ export class ClientHeaderComponent implements OnInit {
   }
 
   // Search functionality
-  performSearch(query: string): void {
-    if (query.trim()) {
-      console.log('Searching for:', query);
-      // TODO: Implement search functionality
-      // this.router.navigate(['/client/search'], { queryParams: { q: query } });
-    }
+  onSearchInput(query: string): void {
+    this.searchQuery$.next(query);
   }
 
-  selectSuggestion(suggestion: string): void {
-    this.performSearch(suggestion);
-    this.searchSuggestions = [];
+  performSearch(query: string): void {
+    if (!query || query.trim() === '') return;
+    // Navigate to category page with search query
+    this.router.navigate(['/category'], { 
+      queryParams: { search: query.trim() } 
+    });
+    this.showSuggestions = false;
+  }
+
+  selectSuggestion(product: ProductResponse): void {
+    this.performSearch(product.name);
+    this.showSuggestions = false;
+  }
+
+  getProductImageUrl(product: ProductResponse): string {
+    if (!product.productImageUrl) {
+      return 'https://via.placeholder.com/50x50/007bff/ffffff?text=No+Image';
+    }
+    return `${environment.assetBase}${product.productImageUrl.startsWith('/') ? '' : '/'}${product.productImageUrl}`;
   }
 
   // Categories dropdown methods

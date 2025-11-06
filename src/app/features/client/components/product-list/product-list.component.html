@@ -2,11 +2,18 @@
   <!-- Header with view controls -->
   <div class="list-header">
     <div class="results-info">
-      <h3>Sản phẩm ({{ displayedProducts.length }})</h3>
+      <ng-container *ngIf="!isSearching; else searchResultHeader">
+        <h3>Tất cả sản phẩm ({{ displayedProducts.length }})</h3>
+      </ng-container>
+      <ng-template #searchResultHeader>
+        <h3>Kết quả tìm kiếm cho "{{ searchQuery }}" ({{ displayedProducts.length }})</h3>
+      </ng-template>
+
       <div *ngIf="isLoading" class="loading-info">
         <i class="fas fa-spinner fa-spin"></i> Đang tải...
       </div>
     </div>
+
     <div class="view-controls">
       <button 
         class="view-btn" 

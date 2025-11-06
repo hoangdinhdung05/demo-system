@@ -85,4 +85,9 @@ export class ProductService {
 
     return this.http.post<BaseResponse<any>>(`${this.apiUrl}/${id}/image`, form, { headers });
   }
+
+  searchByName(name: String): Observable<BaseResponse<ProductResponse[]>> {
+    const params = new HttpParams().set('name', name.toString());
+    return this.http.post<BaseResponse<ProductResponse[]>>(`${this.apiUrl}/search`, null, { params });
+  }
 }
