@@ -75,4 +75,11 @@ public interface ProductService {
      * @return true if any product exists with the given category ID, false otherwise
      */
     boolean existsByCategoryId(Long categoryId);
+
+    /**
+     * Find products by name (case-insensitive, partial match)
+     * @param name product name
+     * @return list of product responses matching the name
+     */
+    List<ProductResponse> findByName(String name);
 }

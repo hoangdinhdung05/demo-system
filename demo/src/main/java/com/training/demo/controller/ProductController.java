@@ -119,4 +119,15 @@ public class ProductController {
         log.info("[Product] Counting total products");
         return ResponseEntity.ok(BaseResponse.success(productService.countProducts()));
     }
+
+    /**
+     * Search products by names
+     * @param name product names
+     * @return list of product responses matching the names
+     */
+    @PostMapping("/search")
+    public ResponseEntity<?> searchByNames(@RequestParam String name) {
+        log.info("[Product] Search products by names");
+        return ResponseEntity.ok(BaseResponse.success(productService.findByName(name)));
+    }
 }

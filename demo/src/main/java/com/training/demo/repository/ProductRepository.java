@@ -2,6 +2,7 @@ package com.training.demo.repository;
 
 import com.training.demo.dto.response.Product.ExportProductResponse;
 import com.training.demo.entity.Product;
+import com.training.demo.repository.custom.ProductRepositoryCustom;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product,Long>, JpaSpecificationExecutor<Product> {
+public interface ProductRepository extends JpaRepository<Product,Long>, JpaSpecificationExecutor<Product>, ProductRepositoryCustom {
 
     /**
      * Check if a product exists by name

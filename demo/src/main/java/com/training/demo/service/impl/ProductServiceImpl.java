@@ -21,6 +21,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+
 import static com.training.demo.mapper.ProductMapper.toProductResponse;
 
 @Service
@@ -292,6 +294,17 @@ public class ProductServiceImpl implements ProductService {
     public boolean existsByCategoryId(Long categoryId) {
         log.info("[ProductService] Checking existence of products with category id={}", categoryId);
         return productRepository.existsByCategoryId(categoryId);
+    }
+
+    /**
+     * Find products by name (case-insensitive, partial match)
+     * @param name product name
+     * @return list of product responses matching the name
+     */
+    @Override
+    public List<ProductResponse> findByName(String name) {
+        log.info("[ProductService] Finding products by name: {}", name);
+        return productRepository.searchByName(name);
     }
 
     //========== PRIVATE METHOD ==========//
