@@ -10,10 +10,10 @@
       </div>
 
       <div class="d-flex gap-2">
-        <button class="btn btn-success d-flex align-items-center" (click)="exportCategoryReport()">
+        <!-- <button class="btn btn-success d-flex align-items-center" (click)="exportCategoryReport()">
           <i class="bi bi-file-earmark-pdf me-2 fs-5"></i>
           <span>Xuất báo cáo PDF</span>
-        </button>
+        </button> -->
 
         <button class="btn btn-primary d-flex align-items-center" (click)="openCreateCategoryModal()">
           <i class="bi bi-plus-circle me-2 fs-5"></i>
@@ -43,7 +43,6 @@
               <td class="text-center">{{ category.description }}</td>
 
               <td class="text-center">
-                <button class="btn btn-sm btn-outline-info me-1" (click)="openDetailsModal(category.id)"><i class="bi bi-eye"></i></button>
                 <button class="btn btn-warning btn-sm me-2" (click)="openEditModal(category)"><i class="bi bi-pencil-square"></i></button>
                 <button class="btn btn-sm btn-outline-danger" (click)="deleteCategory(category)"><i class="bi bi-trash"></i></button>
               </td>

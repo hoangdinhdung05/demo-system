@@ -37,14 +37,10 @@
                 <strong>{{ user?.firstName }} {{ user?.lastName }}</strong><br />
                 <small class="text-muted">{{ user?.email }}</small>
               </div>
-              <div class="dropdown-upload">
-                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="$event.stopPropagation(); triggerAvatarSelect()">
-                  <i class="bi bi-camera"></i> Đổi avatar
-                </button>
-                <!-- hidden file input -->
-                <input #avatarInput type="file" accept="image/*" style="display:none" (change)="onAvatarSelected($event)" />
-              </div>
               <ul>
+                <li (click)="$event.stopPropagation(); triggerAvatarSelect()">
+                  <i class="bi bi-camera"></i> Đổi avatar
+                </li>
                 <li (click)="viewProfile()">
                   <i class="bi bi-person-circle"></i> Thông tin tài khoản
                 </li>
@@ -58,6 +54,8 @@
                   <i class="bi bi-box-arrow-right"></i> Đăng xuất
                 </li>
               </ul>
+              <!-- hidden file input -->
+              <input #avatarInput type="file" accept="image/*" style="display:none" (change)="onAvatarSelected($event)" />
             </div>
           </div>
         </div>

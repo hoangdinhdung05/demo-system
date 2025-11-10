@@ -25,7 +25,7 @@ export class ProductService {
   }
 
   getProductDetails(id: number): Observable<BaseResponse<ProductResponse>> {
-    return this.http.get<BaseResponse<ProductResponse>>(`${this.apiUrl}/details/${id}`);
+    return this.http.get<BaseResponse<ProductResponse>>(`${this.apiUrl}/${id}`);
   }
 
   deleteProduct(id: number): Observable<BaseResponse<any>> {
@@ -62,7 +62,7 @@ export class ProductService {
       }
     }
 
-    return this.http.post<BaseResponse<any>>(`${this.apiUrl}`, formData);
+    return this.http.post<BaseResponse<any>>(`${this.apiUrl}/create`, formData);
   }
 
   updateProduct(id: number, request: ProductRequest): Observable<BaseResponse<any>> {

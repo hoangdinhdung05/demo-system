@@ -222,24 +222,6 @@ export class CategoryComponent implements OnInit {
     });
   }
 
-  openDetailsModal(categoryId: number) {
-    this.categoryService.getCategoryDetails(categoryId).subscribe({
-      next: res => {
-        if (res.success) {
-          this.selectedCategoryDetails = res.data;
-          this.detailsModalInstance = new bootstrap.Modal(this.detailsCategoryModal.nativeElement);
-          this.detailsModalInstance.show();
-        } else {
-          this.toastr.warning('Không tìm thấy thông tin danh mục', 'Cảnh báo');
-        }
-      },
-      error: err => {
-        console.error('Lỗi khi lấy chi tiết category:', err);
-        this.toastr.error('Không thể tải thông tin chi tiết!', 'Lỗi');
-      }
-    });
-  }
-
   closeDetailsModal() {
     if (this.detailsModalInstance) this.detailsModalInstance.hide();
   }
