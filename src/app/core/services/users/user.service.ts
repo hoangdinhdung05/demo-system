@@ -63,7 +63,7 @@ export class UserService {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`
     });
-    return this.http.post<BaseResponse<any>>(`${environment.apiUrl}/change-password`, request, { headers });
+    return this.http.post<BaseResponse<any>>(`${this.apiUrl}/change-password`, request, { headers });
   }
 
   /**

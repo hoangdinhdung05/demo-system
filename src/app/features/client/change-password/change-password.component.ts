@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
+import { UserService } from '../../../core/services/users/user.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { ChangePasswordRequest } from '../../../core/models/request/Users/ChangePasswordRequest';
 
 @Component({
   selector: 'app-change-password',
@@ -26,7 +29,9 @@ export class ChangePasswordComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private toastService: ToastService
+    private userService: UserService,
+    private toastService: ToastService,
+    private router: Router
   ) {
     this.initForm();
   }
@@ -103,20 +108,36 @@ export class ChangePasswordComponent implements OnInit {
       
       const formData = this.changePasswordForm.value;
       
-      // Mock API call - Replace with actual API
-      console.log('Changing password:', {
-        currentPassword: formData.currentPassword,
-        newPassword: formData.newPassword
-      });
+      const request: ChangePasswordRequest = {
+        oldPassword: formData.currentPassword,
+        newPassword: formData.newPassword,
+        confirmPassword: formData.confirmPassword
+      };
       
-      setTimeout(() => {
-        // Simulate success
-        this.toastService.success('Đổi mật khẩu thành công');
-        this.changePasswordForm.reset();
-        this.isLoading = false;
-        
-        // Could redirect to login or show success message
-      }, 2000);
+      this.userService.changePassword(request).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.toastService.success('Đổi mật khẩu thành công! Vui lòng đăng nhập lại');
+            this.changePasswordForm.reset();
+            
+            // Logout and redirect to login
+            setTimeout(() => {
+              localStorage.removeItem('access_token');
+              localStorage.removeItem('refresh_token');
+              this.router.navigate(['/auth/login']);
+            }, 1500);
+          } else {
+            this.toastService.error(response.message || 'Đổi mật khẩu thất bại');
+          }
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error changing password:', error);
+          const errorMessage = error.error?.message || 'Có lỗi xảy ra khi đổi mật khẩu';
+          this.toastService.error(errorMessage);
+          this.isLoading = false;
+        }
+      });
       
     } else {
       this.markFormGroupTouched();
