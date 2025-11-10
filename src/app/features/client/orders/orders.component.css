@@ -74,9 +74,9 @@
 }
 
 .status-tab.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #3498db;
   color: white;
-  border-color: #667eea;
+  border-color: #3498db;
 }
 
 .tab-count {
@@ -112,8 +112,8 @@
 
 .search-input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 .search-icon {
@@ -209,7 +209,7 @@
 
 /* Order Header */
 .order-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #3498db;
   color: white;
   padding: 1.5rem;
   display: flex;
@@ -400,35 +400,37 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #3498db;
   color: white;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+  background: #2980b9;
 }
 
 .btn-outline {
   background: transparent;
-  color: #667eea;
-  border: 1px solid #667eea;
+  color: #3498db;
+  border: 1px solid #3498db;
 }
 
 .btn-outline:hover {
-  background: #667eea;
+  background: #3498db;
   color: white;
   transform: translateY(-2px);
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+  background: #e74c3c;
   color: white;
 }
 
 .btn-danger:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4);
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+  background: #c0392b;
 }
 
 /* Pagination */
@@ -468,15 +470,15 @@
 }
 
 .page-btn:hover:not(:disabled) {
-  background: #667eea;
+  background: #3498db;
   color: white;
-  border-color: #667eea;
+  border-color: #3498db;
 }
 
 .page-btn.active {
-  background: #667eea;
+  background: #3498db;
   color: white;
-  border-color: #667eea;
+  border-color: #3498db;
 }
 
 .page-btn:disabled {

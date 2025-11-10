@@ -201,11 +201,6 @@ export class ClientHeaderComponent implements OnInit {
     this.isMenuOpen = false;
   }
 
-  editProfile(): void {
-    this.router.navigate(['/edit-profile']);
-    this.isMenuOpen = false;
-  }
-
   changePassword(): void {
     this.router.navigate(['/change-password']);
     this.isMenuOpen = false;
@@ -310,9 +305,7 @@ export class ClientHeaderComponent implements OnInit {
       case 'addresses':      this.viewAddresses(); break;
       case 'payments':       this.viewPaymentMethods(); break;
       case 'notifications':  this.viewNotifications(); break;
-      case 'editProfile':    this.editProfile(); break;
       case 'changePassword': this.changePassword(); break;
-      case 'settings':       this.viewSettings(); break;
       case 'logout':         this.logout(); break;
     }
     this.isMenuOpen = false;

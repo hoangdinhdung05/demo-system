@@ -90,75 +90,7 @@
             </div>
           </div>
         </div>
-
-        <!-- Account Status -->
-        <div class="profile-card status-card">
-          <div class="card-header">
-            <h3><i class="fas fa-shield-alt"></i> Trạng thái tài khoản</h3>
-          </div>
-          <div class="card-body">
-            <div class="status-info">
-              <div class="status-badge" [class]="getStatusBadgeClass(user.status)">
-                <i class="fas fa-circle"></i>
-                <span>{{ getStatusText(user.status) }}</span>
-              </div>
-              <div class="status-details">
-                <div class="detail-item">
-                  <i class="fas fa-calendar-alt"></i>
-                  <span>Tài khoản đã được xác thực: <strong>{{ user.verifyEmail ? 'Có' : 'Chưa' }}</strong></span>
-                </div>
-                <div class="detail-item">
-                  <i class="fas fa-shield-alt"></i>
-                  <span>Mã người dùng: <strong>#{{ user.id }}</strong></span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Security Settings -->
-        <div class="profile-card security-card">
-          <div class="card-header">
-            <h3><i class="fas fa-lock"></i> Bảo mật</h3>
-          </div>
-          <div class="card-body">
-            <div class="security-actions">
-              <button class="btn btn-primary btn-block">
-                <i class="fas fa-key"></i> Đổi mật khẩu
-              </button>
-              <button class="btn btn-outline btn-block">
-                <i class="fas fa-shield-alt"></i> Xác thực 2 lớp
-              </button>
-              <button class="btn btn-outline btn-block">
-                <i class="fas fa-history"></i> Lịch sử đăng nhập
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Account Actions -->
-        <div class="profile-card actions-card">
-          <div class="card-header">
-            <h3><i class="fas fa-cog"></i> Thao tác tài khoản</h3>
-          </div>
-          <div class="card-body">
-            <div class="action-buttons">
-              <button class="btn btn-success btn-block">
-                <i class="fas fa-download"></i> Tải dữ liệu cá nhân
-              </button>
-              <button class="btn btn-outline btn-block">
-                <i class="fas fa-user-slash"></i> Vô hiệu hóa tài khoản
-              </button>
-              <button class="btn btn-danger btn-block">
-                <i class="fas fa-trash-alt"></i> Xóa tài khoản vĩnh viễn
-              </button>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
+        
     <!-- Error State -->
     <div *ngIf="!isLoading && !user" class="error-state">
       <div class="error-content">
