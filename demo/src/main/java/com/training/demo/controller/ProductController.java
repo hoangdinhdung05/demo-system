@@ -130,4 +130,10 @@ public class ProductController {
         log.info("[Product] Search products by names");
         return ResponseEntity.ok(BaseResponse.success(productService.findByName(name)));
     }
+
+    @PostMapping("/search-category")
+    public ResponseEntity<?> searchByCategory(@RequestParam String name) {
+        log.info("[Product] Search products by category");
+        return ResponseEntity.ok(BaseResponse.success(productService.findByCategory(name)));
+    }
 }

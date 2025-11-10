@@ -326,15 +326,33 @@ public class UserServiceImpl implements UserService {
 
     //========== PRIVATE METHOD ==========//
     private void validatePassword(ChangePasswordRequest request, User user) {
-        if (request.getNewPassword().equals(request.getOldPassword())) {
+        final String oldRaw = request.getOldPassword();
+        final String newRaw = request.getNewPassword();
+        final String confirmRaw = request.getConfirmPassword();
+        final String currentEncoded = user.getPassword();
+
+        // 1) Xác thực oldPassword khớp với mật khẩu hiện tại
+        if (!passwordEncoder.matches(oldRaw, currentEncoded)) {
+            throw new BadRequestException("Old password is incorrect.");
+        }
+
+        // 2) new != old (so sánh raw string)
+        if (newRaw.equals(oldRaw)) {
             throw new BadRequestException("New password must be different from the current password.");
         }
-        if (request.getNewPassword().matches(request.getOldPassword())) {
-            throw new BadRequestException("New password must be different from the current password.");
-        }
-        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+
+        // 3) new khớp confirm
+        if (!newRaw.equals(confirmRaw)) {
             throw new BadRequestException("New password and confirm password do not match.");
         }
+
+        // 4) (Khuyến nghị) Cấm đặt lại đúng mật khẩu hiện tại (trường hợp ai đó gửi cùng chuỗi nhưng muốn chắc ăn)
+        if (passwordEncoder.matches(newRaw, currentEncoded)) {
+            throw new BadRequestException("New password must be different from the current password.");
+        }
+
+        // 5) (Nếu có) kiểm tra policy qua @ValidPassword đã chạy ở tầng controller (@Valid)
+        // Nếu bạn validate ở service, cần @Validated trên class và @Valid ở tham số method.
     }
 
     private User getUserById(Long id) {

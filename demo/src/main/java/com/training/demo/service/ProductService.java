@@ -82,4 +82,11 @@ public interface ProductService {
      * @return list of product responses matching the name
      */
     List<ProductResponse> findByName(String name);
+
+    /**
+     * Find products by category (case-insensitive, exact match)
+     * @param category product category
+     * @return list of product responses matching the category
+     */
+    List<ProductResponse> findByCategory(String category);
 }

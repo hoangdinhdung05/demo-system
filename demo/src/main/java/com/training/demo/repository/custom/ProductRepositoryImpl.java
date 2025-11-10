@@ -31,5 +31,24 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
         return query.getResultList();
     }
+
+    @Override
+    public List<ProductResponse> searchByCategory(String category) {
+        Query query = em.createNativeQuery("""
+            SELECT
+                p.id AS id,
+                p.name AS name,
+                p.description AS description,
+                p.price AS price,
+                p.quantity AS quantity,
+                p.product_image_url AS productImageUrl
+            FROM tbl_product p
+            JOIN tbl_category c ON p.category_id = c.id
+            WHERE LOWER(c.name) = LOWER(:category)
+        """, "Mapping.ProductResponse"); // ← dùng mapping bạn đã định nghĩa
+
+        query.setParameter("category", category);
+        return query.getResultList();
+    }
 }
 

@@ -21,8 +21,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
-
 import static com.training.demo.mapper.ProductMapper.toProductResponse;
 
 @Service
@@ -305,6 +303,18 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductResponse> findByName(String name) {
         log.info("[ProductService] Finding products by name: {}", name);
         return productRepository.searchByName(name);
+    }
+
+    /**
+     * Find products by category (case-insensitive, exact match)
+     *
+     * @param category product category
+     * @return list of product responses matching the category
+     */
+    @Override
+    public List<ProductResponse> findByCategory(String category) {
+        log.info("[ProductService] Finding products by category: {}", category);
+        return productRepository.searchByCategory(category);
     }
 
     //========== PRIVATE METHOD ==========//
