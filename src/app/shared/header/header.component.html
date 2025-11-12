@@ -14,7 +14,7 @@
 
       <div class="col-auto">
         <div class="d-flex align-items-center gap-3">
-          <!-- 👤 User menu -->
+          <!-- User menu -->
           <div class="user-menu-wrapper">
             <div class="user-profile" (click)="toggleMenu()">
               <ng-container *ngIf="avatarUrl; else noAvatar">
@@ -27,7 +27,7 @@
               <span class="ms-2 d-none d-md-inline">{{ user?.username }}</span>
             </div>
 
-            <!-- 🔽 Dropdown -->
+            <!-- Dropdown -->
             <div
               class="dropdown-menu-custom"
               *ngIf="isMenuOpen"
@@ -65,7 +65,7 @@
 </header>
 
 <!-- ============================= -->
-<!-- 📄 Modal: Xem thông tin tài khoản -->
+<!-- Modal: Xem thông tin tài khoản -->
 <!-- ============================= -->
 <div class="modal-backdrop" *ngIf="showProfileModal" (click)="closeModals()"></div>
 <div class="modal-box" *ngIf="showProfileModal">
@@ -82,7 +82,7 @@
 </div>
 
 <!-- ============================= -->
-<!-- ✏️ Modal: Chỉnh sửa thông tin -->
+<!-- Modal: Chỉnh sửa thông tin -->
 <!-- ============================= -->
 <div class="modal-backdrop" *ngIf="showEditModal" (click)="closeModals()"></div>
 <div class="modal-box" *ngIf="showEditModal">
@@ -108,6 +108,7 @@
         type="button"
         class="btn btn-primary"
         (click)="updateProfile()"
+        style="background: linear-gradient(135deg, #1890ff, #40a9ff); border: none;"
       >
         Lưu thay đổi
       </button>
@@ -116,7 +117,7 @@
 </div>
 
 <!-- ============================= -->
-<!-- 🔐 Modal: Đổi mật khẩu -->
+<!-- Modal: Đổi mật khẩu -->
 <!-- ============================= -->
 <div class="modal-backdrop" *ngIf="showChangePasswordModal" (click)="closeModals()"></div>
 <div class="modal-box" *ngIf="showChangePasswordModal">
@@ -138,8 +139,9 @@
         <label>Xác nhận mật khẩu mới</label>
           <input type="password" class="form-control" [(ngModel)]="confirmPassword" name="confirmPassword"/>
       </div>
-<button type="button" class="btn btn-success" 
-        (click)="changePasswordTest(oldPassword, newPassword, confirmPassword)">
+<button type="button" class="btn btn-primary" 
+        (click)="changePasswordTest(oldPassword, newPassword, confirmPassword)"
+        style="background: linear-gradient(135deg, #1890ff, #40a9ff); border: none;">
   Đổi mật khẩu
 </button>    </form>
   </div>

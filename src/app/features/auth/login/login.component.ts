@@ -54,8 +54,15 @@ export class LoginComponent {
           this.router.navigate(['/auth/login']);
         }
       },
-      error: () => {
-        this.toastr.error('Tên đăng nhập hoặc mật khẩu không đúng!');
+      error: (err) => {
+
+        if (err.error.message) {
+          this.toastr.error(err.error.message);
+          return;
+        } else {
+          this.toastr.error('Tên đăng nhập hoặc mật khẩu không đúng!');
+        }
+
       }
     });
   }

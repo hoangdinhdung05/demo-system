@@ -1,5 +1,5 @@
 /* ============================= */
-/* 🌟 HEADER CONTAINER */
+/* HEADER CONTAINER */
 /* ============================= */
 .header {
   background-color: #ffffff;
@@ -12,7 +12,7 @@
 }
 
 /* ============================= */
-/* 🔍 SEARCH BOX */
+/* SEARCH BOX */
 /* ============================= */
 .search-box {
   position: relative;
@@ -47,7 +47,7 @@
 }
 
 /* ============================= */
-/* 👤 USER PROFILE */
+/* USER PROFILE */
 /* ============================= */
 .user-menu-wrapper {
   position: relative;
@@ -117,7 +117,7 @@
 }
 
 /* ============================= */
-/* 🔽 DROPDOWN MENU */
+/* DROPDOWN MENU */
 /* ============================= */
 .dropdown-menu-custom {
   position: absolute;
@@ -193,7 +193,7 @@
 }
 
 /* ============================= */
-/* ✨ Animation */
+/* Animation */
 /* ============================= */
 @keyframes dropdownFade {
   from {
@@ -207,7 +207,7 @@
 }
 
 /* ============================= */
-/* 💬 MODAL (gợi ý thêm) */
+/* MODAL */
 /* ============================= */
 .modal-backdrop {
   position: fixed;

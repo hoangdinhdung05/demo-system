@@ -193,9 +193,9 @@ export class ProductComponent implements OnInit {
     formData.append('name', (v.name ?? '').trim());
     formData.append('description', v.description ?? '');
     formData.append('price', String(v.price ?? 0));
-    formData.append('quantity', String(v.quantity ?? 0));               // ✅ không để null
+    formData.append('quantity', String(v.quantity ?? 0));
     if (v.categoryId != null) formData.append('categoryId', String(v.categoryId));
-    if (this.imageFile)       formData.append('imageFile', this.imageFile); // ✅ đúng key
+    if (this.imageFile)       formData.append('imageFile', this.imageFile);
 
     this.loading = true;
     this.productService.createProduct(formData).subscribe({

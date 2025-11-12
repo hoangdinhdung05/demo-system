@@ -11,6 +11,22 @@ h3 {
   color: #333;
 }
 
+.email-info {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 20px;
+}
+
+.email-info p {
+  margin: 0;
+}
+
+.email-info strong {
+  color: #0d6efd;
+  font-size: 14px;
+}
+
 form {
   margin-top: 20px;
 }
@@ -21,6 +37,9 @@ form {
   font-size: 15px;
   border: 1px solid #ced4da;
   transition: all 0.3s ease;
+  text-align: center;
+  letter-spacing: 2px;
+  font-weight: 500;
 }
 
 .form-control:focus {
@@ -41,6 +60,43 @@ form {
   transform: translateY(-1px);
 }
 
+.resend-section {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #e9ecef;
+}
+
+.btn-outline-secondary {
+  border-radius: 10px;
+  height: 42px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  transition: all 0.3s ease;
+  color: #6c757d;
+  border-color: #6c757d;
+}
+
+.btn-outline-secondary:hover:not(:disabled) {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.btn-outline-secondary:disabled,
+.btn-outline-secondary.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  color: #adb5bd;
+}
+
+.text-muted {
+  color: #6c757d !important;
+  font-size: 13px;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -51,3 +107,4 @@ form {
     transform: translateY(0);
   }
 }
+
