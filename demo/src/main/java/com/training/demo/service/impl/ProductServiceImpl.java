@@ -1,11 +1,13 @@
 package com.training.demo.service.impl;
 
+import com.training.demo.dto.request.Product.ProductCreateRequest;
 import com.training.demo.dto.request.Product.ProductRequest;
 import com.training.demo.dto.response.Product.ProductResponse;
 import com.training.demo.dto.response.System.PageResponse;
 import com.training.demo.entity.Category;
 import com.training.demo.entity.Product;
 import com.training.demo.exception.BadRequestException;
+import com.training.demo.mapper.ProductMapper;
 import com.training.demo.repository.CategoryRepository;
 import com.training.demo.repository.ProductRepository;
 import com.training.demo.repository.specification.ProductSpecs;
@@ -56,7 +58,7 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     @Transactional
-    public ProductResponse createProduct(ProductRequest request) {
+    public ProductResponse createProduct(ProductCreateRequest request) {
         log.info("[ProductService] Creating product with name: {}", request.getName());
         validateForCreate(request);
 
@@ -67,20 +69,16 @@ public class ProductServiceImpl implements ProductService {
             throw new BadRequestException("Product with name " + request.getName() + " already exists");
         }
 
-        // 1) Upload ảnh -> lấy URL (String)
-        String imageUrl;
-        try {
-            imageUrl = fileService
-                    .upload(com.training.demo.utils.enums.UploadKind.PRODUCT_IMAGE, request.getImageFile())
-                    .getPublicUrl();
-        } catch (Exception e) {
-            throw new BadRequestException("Failed to upload product image: " + e.getMessage());
-        }
-
-        // 2) Tạo entity với imageUrl
-        Product product = buildProduct(request, category, imageUrl);
-
+        Product product = Product.builder()
+                .name(request.getName().trim())
+                .description(request.getDescription())
+                .price(request.getPrice())
+                .quantity(request.getQuantity())
+                .productImageUrl(request.getImageUrl()) // gán URL FE truyền vào
+                .category(category)
+                .build();
         product = productRepository.save(product);
+
         log.info("[ProductService] Created product id={}", product.getId());
         return toProductResponse(product);
     }
@@ -204,7 +202,7 @@ public class ProductServiceImpl implements ProductService {
         var productPage = productRepository.findAll(pageable);
         var items = productPage.getContent()
                 .stream()
-                .map(com.training.demo.mapper.ProductMapper::toProductResponse)
+                .map(ProductMapper::toProductResponse)
                 .toList();
 
         return PageResponse.<ProductResponse>builder()
@@ -318,7 +316,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     //========== PRIVATE METHOD ==========//
-    private void validateForCreate(ProductRequest req) {
+    private void validateForCreate(ProductCreateRequest req) {
         if (req == null) throw new BadRequestException("Request body must not be null");
         if (req.getName() == null || req.getName().isBlank())
             throw new BadRequestException("Product name must not be blank");
@@ -328,7 +326,7 @@ public class ProductServiceImpl implements ProductService {
             throw new BadRequestException("Quantity must be >= 0");
         if (req.getCategoryId() == null)
             throw new BadRequestException("Category id must not be null");
-        if (req.getImageFile() == null || req.getImageFile().isEmpty())
+        if (req.getImageUrl() == null || req.getImageUrl().isEmpty())
             throw new BadRequestException("Product image file must not be null");
     }
 
@@ -340,16 +338,5 @@ public class ProductServiceImpl implements ProductService {
             throw new BadRequestException("Price must be >= 0");
         if (req.getQuantity() != null && req.getQuantity() < 0)
             throw new BadRequestException("Quantity must be >= 0");
-    }
-
-    private static Product buildProduct(ProductRequest request, Category category, String imageUrl) {
-        return Product.builder()
-                .name(request.getName().trim())
-                .description(request.getDescription())
-                .price(request.getPrice())
-                .quantity(request.getQuantity())
-                .productImageUrl(imageUrl)
-                .category(category)
-                .build();
     }
 }

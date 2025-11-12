@@ -1,5 +1,6 @@
 package com.training.demo.service;
 
+import com.training.demo.dto.request.Product.ProductCreateRequest;
 import com.training.demo.dto.request.Product.ProductRequest;
 import com.training.demo.dto.response.Product.ProductResponse;
 import com.training.demo.dto.response.System.PageResponse;
@@ -21,7 +22,7 @@ public interface ProductService {
      * @param request product request
      * @return created product response
      */
-    ProductResponse createProduct(ProductRequest request);
+    ProductResponse createProduct(ProductCreateRequest request);
 
     /**
      * Update an existing product

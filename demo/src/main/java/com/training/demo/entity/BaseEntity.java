@@ -23,7 +23,6 @@ public abstract class BaseEntity {
 
     @Column(name = "updated_at")
     @UpdateTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime updatedAt;
 
     @Column(name = "created_by")

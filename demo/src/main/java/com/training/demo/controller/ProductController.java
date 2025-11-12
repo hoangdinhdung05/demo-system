@@ -1,5 +1,6 @@
 package com.training.demo.controller;
 
+import com.training.demo.dto.request.Product.ProductCreateRequest;
 import com.training.demo.dto.request.Product.ProductRequest;
 import com.training.demo.dto.response.System.BaseResponse;
 import com.training.demo.service.ProductService;
@@ -29,8 +30,9 @@ public class ProductController {
      * @return created product response
      */
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
-    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createProduct(@ModelAttribute ProductRequest request) {
+    @PostMapping(value = "/create")
+    public ResponseEntity<?> createProduct(@RequestBody ProductCreateRequest request) {
+        log.info("[Product] Create new product: {}", request.getName());
         return ResponseEntity.ok(BaseResponse.success(productService.createProduct(request)));
     }
 
