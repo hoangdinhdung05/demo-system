@@ -4,10 +4,12 @@ import com.training.demo.dto.request.Product.ProductCreateRequest;
 import com.training.demo.dto.request.Product.ProductRequest;
 import com.training.demo.dto.response.Product.ProductResponse;
 import com.training.demo.dto.response.System.PageResponse;
+import com.training.demo.dto.response.User.UserResponse;
 import com.training.demo.entity.Category;
 import com.training.demo.entity.Product;
 import com.training.demo.exception.BadRequestException;
 import com.training.demo.mapper.ProductMapper;
+import com.training.demo.mapper.UserMapper;
 import com.training.demo.repository.CategoryRepository;
 import com.training.demo.repository.ProductRepository;
 import com.training.demo.repository.specification.ProductSpecs;
@@ -17,6 +19,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -184,34 +187,24 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Get all products with pagination
      *
-     * @param page page number
-     * @param size page size
+     * @param pageNumber page number
+     * @param pageSize page size
      * @return paginated product responses
      */
     @Override
-    public PageResponse<?> getAllProducts(int page, int size) {
-        if (page < 0) throw new BadRequestException("Page index must be >= 0");
-        if (size <= 0 || size > 200) throw new BadRequestException("Page size must be in range [1, 200]");
+    public PageResponse<?> getAllProducts(int pageNumber, int pageSize) {
+        if (pageNumber < 0) throw new BadRequestException("Page index must be >= 0");
+        if (pageSize <= 0 || pageSize > 200) throw new BadRequestException("Page size must be in range [1, 200]");
 
         var pageable = org.springframework.data.domain.PageRequest.of(
-                page, size,
+                pageNumber, pageSize,
                 org.springframework.data.domain.Sort.by(Sort.Direction.ASC, "createdAt")
                         .and(org.springframework.data.domain.Sort.by("id"))
         );
 
-        var productPage = productRepository.findAll(pageable);
-        var items = productPage.getContent()
-                .stream()
-                .map(ProductMapper::toProductResponse)
-                .toList();
-
-        return PageResponse.<ProductResponse>builder()
-                .pageNumber(page)
-                .pageSize(size)
-                .totalElements(productPage.getTotalElements())
-                .totalPages(productPage.getTotalPages())
-                .content(items)
-                .build();
+        Page<ProductResponse> productResponses = productRepository.findAll(PageRequest.of(pageNumber, pageSize))
+                .map(ProductMapper::toProductResponse);
+        return PageResponse.of(productResponses);
     }
 
     /**

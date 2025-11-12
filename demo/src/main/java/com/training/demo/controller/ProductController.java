@@ -64,15 +64,15 @@ public class ProductController {
 
     /**
      * Get all products with pagination
-     * @param page page number
-     * @param size page size
+     * @param pageNumber page number
+     * @param pageSize page size
      * @return paginated product responses
      */
     @GetMapping
-    public ResponseEntity<?> getAll(@RequestParam(defaultValue = "0") int page,
-                                    @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<?> getAll(@RequestParam(defaultValue = "0") int pageNumber,
+                                    @RequestParam(defaultValue = "12") int pageSize) {
         log.info("[Product] Get all products");
-        return ResponseEntity.ok(BaseResponse.success(productService.getAllProducts(page, size)));
+        return ResponseEntity.ok(BaseResponse.success(productService.getAllProducts(pageNumber, pageSize)));
     }
 
     /**
