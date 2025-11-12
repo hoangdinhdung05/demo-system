@@ -26,14 +26,17 @@ export class ProductComponent implements OnInit {
   @ViewChild('createProductModal') createProductModal!: ElementRef;
   @ViewChild('editProductModal') editProductModal!: ElementRef;
   @ViewChild('detailsProductModal') detailsProductModal!: ElementRef;
+  @ViewChild('deleteProductModal') deleteProductModal!: ElementRef;
 
   createProductForm!: FormGroup;
   editProductForm!: FormGroup;
   modalInstance: any;
   editModalInstance: any;
   detailsModalInstance: any;
+  deleteModalInstance: any;
   selectedProduct: any = null;
   selectedProductDetails: any = null;
+  productToDelete: any = null;
 
   searchText = '';
   imageFile?: File;
@@ -280,13 +283,25 @@ export class ProductComponent implements OnInit {
   }
 
   // === DELETE PRODUCT ===
-  deleteProduct(product: any) {
-    if (!confirm(`Bạn có chắc muốn xóa sản phẩm "${product.name}" không?`)) return;
+  openDeleteModal(product: any) {
+    this.productToDelete = product;
+    this.deleteModalInstance = new bootstrap.Modal(this.deleteProductModal.nativeElement);
+    this.deleteModalInstance.show();
+  }
 
-    this.productService.deleteProduct(product.id).subscribe({
+  closeDeleteModal() {
+    if (this.deleteModalInstance) this.deleteModalInstance.hide();
+    this.productToDelete = null;
+  }
+
+  confirmDeleteProduct() {
+    if (!this.productToDelete) return;
+
+    this.productService.deleteProduct(this.productToDelete.id).subscribe({
       next: res => {
         if (res.success) {
           this.toastr.success('Xóa sản phẩm thành công!', 'Thành công');
+          this.closeDeleteModal();
           this.loadProducts(
             this.currentPage > 0 && this.filteredProducts.length === 1
               ? this.currentPage - 1
@@ -299,6 +314,7 @@ export class ProductComponent implements OnInit {
       error: err => {
         console.error('Error deleting product:', err);
         this.toastr.error(err.error?.message || 'Có lỗi xảy ra!', 'Lỗi');
+        this.closeDeleteModal();
       }
     });
   }

@@ -52,7 +52,7 @@
               <td class="text-center">
                 <button class="btn btn-sm btn-outline-info me-1" (click)="openDetailsModal(product.id)"><i class="bi bi-eye"></i></button>
                 <button class="btn btn-warning btn-sm me-2" (click)="openEditModal(product)"><i class="bi bi-pencil-square"></i></button>
-                <button class="btn btn-sm btn-outline-danger" (click)="deleteProduct(product)"><i class="bi bi-trash"></i></button>
+                <button class="btn btn-sm btn-outline-danger" (click)="openDeleteModal(product)"><i class="bi bi-trash"></i></button>
               </td>
             </tr>
 
@@ -218,6 +218,30 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" (click)="closeDetailsModal()">Đóng</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== Delete Confirmation Modal ========== -->
+    <div class="modal fade" #deleteProductModal tabindex="-1" aria-labelledby="deleteProductModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title" id="deleteProductModalLabel">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận xóa
+            </h5>
+            <button type="button" class="btn-close btn-close-white" (click)="closeDeleteModal()" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" *ngIf="productToDelete">
+            <p class="mb-0">Bạn có chắc muốn xóa sản phẩm <strong>"{{ productToDelete.name }}"</strong> không?</p>
+            <p class="text-muted small mt-2">Hành động này không thể hoàn tác!</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">Hủy</button>
+            <button type="button" class="btn btn-danger" (click)="confirmDeleteProduct()">
+              <i class="bi bi-trash me-1"></i>Xóa
+            </button>
           </div>
         </div>
       </div>

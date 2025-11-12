@@ -26,14 +26,17 @@ export class CategoryComponent implements OnInit {
   @ViewChild('createCategoryModal') createCategoryModal!: ElementRef;
   @ViewChild('editCategoryModal') editCategoryModal!: ElementRef;
   @ViewChild('detailsCategoryModal') detailsCategoryModal!: ElementRef;
+  @ViewChild('deleteCategoryModal') deleteCategoryModal!: ElementRef;
 
   createCategoryForm!: FormGroup;
   editCategoryForm!: FormGroup;
   modalInstance: any;
   editModalInstance: any;
   detailsModalInstance: any;
+  deleteModalInstance: any;
   selectedCategory: any = null;
   selectedCategoryDetails: any = null;
+  categoryToDelete: any = null;
 
   searchText = '';
 
@@ -197,15 +200,25 @@ export class CategoryComponent implements OnInit {
     });
   }
 
-  deleteCategory(category: any) {
-    if (!confirm(`Bạn có chắc muốn xóa danh mục "${category.name}" không?`)) {
-      return;
-    }
+  openDeleteModal(category: any) {
+    this.categoryToDelete = category;
+    this.deleteModalInstance = new bootstrap.Modal(this.deleteCategoryModal.nativeElement);
+    this.deleteModalInstance.show();
+  }
 
-    this.categoryService.deleteCategory(category.id).subscribe({
+  closeDeleteModal() {
+    if (this.deleteModalInstance) this.deleteModalInstance.hide();
+    this.categoryToDelete = null;
+  }
+
+  confirmDeleteCategory() {
+    if (!this.categoryToDelete) return;
+
+    this.categoryService.deleteCategory(this.categoryToDelete.id).subscribe({
       next: (res) => {
         if (res.success) {
           this.toastr.success('Xóa danh mục thành công!', 'Thành công');
+          this.closeDeleteModal();
           this.loadCategories(this.currentPage);
         } else {
           this.toastr.warning('Không thể xóa danh mục này!', 'Cảnh báo');
@@ -218,6 +231,7 @@ export class CategoryComponent implements OnInit {
         } else {
           this.toastr.error('Có lỗi xảy ra, vui lòng thử lại!', 'Lỗi');
         }
+        this.closeDeleteModal();
       }
     });
   }

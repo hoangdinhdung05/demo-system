@@ -39,6 +39,9 @@ export class UsersComponent implements OnInit {
   detailsModalInstance: any;
   selectedUserDetails: any = null;
 
+  @ViewChild('deleteUserModal') deleteUserModal!: ElementRef;
+  deleteModalInstance: any;
+  userToDelete: any = null;
 
   constructor(private userService: UserService, 
     private fb: FormBuilder, 
@@ -228,15 +231,25 @@ submitCreateUser() {
     });
   }
 
-  deleteUser(user: any) {
-    if (!confirm(`Bạn có chắc muốn xóa người dùng "${user.username}" không?`)) {
-      return;
-    }
+  openDeleteModal(user: any) {
+    this.userToDelete = user;
+    this.deleteModalInstance = new bootstrap.Modal(this.deleteUserModal.nativeElement);
+    this.deleteModalInstance.show();
+  }
 
-    this.userService.deleteUser(user.id).subscribe({
+  closeDeleteModal() {
+    if (this.deleteModalInstance) this.deleteModalInstance.hide();
+    this.userToDelete = null;
+  }
+
+  confirmDeleteUser() {
+    if (!this.userToDelete) return;
+
+    this.userService.deleteUser(this.userToDelete.id).subscribe({
       next: (res) => {
         if (res.success) {
           this.toastr.success('Xóa người dùng thành công!', 'Thành công');
+          this.closeDeleteModal();
           this.loadUsers(this.currentPage); // reload lại bảng
         } else {
           this.toastr.warning('Không thể xóa người dùng này!', 'Cảnh báo');
@@ -249,6 +262,7 @@ submitCreateUser() {
         } else {
           this.toastr.error('Có lỗi xảy ra, vui lòng thử lại!', 'Lỗi');
         }
+        this.closeDeleteModal();
       }
     });
   }
