@@ -4,5 +4,5 @@ export interface ProductRequest {
     price: number;
     quantity: number;
     categoryId: number;
-    imageFile?: File;
+    imageUrl: string; // URL từ Upload API
 }

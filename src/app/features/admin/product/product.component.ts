@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { ProductService } from 'src/app/core/services/products/product.service';
 import { CategoryService } from 'src/app/core/services/categories/category.service';
+import { UploadService } from 'src/app/core/services/upload/upload.service';
 import { environment } from 'src/environments/environment';
 
 declare var bootstrap: any;
@@ -42,8 +43,9 @@ export class ProductComponent implements OnInit {
   constructor(
     private productService: ProductService, 
     private toastr: ToastrService, 
-    private fb: FormBuilder
-    , private categoryService: CategoryService
+    private fb: FormBuilder,
+    private categoryService: CategoryService,
+    private uploadService: UploadService
   ) { }
 
   imageUrl(product: any) {
@@ -182,36 +184,60 @@ export class ProductComponent implements OnInit {
 
 
   submitCreateProduct() {
+    // Validation
     if (this.createProductForm.invalid) {
       this.toastr.warning('Vui lòng điền đầy đủ thông tin!', 'Cảnh báo');
       return;
     }
 
-    const v = this.createProductForm.value;
-    const formData = new FormData();
-
-    formData.append('name', (v.name ?? '').trim());
-    formData.append('description', v.description ?? '');
-    formData.append('price', String(v.price ?? 0));
-    formData.append('quantity', String(v.quantity ?? 0));
-    if (v.categoryId != null) formData.append('categoryId', String(v.categoryId));
-    if (this.imageFile)       formData.append('imageFile', this.imageFile);
+    if (!this.imageFile) {
+      this.toastr.warning('Vui lòng chọn ảnh sản phẩm!', 'Cảnh báo');
+      return;
+    }
 
     this.loading = true;
-    this.productService.createProduct(formData).subscribe({
-      next: res => {
-        if (res.success) {
-          this.toastr.success('Tạo sản phẩm thành công!', 'Thành công');
-          this.closeCreateModal();
-          this.loadProducts(this.currentPage);
-        } else {
-          this.toastr.warning(res.message || 'Không thể tạo sản phẩm!', 'Cảnh báo');
-        }
-        this.loading = false;
+
+    // Bước 1: Upload ảnh trước
+    this.toastr.info('Đang upload ảnh...', 'Xử lý');
+    this.uploadService.uploadProductImage(this.imageFile).subscribe({
+      next: uploadRes => {
+        console.log('Upload success:', uploadRes);
+        
+        // Bước 2: Tạo product với imageUrl từ upload
+        this.toastr.info('Đang tạo sản phẩm...', 'Xử lý');
+        const v = this.createProductForm.value;
+        const request = {
+          name: (v.name ?? '').trim(),
+          description: v.description ?? '',
+          price: v.price ?? 0,
+          quantity: v.quantity ?? 0,
+          categoryId: v.categoryId,
+          imageUrl: uploadRes.publicUrl // Lấy publicUrl từ Upload API
+        };
+
+        console.log('Create product request:', request);
+
+        this.productService.createProduct(request).subscribe({
+          next: res => {
+            if (res.success) {
+              this.toastr.success('Tạo sản phẩm thành công!', 'Thành công');
+              this.closeCreateModal();
+              this.loadProducts(this.currentPage);
+            } else {
+              this.toastr.warning(res.message || 'Không thể tạo sản phẩm!', 'Cảnh báo');
+            }
+            this.loading = false;
+          },
+          error: err => {
+            console.error('Create product error:', err);
+            this.toastr.error(err.error?.message || 'Có lỗi xảy ra khi tạo sản phẩm!', 'Lỗi');
+            this.loading = false;
+          }
+        });
       },
       error: err => {
-        console.error('Create product error:', err);
-        this.toastr.error(err.error?.message || 'Có lỗi xảy ra khi tạo sản phẩm!', 'Lỗi');
+        console.error('Upload image error:', err);
+        this.toastr.error(err.error?.message || 'Có lỗi xảy ra khi upload ảnh!', 'Lỗi');
         this.loading = false;
       }
     });

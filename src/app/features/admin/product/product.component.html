@@ -133,11 +133,20 @@
               </div>
 
               <div class="mb-3">
-                <label class="form-label">Ảnh sản phẩm</label>
-                <input type="file" class="form-control" (change)="onImageSelected($event)">
+                <label class="form-label">Ảnh sản phẩm <span class="text-danger">*</span></label>
+                <input type="file" class="form-control" (change)="onImageSelected($event)" accept="image/jpeg,image/jpg,image/png,image/webp">
+                
+                <!-- Preview ảnh đã chọn -->
+                <div *ngIf="imagePreview" class="mt-2">
+                  <img [src]="imagePreview" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                  <p class="text-muted small mt-1">{{ imageFile?.name }} ({{ (imageFile?.size || 0) / 1024 | number:'1.0-2' }} KB)</p>
+                </div>
               </div>
 
-              <button type="submit" class="btn btn-primary" [disabled]="createProductForm.invalid">Tạo</button>
+              <button type="submit" class="btn btn-primary" [disabled]="createProductForm.invalid || loading">
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                {{ loading ? 'Đang xử lý...' : 'Tạo sản phẩm' }}
+              </button>
             </form>
           </div>
         </div>

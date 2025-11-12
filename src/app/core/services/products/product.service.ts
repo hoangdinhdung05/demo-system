@@ -38,31 +38,10 @@ export class ProductService {
   }
 
   /**
-   * Create product. Accepts either a ProductRequest object or a FormData instance.
-   * Backend expects multipart/form-data with @ModelAttribute, so when a ProductRequest
-   * is provided we convert it to FormData; if a FormData is provided we send it directly.
+   * Create product với imageUrl từ Upload API
    */
-  createProduct(request: ProductRequest | FormData): Observable<BaseResponse<any>> {
-    let formData: FormData;
-
-    if (request instanceof FormData) {
-      formData = request;
-    } else {
-      formData = new FormData();
-      // Append các field từ ProductRequest
-      formData.append('name', request.name);
-      formData.append('price', request.price.toString());
-      formData.append('description', request.description || '');
-      formData.append('quantity', (request.quantity ?? 0).toString());
-      formData.append('categoryId', request.categoryId.toString());
-
-      // Nếu có file ảnh
-      if ((request as any).imageFile) {
-        formData.append('imageFile', (request as any).imageFile as File);
-      }
-    }
-
-    return this.http.post<BaseResponse<any>>(`${this.apiUrl}/create`, formData);
+  createProduct(request: ProductRequest): Observable<BaseResponse<any>> {
+    return this.http.post<BaseResponse<any>>(`${this.apiUrl}/create`, request);
   }
 
   updateProduct(id: number, request: ProductRequest): Observable<BaseResponse<any>> {
