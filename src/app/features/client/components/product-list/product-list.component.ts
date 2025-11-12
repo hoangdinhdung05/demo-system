@@ -18,7 +18,7 @@ export class ProductListComponent implements OnInit {
   
   // Pagination
   currentPage = 0;
-  pageSize = 12;
+  pageSize = 12; 
   totalElements = 0;
   totalPages = 0;
 
@@ -43,8 +43,9 @@ export class ProductListComponent implements OnInit {
     });
   }
 
-  loadProducts(): void {
+  loadProducts(page: number = 0): void {
     this.isLoading = true;
+    this.currentPage = page;
     console.log('Loading products, page:', this.currentPage, 'pageSize:', this.pageSize);
     
     this.productService.getAllProducts(this.currentPage, this.pageSize).subscribe({
@@ -53,10 +54,10 @@ export class ProductListComponent implements OnInit {
         if (response.success && response.data) {
           console.log('Products loaded:', response.data.content);
           this.allProducts = response.data.content;
-          this.displayedProducts = [...this.allProducts]; // Simply copy all products
+          this.displayedProducts = [...this.allProducts];
           this.totalElements = response.data.totalElements;
           this.totalPages = response.data.totalPages;
-          
+
           // Debug: Log detailed product structure
           if (this.allProducts.length > 0) {
             console.log('First product structure:', JSON.stringify(this.allProducts[0], null, 2));
@@ -76,6 +77,70 @@ export class ProductListComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  nextPage(): void { 
+    if (this.currentPage < this.totalPages - 1) {
+      this.loadProducts(this.currentPage + 1); 
+    }
+  }
+  
+  previousPage(): void { 
+    if (this.currentPage > 0) {
+      this.loadProducts(this.currentPage - 1); 
+    }
+  }
+  
+  goToPage(page: number): void { 
+    if (page >= 0 && page < this.totalPages) {
+      this.loadProducts(page); 
+    }
+  }
+
+  // Helper method to get page numbers to display
+  getPageNumbers(): number[] {
+    const maxPagesToShow = 5;
+    const pages: number[] = [];
+    
+    if (this.totalPages <= maxPagesToShow) {
+      // Show all pages if total is small
+      for (let i = 0; i < this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Show pages with ellipsis
+      const halfMax = Math.floor(maxPagesToShow / 2);
+      let startPage = Math.max(0, this.currentPage - halfMax);
+      let endPage = Math.min(this.totalPages - 1, startPage + maxPagesToShow - 1);
+      
+      // Adjust startPage if we're near the end
+      if (endPage - startPage < maxPagesToShow - 1) {
+        startPage = Math.max(0, endPage - maxPagesToShow + 1);
+      }
+      
+      // Always show first page
+      if (startPage > 0) {
+        pages.push(0);
+        if (startPage > 1) {
+          pages.push(-1); // -1 represents ellipsis
+        }
+      }
+      
+      // Show middle pages
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      
+      // Always show last page
+      if (endPage < this.totalPages - 1) {
+        if (endPage < this.totalPages - 2) {
+          pages.push(-1); // -1 represents ellipsis
+        }
+        pages.push(this.totalPages - 1);
+      }
+    }
+    
+    return pages;
   }
 
   toggleViewMode(): void {
@@ -113,6 +178,7 @@ export class ProductListComponent implements OnInit {
     if (!name.trim()) {
       // Nếu rỗng → load lại toàn bộ danh sách mặc định
       this.isSearching = false;
+      this.currentPage = 0; // Reset về trang đầu
       this.loadProducts();
       return;
     }
@@ -126,15 +192,20 @@ export class ProductListComponent implements OnInit {
         if (res.success && res.data) {
           this.displayedProducts = res.data;
           this.totalElements = res.data.length;
-          this.totalPages = 1;
+          this.totalPages = 0; // Không có phân trang khi search
+          this.currentPage = 0;
         } else {
           this.displayedProducts = [];
+          this.totalElements = 0;
+          this.totalPages = 0;
         }
         this.isLoading = false;
       },
       error: (err) => {
         console.error('Search error:', err);
         this.displayedProducts = [];
+        this.totalElements = 0;
+        this.totalPages = 0;
         this.isLoading = false;
       }
     });
