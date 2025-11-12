@@ -2,6 +2,7 @@ package com.training.demo.repository;
 
 import com.training.demo.dto.response.User.ExportUserResponse;
 import com.training.demo.entity.User;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -55,8 +56,10 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     FROM User u
     JOIN u.userHasRoles uhr
     JOIN uhr.role r
+    WHERE (:username IS NULL OR :username = ''
+    OR LOWER(u.username) LIKE LOWER(CONCAT('%', :username, '%')))
     """)
-    List<ExportUserResponse> findAllWithRoles();
+    List<ExportUserResponse> findAllWithRoles(@Param("username") String username);
 
     /**
      * Đếm tổng số người dùng trong hệ thống

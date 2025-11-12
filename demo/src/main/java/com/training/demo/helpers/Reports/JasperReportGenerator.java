@@ -139,7 +139,7 @@ public class JasperReportGenerator {
                 {"price", "java.lang.Double"},
                 {"quantity", "java.lang.Integer"},
                 {"categoryName", "java.lang.String"},
-                {"productImageUrl", "java.lang.String"}
+                {"createdAt", "java.time.LocalDateTime"}
         };
         for (String[] f : fields) {
             JRDesignField field = new JRDesignField();
@@ -172,13 +172,13 @@ public class JasperReportGenerator {
         columnHeader.setHeight(25);
 
         int x = 0;
-        columnHeader.addElement(createHeaderCell("Image", x, 60)); x += 60;
-        columnHeader.addElement(createHeaderCell("ID", x, 35)); x += 35;
-        columnHeader.addElement(createHeaderCell("Name", x, 100)); x += 100;
-        columnHeader.addElement(createHeaderCell("Description", x, 120)); x += 120;
-        columnHeader.addElement(createHeaderCell("Price", x, 70)); x += 70;
-        columnHeader.addElement(createHeaderCell("Qty", x, 50)); x += 50;
-        columnHeader.addElement(createHeaderCell("Category", x, 120));
+        columnHeader.addElement(createHeaderCell("ID", x, 35));           x += 35;
+        columnHeader.addElement(createHeaderCell("Name", x, 95));         x += 95;
+        columnHeader.addElement(createHeaderCell("Description", x, 130)); x += 130;
+        columnHeader.addElement(createHeaderCell("Price", x, 65));        x += 65;
+        columnHeader.addElement(createHeaderCell("Qty", x, 50));          x += 50;
+        columnHeader.addElement(createHeaderCell("Category", x, 100));    x += 100;
+        columnHeader.addElement(createHeaderCell("Created At", x, 80));   // x kết thúc = 555
         jasperDesign.setColumnHeader(columnHeader);
 
         // ====== Detail ======
@@ -187,58 +187,51 @@ public class JasperReportGenerator {
 
         int dx = 0;
 
-        // Image
-        JRDesignImage imageElement = new JRDesignImage(jasperDesign);
-        imageElement.setX(dx);
-        imageElement.setY(5);
-        imageElement.setWidth(60);
-        imageElement.setHeight(55);
-        imageElement.setScaleImage(ScaleImageEnum.RETAIN_SHAPE);
-        imageElement.setHorizontalImageAlign(HorizontalImageAlignEnum.CENTER);
-        imageElement.setOnErrorType(OnErrorTypeEnum.BLANK);
-
-        // Sử dụng expression đơn giản hơn - chỉ trả về string URL
-        imageElement.setExpression(new JRDesignExpression("$F{productImageUrl}"));
-
-        imageElement.getLineBox().getPen().setLineWidth(0.5f);
-        imageElement.getLineBox().getPen().setLineColor(new Color(180, 180, 180));
-        detailBand.addElement(imageElement);
-        dx += 60;
-
         // ID
-        detailBand.addElement(createProductDetailCell("($F{id} == null) ? \"—\" : String.valueOf($F{id})", dx, 35, 65));
+        detailBand.addElement(createProductDetailCell(
+                "($F{id} == null) ? \"—\" : String.valueOf($F{id})", dx, 35, 65));
         dx += 35;
 
         // Name
-        detailBand.addElement(createProductDetailCell("($F{name} == null) ? \"—\" : $F{name}", dx, 100, 65));
-        dx += 100;
+        detailBand.addElement(createProductDetailCell(
+                "($F{name} == null) ? \"—\" : $F{name}", dx, 95, 65));
+        dx += 95;
 
         // Description
-        JRDesignTextField descField = createProductDetailCell("($F{description} == null) ? \"—\" : $F{description}", dx, 120, 65);
+        JRDesignTextField descField = createProductDetailCell(
+                "($F{description} == null) ? \"—\" : $F{description}", dx, 130, 65);
         descField.setStretchType(StretchTypeEnum.RELATIVE_TO_TALLEST_OBJECT);
         descField.setFontSize(9f);
         detailBand.addElement(descField);
-        dx += 120;
+        dx += 130;
 
         // Price
         detailBand.addElement(createProductDetailCell(
                 "($F{price} == null) ? \"—\" : String.format(\"$%.2f\", $F{price})",
-                dx, 70, 65
-        ));
-        dx += 70;
+                dx, 65, 65));
+        dx += 65;
 
         // Quantity
         JRDesignTextField qtyField = createProductDetailCell(
                 "($F{quantity} == null) ? \"—\" : String.valueOf($F{quantity})",
-                dx, 50, 65
-        );
+                dx, 50, 65);
         applyConditionalQuantityColor(jasperDesign, qtyField);
         detailBand.addElement(qtyField);
         dx += 50;
 
         // Category
-        detailBand.addElement(createProductDetailCell("($F{categoryName} == null) ? \"—\" : $F{categoryName}", dx, 120, 65));
+        detailBand.addElement(createProductDetailCell(
+                "($F{categoryName} == null) ? \"—\" : $F{categoryName}", dx, 100, 65));
+        dx += 100;
 
+        // Created At (format gọn dd/MM/yyyy HH:mm)
+        JRDesignTextField createdAtField = createProductDetailCell(
+                "($F{createdAt} == null) ? \"—\" : " +
+                        "$F{createdAt}.format(java.time.format.DateTimeFormatter.ofPattern(\"dd/MM/yyyy HH:mm\"))",
+                dx, 80, 65);
+        detailBand.addElement(createdAtField);
+
+        // add band
         ((JRDesignSection) jasperDesign.getDetailSection()).addBand(detailBand);
 
         // ====== Footer ======

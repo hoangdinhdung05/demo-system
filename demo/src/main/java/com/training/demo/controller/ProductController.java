@@ -29,7 +29,7 @@ public class ProductController {
      * @return created product response
      */
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(@ModelAttribute ProductRequest request) {
         return ResponseEntity.ok(BaseResponse.success(productService.createProduct(request)));
     }

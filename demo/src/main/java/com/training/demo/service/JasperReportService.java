@@ -25,10 +25,10 @@ public class JasperReportService {
         this.reportGenerator = new JasperReportGenerator();
     }
 
-    public byte[] generateUserReportPdf() {
+    public byte[] generateUserReportPdf(String username) {
         try {
             log.info("[JasperReportService] Fetching users from database");
-            List<ExportUserResponse> users = userRepository.findAllWithRoles();
+            List<ExportUserResponse> users = userRepository.findAllWithRoles(username);
             log.info("[JasperReportService] {} users fetched", users.size());
 
             log.info("[JasperReportService] Start generating Jasper user report");
@@ -46,10 +46,10 @@ public class JasperReportService {
         }
     }
 
-    public byte[] generateProductReportPdf() {
+    public byte[] generateProductReportPdf(String name) {
         try {
             log.info("[JasperReportService] Fetching products from database");
-            List<ExportProductResponse> products = productRepository.findAllProjectedWithCategory();
+            List<ExportProductResponse> products = productRepository.findAllProjectedWithCategory(name);
             log.info("[JasperReportService] {} products fetched", products.size());
 
             log.info("[JasperReportService] Start generating Jasper product report");

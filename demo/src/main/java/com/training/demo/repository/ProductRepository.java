@@ -3,6 +3,7 @@ package com.training.demo.repository;
 import com.training.demo.dto.response.Product.ExportProductResponse;
 import com.training.demo.entity.Product;
 import com.training.demo.repository.custom.ProductRepositoryCustom;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -41,12 +42,15 @@ public interface ProductRepository extends JpaRepository<Product,Long>, JpaSpeci
            p.price AS price,
            p.quantity AS quantity,
            c.name AS categoryName,
-           p.productImageUrl AS productImageUrl
+           p.createdAt as createdAt
     FROM Product p
     JOIN p.category c
     ON p.category.id = c.id
+    WHERE (:name IS NULL OR :name = ''\s
+    OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))
     """)
-    List<ExportProductResponse> findAllProjectedWithCategory();
+    List<ExportProductResponse> findAllProjectedWithCategory(@Param("name") String name);
+
 
     @EntityGraph(attributePaths = "category")
     Page<Product> findAll(Specification<Product> spec, Pageable pageable);

@@ -1,5 +1,7 @@
 package com.training.demo.dto.response.Product;
 
+import java.time.LocalDateTime;
+
 public interface ExportProductResponse {
     long getId();
     String getName();
@@ -7,5 +9,5 @@ public interface ExportProductResponse {
     double getPrice();
     int getQuantity();
     String getCategoryName();
-    String getProductImageUrl();
+    LocalDateTime getCreatedAt();
 }

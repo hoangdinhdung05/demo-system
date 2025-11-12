@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -23,10 +24,10 @@ public class ReportController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<byte[]> generateUserReport() {
+    public ResponseEntity<byte[]> generateUserReport(@RequestParam (required = false) String username) {
         log.info("[JasperReportController] Request to generate user report");
 
-        byte[] pdfBytes = reportService.generateUserReportPdf();
+        byte[] pdfBytes = reportService.generateUserReportPdf(username);
 
         log.info("[JasperReportController] Returning PDF report users, size: {} bytes", pdfBytes.length);
 
@@ -37,10 +38,10 @@ public class ReportController {
     }
 
     @GetMapping("/products")
-    public ResponseEntity<byte[]> exportProductsPdf() {
+    public ResponseEntity<byte[]> exportProductsPdf(@RequestParam (required = false) String name) {
         log.info("[JasperReportController] Request to generate products report");
 
-        byte[] pdfBytes = reportService.generateProductReportPdf();
+        byte[] pdfBytes = reportService.generateProductReportPdf(name);
 
         log.info("[JasperReportController] Returning PDF report products, size: {} bytes", pdfBytes.length);
 
