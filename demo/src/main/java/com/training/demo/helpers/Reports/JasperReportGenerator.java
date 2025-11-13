@@ -2,18 +2,62 @@ package com.training.demo.helpers.Reports;
 
 import com.training.demo.dto.response.Product.ExportProductResponse;
 import com.training.demo.dto.response.User.ExportUserResponse;
+import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.design.*;
 import net.sf.jasperreports.engine.type.*;
 import java.awt.*;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 
+@Slf4j
 public class JasperReportGenerator {
 
+    private JasperReport userReportTemplate;
+    private JasperReport productReportTemplate;
+
+    /**
+     * Constructor - Compile templates 1 lần khi khởi tạo
+     */
+    public JasperReportGenerator() {
+        try {
+            log.info("[JasperReportGenerator] Compiling User Report Template...");
+            this.userReportTemplate = compileUserReportTemplate();
+            log.info("[JasperReportGenerator] User Report Template compiled successfully");
+
+            log.info("[JasperReportGenerator] Compiling Product Report Template...");
+            this.productReportTemplate = compileProductReportTemplate();
+            log.info("[JasperReportGenerator] Product Report Template compiled successfully");
+        } catch (JRException e) {
+            log.error("[JasperReportGenerator] Failed to compile templates", e);
+            throw new RuntimeException("Failed to initialize JasperReportGenerator", e);
+        }
+    }
+
+    /**
+     * Generate User Report - Chỉ fill data vào template đã compile
+     */
     public JasperPrint generateUserReport(List<ExportUserResponse> users) throws JRException {
+        log.debug("[JasperReportGenerator] Filling user report with {} records", users.size());
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(users);
+        return JasperFillManager.fillReport(userReportTemplate, new HashMap<>(), dataSource);
+    }
+
+    /**
+     * Generate Product Report - Chỉ fill data vào template đã compile
+     */
+    public JasperPrint generateProductReport(List<ExportProductResponse> products) throws JRException {
+        log.debug("[JasperReportGenerator] Filling product report with {} records", products.size());
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(products);
+        return JasperFillManager.fillReport(productReportTemplate, new HashMap<>(), dataSource);
+    }
+
+    // ============================================================
+    // PRIVATE: Compile templates (chỉ chạy 1 lần khi init)
+    // ============================================================
+
+    private JasperReport compileUserReportTemplate() throws JRException {
         JasperDesign jasperDesign = new JasperDesign();
         jasperDesign.setName("user_report");
         jasperDesign.setPageWidth(595);
@@ -114,13 +158,11 @@ public class JasperReportGenerator {
         footerBand.addElement(footerText);
         jasperDesign.setPageFooter(footerBand);
 
-        // ====== Compile & Fill ======
-        JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
-        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(users);
-        return JasperFillManager.fillReport(jasperReport, new HashMap<>(), dataSource);
+        // ====== Compile ONLY (không fill data) ======
+        return JasperCompileManager.compileReport(jasperDesign);
     }
 
-    public JasperPrint generateProductReport(List<ExportProductResponse> products) throws JRException {
+    private JasperReport compileProductReportTemplate() throws JRException {
         JasperDesign jasperDesign = new JasperDesign();
         jasperDesign.setName("product_report");
         jasperDesign.setPageWidth(595);
@@ -252,10 +294,8 @@ public class JasperReportGenerator {
         footerBand.addElement(footerText);
         jasperDesign.setPageFooter(footerBand);
 
-        // ====== Compile & Fill ======
-        JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
-        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(products);
-        return JasperFillManager.fillReport(jasperReport, new HashMap<>(), dataSource);
+        // ====== Compile ONLY (không fill data) ======
+        return JasperCompileManager.compileReport(jasperDesign);
     }
 
     private JRDesignStaticText createHeaderCell(String text, int x, int width) {

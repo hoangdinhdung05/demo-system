@@ -19,10 +19,13 @@ public class JasperReportService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
 
-    public JasperReportService(UserRepository userRepository, ProductRepository productRepository) {
+    public JasperReportService(
+            JasperReportGenerator reportGenerator,
+            UserRepository userRepository,
+            ProductRepository productRepository) {
+        this.reportGenerator = reportGenerator;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
-        this.reportGenerator = new JasperReportGenerator();
     }
 
     public byte[] generateUserReportPdf(String username) {
