@@ -1,15 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 
-interface Order {
-  id: string;
-  orderDate: Date;
-  status: 'pending' | 'confirmed' | 'shipping' | 'delivered' | 'cancelled';
-  totalAmount: number;
-  items: OrderItem[];
-  shippingAddress: string;
-  paymentMethod: string;
-}
-
 interface OrderItem {
   id: string;
   productName: string;
@@ -17,6 +7,16 @@ interface OrderItem {
   quantity: number;
   price: number;
   total: number;
+}
+
+interface Order {
+  id: string;
+  orderDate: Date;
+  status: string;
+  totalAmount: number;
+  shippingAddress: string;
+  paymentMethod: string;
+  items: OrderItem[];
 }
 
 @Component({

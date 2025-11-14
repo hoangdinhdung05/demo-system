@@ -4,12 +4,15 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { UsersComponent } from './users/users.component';
 import { CategoryComponent } from './category/category.component';
 import { ProductComponent } from './product/product.component';
+import { PaymentsComponent } from './payments/payments.component';
 
 const routes: Routes = [
   {path: '', component: DashboardComponent},
   {path: 'users', component: UsersComponent},
   {path: 'categories', component: CategoryComponent},
   {path: 'products', component: ProductComponent},
+  {path: 'orders', loadChildren: () => import('./orders/orders.module').then(m => m.OrdersModule)},
+  {path: 'payments', component: PaymentsComponent},
 ];
 
 @NgModule({
@@ -17,4 +20,5 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class AdminRoutingModule { }
+
  

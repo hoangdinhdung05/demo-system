@@ -19,6 +19,10 @@ import { ClientLayoutComponent } from './client-layout.component';
 import { ProductDetailComponent } from './product-detail/product-detail.component';
 import { AboutComponent } from './about/about.component';
 import { ContactComponent } from './contact/contact.component';
+import { OrderListComponent } from './orders/order-list/order-list.component';
+import { OrderDetailComponent } from './orders/order-detail/order-detail.component';
+import { CheckoutComponent } from './checkout/checkout.component';
+import { CartComponent } from './cart/cart.component';
 
 @NgModule({
   declarations: [
@@ -36,7 +40,11 @@ import { ContactComponent } from './contact/contact.component';
     ClientLayoutComponent,
     ProductDetailComponent,
     AboutComponent,
-    ContactComponent
+    ContactComponent,
+    OrderListComponent,
+    OrderDetailComponent,
+    CheckoutComponent,
+    CartComponent
   ],
   imports: [
     CommonModule,

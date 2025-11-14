@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../../../core/services/products/product.service';
 import { ProductResponse } from '../../../core/models/response/Product/ProductResponse';
+import { CartService } from '../../../core/services/cart/cart.service';
 import { environment } from '../../../../environments/environment';
 import { ToastrService } from 'ngx-toastr';
 
@@ -20,6 +21,7 @@ export class ProductDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private productService: ProductService,
+    private cartService: CartService,
     private toastr: ToastrService
   ) { }
 
@@ -75,17 +77,35 @@ export class ProductDetailComponent implements OnInit {
   addToCart(): void {
     if (!this.product) return;
     
-    // TODO: Implement add to cart functionality
-    this.toastr.success(`Đã thêm ${this.quantity} sản phẩm vào giỏ hàng!`, 'Thành công');
-    console.log('Add to cart:', this.product, 'Quantity:', this.quantity);
+    this.cartService.addToCart({
+      productId: this.product.id,
+      quantity: this.quantity
+    }).subscribe({
+      next: (response) => {
+        this.toastr.success(`Đã thêm ${this.quantity} sản phẩm vào giỏ hàng!`, 'Thành công');
+      },
+      error: (error) => {
+        console.error('Error adding to cart:', error);
+        this.toastr.error('Không thể thêm sản phẩm vào giỏ hàng!', 'Lỗi');
+      }
+    });
   }
 
   buyNow(): void {
     if (!this.product) return;
     
-    // TODO: Implement buy now functionality
-    this.toastr.info('Chức năng mua ngay đang được phát triển!', 'Thông báo');
-    console.log('Buy now:', this.product, 'Quantity:', this.quantity);
+    this.cartService.addToCart({
+      productId: this.product.id,
+      quantity: this.quantity
+    }).subscribe({
+      next: (response) => {
+        this.router.navigate(['/checkout']);
+      },
+      error: (error) => {
+        console.error('Error adding to cart:', error);
+        this.toastr.error('Không thể thêm sản phẩm vào giỏ hàng!', 'Lỗi');
+      }
+    });
   }
 
   isInStock(): boolean {

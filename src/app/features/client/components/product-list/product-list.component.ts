@@ -1,8 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../../../../core/services/products/product.service';
+import { CartService } from '../../../../core/services/cart/cart.service';
+import { AuthService } from '../../../../core/auth.service';
 import { ProductResponse } from '../../../../core/models/response/Product/ProductResponse';
+import { AddToCartRequest } from '../../../../core/models/request/Cart/AddToCartRequest';
 import { environment } from '../../../../../environments/environment';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-product-list',
@@ -28,6 +32,9 @@ export class ProductListComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
+    private cartService: CartService,
+    private authService: AuthService,
+    private toastr: ToastrService,
     private route: ActivatedRoute,
     private router: Router
   ) { }
@@ -149,8 +156,39 @@ export class ProductListComponent implements OnInit {
   }
 
   addToCart(product: ProductResponse): void {
-    // TODO: Implement add to cart functionality
-    console.log('Added to cart:', product);
+    // Check if user is logged in
+    if (!this.authService.isAuthenticated()) {
+      this.toastr.warning('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng', 'Yêu cầu đăng nhập');
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+
+    // Check if product is in stock
+    if (!this.isProductInStock(product)) {
+      this.toastr.error('Sản phẩm hiện đang hết hàng', 'Không thể thêm vào giỏ');
+      return;
+    }
+
+    const request: AddToCartRequest = {
+      productId: product.id,
+      quantity: 1
+    };
+
+    this.cartService.addToCart(request).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastr.success(`Đã thêm "${product.name}" vào giỏ hàng`, 'Thành công');
+          // Cart will be automatically updated via cart$ observable in CartService
+        } else {
+          this.toastr.error('Không thể thêm sản phẩm vào giỏ hàng', 'Lỗi');
+        }
+      },
+      error: (error) => {
+        console.error('Error adding to cart:', error);
+        const errorMessage = error.error?.message || 'Không thể thêm sản phẩm vào giỏ hàng';
+        this.toastr.error(errorMessage, 'Lỗi');
+      }
+    });
   }
 
   viewProductDetails(product: ProductResponse): void {

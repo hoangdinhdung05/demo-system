@@ -6,9 +6,12 @@ import { AuthService } from '../../../../core/auth.service';
 import { UserService } from '../../../../core/services/users/user.service';
 import { CategoryService } from '../../../../core/services/categories/category.service';
 import { ProductService } from '../../../../core/services/products/product.service';
+import { CartService } from '../../../../core/services/cart/cart.service';
 import { UserDetailsResponse } from '../../../../core/models/response/User/UserDetailsRespomse';
 import { CategoryResponse } from '../../../../core/models/response/Category/CategoryResponse';
 import { ProductResponse } from '../../../../core/models/response/Product/ProductResponse';
+import { CartResponse } from '../../../../core/models/response/Cart/CartResponse';
+import { CartItemResponse } from '../../../../core/models/response/Cart/CartItemResponse';
 import { environment } from '../../../../../environments/environment';
 
 @Component({
@@ -35,11 +38,18 @@ export class ClientHeaderComponent implements OnInit {
   isSearching = false;
   showSuggestions = false;
 
+  // Cart functionality
+  cartCount = 0;
+  cart: CartResponse | null = null;
+  isCartDropdownOpen = false;
+  isLoadingCart = false;
+
   constructor(
     private authService: AuthService,
     private userService: UserService,
     private categoryService: CategoryService,
     private productService: ProductService,
+    private cartService: CartService,
     private router: Router
   ) {}
 
@@ -47,6 +57,42 @@ export class ClientHeaderComponent implements OnInit {
     this.checkAuthStatus();
     this.loadCategories();
     this.setupSearchAutocomplete();
+    this.subscribeToCart();
+  }
+
+  subscribeToCart(): void {
+    // Subscribe to cart changes from CartService
+    this.cartService.cart$.subscribe({
+      next: (cart: CartResponse | null) => {
+        this.cart = cart;
+        this.cartCount = cart?.totalItems || 0;
+      },
+      error: (error: any) => {
+        console.error('Error subscribing to cart:', error);
+      }
+    });
+
+    // Load initial cart data if user is logged in
+    if (this.isLoggedIn) {
+      this.loadCart();
+    }
+  }
+
+  loadCart(): void {
+    this.isLoadingCart = true;
+    this.cartService.getCart().subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.cart = response.data;
+          this.cartCount = this.cart.totalItems;
+        }
+        this.isLoadingCart = false;
+      },
+      error: (error) => {
+        console.error('Error loading cart:', error);
+        this.isLoadingCart = false;
+      }
+    });
   }
 
   setupSearchAutocomplete(): void {
@@ -99,6 +145,11 @@ export class ClientHeaderComponent implements OnInit {
     // Check if click is outside search suggestions
     if (this.showSuggestions && !target.closest('.search-section')) {
       this.showSuggestions = false;
+    }
+
+    // Check if click is outside cart dropdown
+    if (this.isCartDropdownOpen && !target.closest('.cart-section')) {
+      this.isCartDropdownOpen = false;
     }
   }
 
@@ -317,5 +368,38 @@ export class ClientHeaderComponent implements OnInit {
       case 'logout':         this.logout(); break;
     }
     this.isMenuOpen = false;
+  }
+
+  // Cart methods
+  toggleCartDropdown(): void {
+    if (!this.isLoggedIn) {
+      this.navigateToLogin();
+      return;
+    }
+    this.isCartDropdownOpen = !this.isCartDropdownOpen;
+  }
+
+  navigateToCart(): void {
+    this.router.navigate(['/cart']);
+    this.isCartDropdownOpen = false;
+  }
+
+  getCartItemImageUrl(item: CartItemResponse): string {
+    if (!item.productImageUrl) {
+      return 'https://via.placeholder.com/60x60/007bff/ffffff?text=No+Image';
+    }
+    return `${environment.assetBase}${item.productImageUrl.startsWith('/') ? '' : '/'}${item.productImageUrl}`;
+  }
+
+  formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount);
+  }
+
+  getCartTotal(): number {
+    if (!this.cart || !this.cart.items) return 0;
+    return this.cart.items.reduce((total, item) => total + item.subtotal, 0);
   }
 }

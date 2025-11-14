@@ -1,0 +1,232 @@
+<div class="payments-management">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h2><i class="fas fa-credit-card"></i> Quản lý thanh toán</h2>
+    <p>Theo dõi và quản lý các giao dịch thanh toán</p>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="filters-section">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="form-group">
+          <label>Số bản ghi mỗi trang:</label>
+          <select class="form-control" [(ngModel)]="pageSize" (change)="onPageSizeChange(pageSize)">
+            <option [value]="5">5</option>
+            <option [value]="10">10</option>
+            <option [value]="20">20</option>
+            <option [value]="50">50</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <i class="fas fa-spinner fa-spin fa-3x"></i>
+    <p>Đang tải dữ liệu...</p>
+  </div>
+
+  <!-- Payments Table -->
+  <div *ngIf="!isLoading" class="table-container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th (click)="onSort('id')" class="sortable">
+            ID
+            <i class="fas fa-sort" *ngIf="sortBy !== 'id'"></i>
+            <i class="fas fa-sort-up" *ngIf="sortBy === 'id' && sortDirection === 'ASC'"></i>
+            <i class="fas fa-sort-down" *ngIf="sortBy === 'id' && sortDirection === 'DESC'"></i>
+          </th>
+          <th>Mã GD</th>
+          <th (click)="onSort('orderId')" class="sortable">
+            Đơn hàng
+            <i class="fas fa-sort" *ngIf="sortBy !== 'orderId'"></i>
+            <i class="fas fa-sort-up" *ngIf="sortBy === 'orderId' && sortDirection === 'ASC'"></i>
+            <i class="fas fa-sort-down" *ngIf="sortBy === 'orderId' && sortDirection === 'DESC'"></i>
+          </th>
+          <th (click)="onSort('amount')" class="sortable">
+            Số tiền
+            <i class="fas fa-sort" *ngIf="sortBy !== 'amount'"></i>
+            <i class="fas fa-sort-up" *ngIf="sortBy === 'amount' && sortDirection === 'ASC'"></i>
+            <i class="fas fa-sort-down" *ngIf="sortBy === 'amount' && sortDirection === 'DESC'"></i>
+          </th>
+          <th>Phương thức</th>
+          <th (click)="onSort('status')" class="sortable">
+            Trạng thái
+            <i class="fas fa-sort" *ngIf="sortBy !== 'status'"></i>
+            <i class="fas fa-sort-up" *ngIf="sortBy === 'status' && sortDirection === 'ASC'"></i>
+            <i class="fas fa-sort-down" *ngIf="sortBy === 'status' && sortDirection === 'DESC'"></i>
+          </th>
+          <th (click)="onSort('createdAt')" class="sortable">
+            Ngày tạo
+            <i class="fas fa-sort" *ngIf="sortBy !== 'createdAt'"></i>
+            <i class="fas fa-sort-up" *ngIf="sortBy === 'createdAt' && sortDirection === 'ASC'"></i>
+            <i class="fas fa-sort-down" *ngIf="sortBy === 'createdAt' && sortDirection === 'DESC'"></i>
+          </th>
+          <th class="text-center">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Empty State -->
+        <tr *ngIf="payments.length === 0">
+          <td colspan="8" class="text-center py-5">
+            <i class="fas fa-money-bill-wave fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Chưa có dữ liệu thanh toán</p>
+          </td>
+        </tr>
+
+        <!-- Payment Rows -->
+        <tr *ngFor="let payment of payments">
+          <td><strong>#{{ payment.id }}</strong></td>
+          <td>
+            <span class="transaction-id">{{ payment.transactionId || 'N/A' }}</span>
+          </td>
+          <td>
+            <a href="javascript:void(0)" class="order-link">
+              #{{ payment.orderId }}
+            </a>
+          </td>
+          <td>
+            <strong class="amount">{{ formatCurrency(payment.amount) }}</strong>
+          </td>
+          <td>
+            <span class="payment-method">{{ payment.paymentMethod }}</span>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="getStatusBadgeClass(payment.status)">
+              {{ getStatusLabel(payment.status) }}
+            </span>
+          </td>
+          <td>{{ formatDate(payment.createdAt) }}</td>
+          <td class="text-center">
+            <button 
+              class="btn btn-sm btn-info" 
+              (click)="viewPaymentDetails(payment)"
+              title="Xem chi tiết"
+            >
+              <i class="fas fa-eye"></i>
+            </button>
+            <button 
+              *ngIf="payment.status === 'PENDING'" 
+              class="btn btn-sm btn-success ml-2"
+              (click)="confirmPayment(payment)"
+              title="Xác nhận thanh toán"
+            >
+              <i class="fas fa-check"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!isLoading && totalElements > 0" class="pagination-container">
+    <div class="pagination-info">
+      Hiển thị {{ currentPage * pageSize + 1 }} - {{ Math.min((currentPage + 1) * pageSize, totalElements) }} 
+      trong tổng số {{ totalElements }} bản ghi
+    </div>
+    <nav>
+      <ul class="pagination">
+        <li class="page-item" [class.disabled]="currentPage === 0">
+          <a class="page-link" (click)="onPageChange(0)" href="javascript:void(0)">
+            <i class="fas fa-angle-double-left"></i>
+          </a>
+        </li>
+        <li class="page-item" [class.disabled]="currentPage === 0">
+          <a class="page-link" (click)="onPageChange(currentPage - 1)" href="javascript:void(0)">
+            <i class="fas fa-angle-left"></i>
+          </a>
+        </li>
+        <li 
+          class="page-item" 
+          *ngFor="let page of [].constructor(totalPages); let i = index"
+          [class.active]="i === currentPage"
+          [hidden]="i < currentPage - 2 || i > currentPage + 2"
+        >
+          <a class="page-link" (click)="onPageChange(i)" href="javascript:void(0)">
+            {{ i + 1 }}
+          </a>
+        </li>
+        <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+          <a class="page-link" (click)="onPageChange(currentPage + 1)" href="javascript:void(0)">
+            <i class="fas fa-angle-right"></i>
+          </a>
+        </li>
+        <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+          <a class="page-link" (click)="onPageChange(totalPages - 1)" href="javascript:void(0)">
+            <i class="fas fa-angle-double-right"></i>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Payment Detail Modal -->
+  <div class="modal" [class.show]="showDetailModal" *ngIf="selectedPayment">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-receipt"></i> Chi tiết thanh toán #{{ selectedPayment.id }}
+          </h5>
+          <button type="button" class="close" (click)="closeDetailModal()">
+            <span>&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="info-group">
+                <label>Mã giao dịch:</label>
+                <p>{{ selectedPayment.transactionId || 'N/A' }}</p>
+              </div>
+              <div class="info-group">
+                <label>Đơn hàng:</label>
+                <p>#{{ selectedPayment.orderId }}</p>
+              </div>
+              <div class="info-group">
+                <label>Số tiền:</label>
+                <p class="amount">{{ formatCurrency(selectedPayment.amount) }}</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-group">
+                <label>Phương thức:</label>
+                <p>{{ selectedPayment.paymentMethod }}</p>
+              </div>
+              <div class="info-group">
+                <label>Trạng thái:</label>
+                <p>
+                  <span class="badge" [ngClass]="getStatusBadgeClass(selectedPayment.status)">
+                    {{ getStatusLabel(selectedPayment.status) }}
+                  </span>
+                </p>
+              </div>
+              <div class="info-group">
+                <label>Ngày tạo:</label>
+                <p>{{ formatDate(selectedPayment.createdAt) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeDetailModal()">
+            Đóng
+          </button>
+          <button 
+            *ngIf="selectedPayment.status === 'PENDING'" 
+            type="button" 
+            class="btn btn-success"
+            (click)="confirmPayment(selectedPayment); closeDetailModal()"
+          >
+            <i class="fas fa-check"></i> Xác nhận thanh toán
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop" [class.show]="showDetailModal" (click)="closeDetailModal()"></div>
+</div>
