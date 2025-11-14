@@ -188,6 +188,14 @@ export class ClientHeaderComponent implements OnInit {
     this.router.navigate(['/category', categoryId]);
   }
 
+  navigateToAbout(): void {
+    this.router.navigate(['/about']);
+  }
+
+  navigateToContact(): void {
+    this.router.navigate(['/contact']);
+  }
+
   logout(): void {
     this.authService.logout();
     this.isLoggedIn = false;

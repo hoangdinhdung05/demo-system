@@ -5,6 +5,8 @@ import { ProductService } from 'src/app/core/services/products/product.service';
 import { CategoryService } from 'src/app/core/services/categories/category.service';
 import { UploadService } from 'src/app/core/services/upload/upload.service';
 import { environment } from 'src/environments/environment';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 declare var bootstrap: any;
 
@@ -20,7 +22,7 @@ export class ProductComponent implements OnInit {
   totalPages = 0;
   totalElements = 0;
   currentPage = 0;
-  pageSize = 5;
+  pageSize = 10;
   loading = false;
 
   @ViewChild('createProductModal') createProductModal!: ElementRef;
@@ -41,7 +43,11 @@ export class ProductComponent implements OnInit {
   searchText = '';
   imageFile?: File;
   imagePreview?: string; // Thêm để preview ảnh
+  editImageFile?: File; // File ảnh mới cho edit
+  editImagePreview?: string; // Preview ảnh mới cho edit
   categoryOptions: any[] = [];
+  
+  private searchSubject = new Subject<string>();
 
   constructor(
     private productService: ProductService, 
@@ -74,6 +80,14 @@ export class ProductComponent implements OnInit {
 
     this.loadProducts(this.currentPage);
     this.loadCategoryOptions();
+    
+    // Setup debounced search
+    this.searchSubject.pipe(
+      debounceTime(400), // Chờ 400ms sau khi người dùng ngừng gõ
+      distinctUntilChanged() // Chỉ gọi API khi giá trị thay đổi
+    ).subscribe(searchText => {
+      this.performSearch(searchText);
+    });
   }
 
   loadCategoryOptions() {
@@ -123,22 +137,126 @@ export class ProductComponent implements OnInit {
     this.loadProducts(page); 
   }
 
+  getPageNumbers(): number[] {
+    const maxPagesToShow = 5;
+    const pages: number[] = [];
+    
+    if (this.totalPages <= maxPagesToShow) {
+      // Nếu tổng số trang <= 5, hiển thị tất cả
+      for (let i = 0; i < this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Luôn hiển thị trang đầu
+      pages.push(0);
+      
+      let startPage = Math.max(1, this.currentPage - 1);
+      let endPage = Math.min(this.totalPages - 2, this.currentPage + 1);
+      
+      // Điều chỉnh nếu gần đầu hoặc cuối
+      if (this.currentPage <= 2) {
+        endPage = Math.min(3, this.totalPages - 2);
+      }
+      if (this.currentPage >= this.totalPages - 3) {
+        startPage = Math.max(1, this.totalPages - 4);
+      }
+      
+      // Thêm ellipsis nếu cần
+      if (startPage > 1) {
+        pages.push(-1); // -1 represents ellipsis
+      }
+      
+      // Thêm các trang ở giữa
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      
+      // Thêm ellipsis nếu cần
+      if (endPage < this.totalPages - 2) {
+        pages.push(-1);
+      }
+      
+      // Luôn hiển thị trang cuối
+      pages.push(this.totalPages - 1);
+    }
+    
+    return pages;
+  }
+
   filterProducts() {
-    const text = this.searchText.toLowerCase();
-    this.filteredProducts = this.products.filter(p =>
-      p.name?.toLowerCase().includes(text) ||
-      (p.description?.toLowerCase().includes(text))
-    );
+    this.searchSubject.next(this.searchText);
+  }
+
+  private performSearch(text: string) {
+    const searchText = text.trim();
+    
+    // Nếu không có text, load lại danh sách phân trang
+    if (!searchText) {
+      this.loadProducts(this.currentPage);
+      return;
+    }
+    
+    // Gọi API search theo tên
+    this.loading = true;
+    this.productService.searchByName(searchText).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.filteredProducts = response.data;
+          
+          // Reset pagination vì search không có phân trang
+          this.totalPages = this.filteredProducts.length > 0 ? 1 : 0;
+          this.totalElements = this.filteredProducts.length;
+          this.currentPage = 0;
+          
+          if (this.filteredProducts.length > 0) {
+            this.toastr.info(`Tìm thấy ${this.filteredProducts.length} sản phẩm`, 'Kết quả');
+          } else {
+            this.toastr.warning('Không tìm thấy sản phẩm nào!', 'Thông báo');
+          }
+        } else {
+          this.filteredProducts = [];
+          this.totalPages = 0;
+          this.totalElements = 0;
+          this.currentPage = 0;
+          this.toastr.warning('Không tìm thấy sản phẩm nào!', 'Thông báo');
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Search error:', err);
+        this.toastr.error('Có lỗi xảy ra khi tìm kiếm!', 'Lỗi');
+        this.filteredProducts = [];
+        this.totalPages = 0;
+        this.totalElements = 0;
+        this.currentPage = 0;
+        this.loading = false;
+      }
+    });
+  }
+
+  resetSearch() {
+    this.searchText = '';
+    this.loadProducts(this.currentPage);
   }
 
   exportProductReport() {
     this.loading = true;
-    this.productService.exportProductReport().subscribe({
+    
+    // Lấy tên sản phẩm từ ô tìm kiếm (nếu có)
+    const productName = this.searchText.trim() || undefined;
+    
+    this.productService.exportProductReport(productName).subscribe({
       next: (blob) => {
         const file = new Blob([blob], { type: 'application/pdf' });
         const fileURL = URL.createObjectURL(file);
         window.open(fileURL, '_blank');
-        this.toastr.success('Xuất báo cáo PDF thành công!', 'Thành công');
+        
+        if (productName) {
+          this.toastr.success(`Xuất báo cáo PDF cho sản phẩm "${productName}" thành công!`, 'Thành công');
+        } else {
+          this.toastr.success('Xuất báo cáo PDF tất cả sản phẩm thành công!', 'Thành công');
+        }
+        
         this.loading = false;
       },
       error: (err) => {
@@ -182,6 +300,33 @@ export class ProductComponent implements OnInit {
 
     const reader = new FileReader();
     reader.onload = (e: any) => this.imagePreview = e.target.result;
+    reader.readAsDataURL(file);
+  }
+
+  onEditImageSelected(event: any) {
+    const file: File = event.target.files?.[0];
+    if (!file) { 
+      this.editImageFile = undefined; 
+      this.editImagePreview = undefined; 
+      return; 
+    }
+
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      this.toastr.error('Chỉ chấp nhận file ảnh (JPG, PNG, WEBP)!', 'Lỗi');
+      event.target.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      this.toastr.error('Kích thước file không được vượt quá 5MB!', 'Lỗi');
+      event.target.value = '';
+      return;
+    }
+
+    this.editImageFile = file;
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => this.editImagePreview = e.target.result;
     reader.readAsDataURL(file);
   }
 
@@ -250,15 +395,36 @@ export class ProductComponent implements OnInit {
   // === EDIT PRODUCT ===
   openEditModal(product: any) {
     this.selectedProduct = product;
+    
+    // Debug log để kiểm tra cấu trúc dữ liệu
+    console.log('Opening edit modal for product:', product);
+    console.log('Category ID:', product.category?.id);
+    console.log('Available category options:', this.categoryOptions);
+    
+    // Đảm bảo categoryId được set đúng
+    const categoryId = product.category?.id || product.categoryId || null;
+    
     this.editProductForm.patchValue({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      categoryId: product.categoryId
+      name: product.name || '',
+      description: product.description || '',
+      price: product.price || 0,
+      quantity: product.quantity || 0,
+      categoryId: categoryId
     });
 
-    this.editModalInstance = new bootstrap.Modal(this.editProductModal.nativeElement);
-    this.editModalInstance.show();
+    // Log giá trị sau khi patch
+    console.log('Form values after patch:', this.editProductForm.value);
+    console.log('Selected categoryId:', categoryId);
+
+    // Reset edit image preview
+    this.editImageFile = undefined;
+    this.editImagePreview = undefined;
+
+    // Mở modal với một chút delay để đảm bảo form đã được patch xong
+    setTimeout(() => {
+      this.editModalInstance = new bootstrap.Modal(this.editProductModal.nativeElement);
+      this.editModalInstance.show();
+    }, 50);
   }
 
   closeEditModal() {
@@ -268,16 +434,48 @@ export class ProductComponent implements OnInit {
   submitEditProduct() {
     if (this.editProductForm.invalid || !this.selectedProduct) return;
 
-    const request = this.editProductForm.value;
+    this.loading = true;
+
+    // Nếu có chọn ảnh mới, upload ảnh trước
+    if (this.editImageFile) {
+      this.toastr.info('Đang upload ảnh mới...', 'Xử lý');
+      this.uploadService.uploadProductImage(this.editImageFile).subscribe({
+        next: uploadRes => {
+          console.log('Upload new image success:', uploadRes);
+          
+          // Cập nhật product với imageUrl mới
+          const request = {
+            ...this.editProductForm.value,
+            imageUrl: uploadRes.publicUrl
+          };
+          
+          this.updateProductData(request);
+        },
+        error: err => {
+          console.error('Upload image error:', err);
+          this.toastr.error(err.error?.message || 'Có lỗi xảy ra khi upload ảnh!', 'Lỗi');
+          this.loading = false;
+        }
+      });
+    } else {
+      // Không có ảnh mới, chỉ cập nhật thông tin
+      const request = this.editProductForm.value;
+      this.updateProductData(request);
+    }
+  }
+
+  private updateProductData(request: any) {
     this.productService.updateProduct(this.selectedProduct.id, request).subscribe({
       next: res => {
         this.toastr.success('Cập nhật sản phẩm thành công!', 'Thành công');
         this.closeEditModal();
         this.loadProducts(this.currentPage);
+        this.loading = false;
       },
       error: err => {
         console.error('Update error:', err);
         this.toastr.error(err.error?.message || 'Có lỗi xảy ra khi cập nhật!', 'Lỗi');
+        this.loading = false;
       }
     });
   }

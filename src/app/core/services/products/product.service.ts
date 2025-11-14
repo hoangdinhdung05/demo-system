@@ -48,8 +48,14 @@ export class ProductService {
     return this.http.patch<BaseResponse<any>>(`${this.apiUrl}/${id}`, request);
   }
 
-  exportProductReport(): Observable<Blob> {
+  exportProductReport(name?: string): Observable<Blob> {
+    let params = new HttpParams();
+    if (name && name.trim()) {
+      params = params.set('name', name.trim());
+    }
+    
     return this.http.get(`${environment.apiUrl}/reports/products`, {
+      params: params,
       responseType: 'blob'
     });
   }

@@ -48,8 +48,14 @@ export class UserService {
     return this.http.delete<BaseResponse<any>>(`${this.apiUrl}/${id}`);
   }
 
-  exportUserReport(): Observable<Blob> {
+  exportUserReport(username?: string): Observable<Blob> {
+    let params = new HttpParams();
+    if (username && username.trim()) {
+      params = params.set('username', username.trim());
+    }
+    
     return this.http.get(`${environment.apiUrl}/reports/users`, {
+      params: params,
       responseType: 'blob'
     });
   }

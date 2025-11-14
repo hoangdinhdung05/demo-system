@@ -3,8 +3,8 @@
     <h2 class="mb-4">Quản lý sản phẩm</h2>
     <!-- Thanh tìm kiếm và nút tạo -->
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-      <div class="flex-grow-1" style="max-width: 250px;">
-        <input type="text" class="form-control" placeholder="Tìm kiếm sản phẩm..."
+      <div class="flex-grow-1" style="max-width: 300px;">
+        <input type="text" class="form-control" placeholder="Tìm kiếm theo tên sản phẩm..."
               [(ngModel)]="searchText" (input)="filterProducts()">
       </div>
 
@@ -75,16 +75,38 @@
         <div class="text-muted small">
           Trang {{ currentPage + 1 }} / {{ totalPages }} ({{ totalElements }} sản phẩm)
         </div>
-        <nav>
+        <nav *ngIf="totalPages > 0">
           <ul class="pagination mb-0">
+            <!-- First Page -->
             <li class="page-item" [class.disabled]="currentPage === 0">
-              <button class="page-link" (click)="previousPage()">&laquo;</button>
+              <button class="page-link" (click)="goToPage(0)" title="Trang đầu">&laquo;&laquo;</button>
             </li>
-            <li class="page-item" *ngFor="let page of [].constructor(totalPages); let i = index" [class.active]="currentPage === i">
-              <button class="page-link" (click)="goToPage(i)">{{ i + 1 }}</button>
+            
+            <!-- Previous -->
+            <li class="page-item" [class.disabled]="currentPage === 0">
+              <button class="page-link" (click)="previousPage()">&lsaquo;</button>
             </li>
+            
+            <!-- Page Numbers -->
+            <li class="page-item" *ngFor="let page of getPageNumbers()" 
+                [class.active]="currentPage === page"
+                [class.disabled]="page === -1">
+              <button class="page-link" 
+                      *ngIf="page !== -1" 
+                      (click)="goToPage(page)">
+                {{ page + 1 }}
+              </button>
+              <span class="page-link" *ngIf="page === -1">...</span>
+            </li>
+            
+            <!-- Next -->
             <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
-              <button class="page-link" (click)="nextPage()">&raquo;</button>
+              <button class="page-link" (click)="nextPage()">&rsaquo;</button>
+            </li>
+            
+            <!-- Last Page -->
+            <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+              <button class="page-link" (click)="goToPage(totalPages - 1)" title="Trang cuối">&raquo;&raquo;</button>
             </li>
           </ul>
         </nav>
@@ -179,10 +201,12 @@
                 <label class="form-label">Giá</label>
                 <input type="number" formControlName="price" class="form-control" />
               </div>
+              
               <div class="mb-3">
                 <label class="form-label">Số lượng</label>
                 <input type="number" formControlName="quantity" class="form-control" />
               </div>
+              
               <div class="mb-3">
                 <label class="form-label">Danh mục</label>
                 <select class="form-select" formControlName="categoryId">
@@ -190,11 +214,39 @@
                   <option *ngFor="let c of categoryOptions" [ngValue]="c.id">{{ c.name }}</option>
                 </select>
               </div>
+
+              <div class="mb-3">
+                <label class="form-label">Ảnh sản phẩm</label>
+                
+                <!-- Hiển thị ảnh hiện tại -->
+                <div class="mb-2" *ngIf="selectedProduct && !editImagePreview">
+                  <p class="text-muted small mb-1">Ảnh hiện tại:</p>
+                  <img [src]="imageUrl(selectedProduct)" [alt]="selectedProduct.name" 
+                       class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                </div>
+                
+                <!-- Preview ảnh mới nếu có chọn -->
+                <div class="mb-2" *ngIf="editImagePreview">
+                  <p class="text-muted small mb-1">Ảnh mới:</p>
+                  <img [src]="editImagePreview" alt="Preview" 
+                       class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                  <p class="text-muted small mt-1">{{ editImageFile?.name }} ({{ (editImageFile?.size || 0) / 1024 | number:'1.0-2' }} KB)</p>
+                </div>
+                
+                <!-- Input chọn ảnh mới -->
+                <input type="file" class="form-control" 
+                       (change)="onEditImageSelected($event)" 
+                       accept="image/jpeg,image/jpg,image/png,image/webp">
+                <small class="text-muted">Chọn ảnh mới nếu muốn thay đổi (tùy chọn)</small>
+              </div>
             </div>
 
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Đóng</button>
-              <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+              <button type="button" class="btn btn-secondary" (click)="closeEditModal()" [disabled]="loading">Đóng</button>
+              <button type="submit" class="btn btn-primary" [disabled]="editProductForm.invalid || loading">
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                {{ loading ? 'Đang xử lý...' : 'Lưu thay đổi' }}
+              </button>
             </div>
           </form>
         </div>
@@ -208,13 +260,62 @@
         <div class="modal-content">
           <div class="modal-header bg-info text-white">
             <h5 class="modal-title" id="detailsProductModalLabel">Thông tin chi tiết sản phẩm</h5>
-            <button type="button" class="btn-close" (click)="closeDetailsModal()" aria-label="Close"></button>
+            <button type="button" class="btn-close btn-close-white" (click)="closeDetailsModal()" aria-label="Close"></button>
           </div>
           <div class="modal-body" *ngIf="selectedProductDetails">
-            <p><strong>ID:</strong> {{ selectedProductDetails.id }}</p>
-            <p><strong>Tên:</strong> {{ selectedProductDetails.name }}</p>
-            <p><strong>Mô tả:</strong> {{ selectedProductDetails.description }}</p>
-            <p><strong>Giá:</strong> {{ selectedProductDetails.price | currency }}</p>
+            <div class="row">
+              <!-- Cột trái: Ảnh sản phẩm -->
+              <div class="col-md-5 text-center mb-3">
+                <img [src]="imageUrl(selectedProductDetails)" 
+                     [alt]="selectedProductDetails.name" 
+                     class="img-fluid rounded shadow"
+                     style="max-height: 300px; object-fit: cover;">
+              </div>
+              
+              <!-- Cột phải: Thông tin chi tiết -->
+              <div class="col-md-7">
+                <div class="mb-3">
+                  <label class="text-muted small mb-1">ID:</label>
+                  <p class="fw-bold mb-0">{{ selectedProductDetails.id }}</p>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="text-muted small mb-1">Tên sản phẩm:</label>
+                  <p class="fw-bold mb-0">{{ selectedProductDetails.name }}</p>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="text-muted small mb-1">Mô tả:</label>
+                  <p class="mb-0">{{ selectedProductDetails.description || 'Không có mô tả' }}</p>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="text-muted small mb-1">Giá:</label>
+                  <p class="fw-bold text-success mb-0 fs-5">{{ selectedProductDetails.price | currency:'VND':'symbol':'1.0-0' }}</p>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="text-muted small mb-1">Số lượng:</label>
+                  <p class="mb-0">
+                    <span class="badge" [ngClass]="selectedProductDetails.quantity > 0 ? 'bg-success' : 'bg-danger'">
+                      {{ selectedProductDetails.quantity }} sản phẩm
+                    </span>
+                  </p>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="text-muted small mb-1">Danh mục:</label>
+                  <p class="mb-0">
+                    <span class="badge bg-primary" *ngIf="selectedProductDetails.category">
+                      {{ selectedProductDetails.category.name }}
+                    </span>
+                    <span class="text-muted" *ngIf="!selectedProductDetails.category">
+                      Chưa phân loại
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" (click)="closeDetailsModal()">Đóng</button>

@@ -67,16 +67,38 @@
         <div class="text-muted small">
           Trang {{ currentPage + 1 }} / {{ totalPages }} ({{ totalElements }} danh mục)
         </div>
-        <nav>
+        <nav *ngIf="totalPages > 0">
           <ul class="pagination mb-0">
+            <!-- First Page -->
             <li class="page-item" [class.disabled]="currentPage === 0">
-              <button class="page-link" (click)="previousPage()">&laquo;</button>
+              <button class="page-link" (click)="goToPage(0)" title="Trang đầu">&laquo;&laquo;</button>
             </li>
-            <li class="page-item" *ngFor="let page of [].constructor(totalPages); let i = index" [class.active]="currentPage === i">
-              <button class="page-link" (click)="goToPage(i)">{{ i + 1 }}</button>
+            
+            <!-- Previous -->
+            <li class="page-item" [class.disabled]="currentPage === 0">
+              <button class="page-link" (click)="previousPage()">&lsaquo;</button>
             </li>
+            
+            <!-- Page Numbers -->
+            <li class="page-item" *ngFor="let page of getPageNumbers()" 
+                [class.active]="currentPage === page"
+                [class.disabled]="page === -1">
+              <button class="page-link" 
+                      *ngIf="page !== -1" 
+                      (click)="goToPage(page)">
+                {{ page + 1 }}
+              </button>
+              <span class="page-link" *ngIf="page === -1">...</span>
+            </li>
+            
+            <!-- Next -->
             <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
-              <button class="page-link" (click)="nextPage()">&raquo;</button>
+              <button class="page-link" (click)="nextPage()">&rsaquo;</button>
+            </li>
+            
+            <!-- Last Page -->
+            <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+              <button class="page-link" (click)="goToPage(totalPages - 1)" title="Trang cuối">&raquo;&raquo;</button>
             </li>
           </ul>
         </nav>

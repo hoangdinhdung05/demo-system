@@ -88,6 +88,52 @@ export class CategoryComponent implements OnInit {
     this.loadCategories(page); 
   }
 
+  getPageNumbers(): number[] {
+    const maxPagesToShow = 5;
+    const pages: number[] = [];
+    
+    if (this.totalPages <= maxPagesToShow) {
+      // Nếu tổng số trang <= 5, hiển thị tất cả
+      for (let i = 0; i < this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Luôn hiển thị trang đầu
+      pages.push(0);
+      
+      let startPage = Math.max(1, this.currentPage - 1);
+      let endPage = Math.min(this.totalPages - 2, this.currentPage + 1);
+      
+      // Điều chỉnh nếu gần đầu hoặc cuối
+      if (this.currentPage <= 2) {
+        endPage = Math.min(3, this.totalPages - 2);
+      }
+      if (this.currentPage >= this.totalPages - 3) {
+        startPage = Math.max(1, this.totalPages - 4);
+      }
+      
+      // Thêm ellipsis nếu cần
+      if (startPage > 1) {
+        pages.push(-1); // -1 represents ellipsis
+      }
+      
+      // Thêm các trang ở giữa
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      
+      // Thêm ellipsis nếu cần
+      if (endPage < this.totalPages - 2) {
+        pages.push(-1);
+      }
+      
+      // Luôn hiển thị trang cuối
+      pages.push(this.totalPages - 1);
+    }
+    
+    return pages;
+  }
+
   openCreateCategoryModal() {
     this.modalInstance = new bootstrap.Modal(this.createCategoryModal.nativeElement);
     this.createCategoryForm.reset();

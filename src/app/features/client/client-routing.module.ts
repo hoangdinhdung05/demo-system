@@ -8,6 +8,9 @@ import { EditProfileComponent } from './edit-profile/edit-profile.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
 import { SettingsComponent } from './settings/settings.component';
 import { ClientLayoutComponent } from './client-layout.component';
+import { ProductDetailComponent } from './product-detail/product-detail.component';
+import { AboutComponent } from './about/about.component';
+import { ContactComponent } from './contact/contact.component';
 
 const routes: Routes = [
   {
@@ -15,13 +18,16 @@ const routes: Routes = [
     component: ClientLayoutComponent,
     children: [
       { path: '', component: HomeComponent },
+      { path: 'product/:id', component: ProductDetailComponent },
       { path: 'category', component: CategoryComponent },
       { path: 'category/:category', component: CategoryComponent },
       { path: 'profile', component: ProfileComponent },
       { path: 'orders', component: OrdersComponent },
       { path: 'edit-profile', component: EditProfileComponent },
       { path: 'change-password', component: ChangePasswordComponent },
-      { path: 'settings', component: SettingsComponent }
+      { path: 'settings', component: SettingsComponent },
+      { path: 'about', component: AboutComponent },
+      { path: 'contact', component: ContactComponent }
     ]
   }
 ];

@@ -16,6 +16,9 @@ import { EditProfileComponent } from './edit-profile/edit-profile.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
 import { SettingsComponent } from './settings/settings.component';
 import { ClientLayoutComponent } from './client-layout.component';
+import { ProductDetailComponent } from './product-detail/product-detail.component';
+import { AboutComponent } from './about/about.component';
+import { ContactComponent } from './contact/contact.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +33,10 @@ import { ClientLayoutComponent } from './client-layout.component';
     EditProfileComponent,
     ChangePasswordComponent,
     SettingsComponent,
-    ClientLayoutComponent
+    ClientLayoutComponent,
+    ProductDetailComponent,
+    AboutComponent,
+    ContactComponent
   ],
   imports: [
     CommonModule,

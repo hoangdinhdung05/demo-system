@@ -19,7 +19,7 @@ export class UsersComponent implements OnInit {
   totalPages = 0;
   totalElements = 0;
   currentPage = 0;
-  pageSize = 5;
+  pageSize = 10;
   loading = false;
 
   createUserForm!: FormGroup;
@@ -104,6 +104,52 @@ export class UsersComponent implements OnInit {
   previousPage() { if (this.currentPage > 0) this.loadUsers(this.currentPage - 1); }
   goToPage(page: number) { this.loadUsers(page); }
 
+  getPageNumbers(): number[] {
+    const maxPagesToShow = 5;
+    const pages: number[] = [];
+    
+    if (this.totalPages <= maxPagesToShow) {
+      // Nếu tổng số trang <= 5, hiển thị tất cả
+      for (let i = 0; i < this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Luôn hiển thị trang đầu
+      pages.push(0);
+      
+      let startPage = Math.max(1, this.currentPage - 1);
+      let endPage = Math.min(this.totalPages - 2, this.currentPage + 1);
+      
+      // Điều chỉnh nếu gần đầu hoặc cuối
+      if (this.currentPage <= 2) {
+        endPage = Math.min(3, this.totalPages - 2);
+      }
+      if (this.currentPage >= this.totalPages - 3) {
+        startPage = Math.max(1, this.totalPages - 4);
+      }
+      
+      // Thêm ellipsis nếu cần
+      if (startPage > 1) {
+        pages.push(-1); // -1 represents ellipsis
+      }
+      
+      // Thêm các trang ở giữa
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      
+      // Thêm ellipsis nếu cần
+      if (endPage < this.totalPages - 2) {
+        pages.push(-1);
+      }
+      
+      // Luôn hiển thị trang cuối
+      pages.push(this.totalPages - 1);
+    }
+    
+    return pages;
+  }
+
   // === Modal create user ===
   openCreateModal() {
     this.modalInstance = new bootstrap.Modal(this.createUserModal.nativeElement);
@@ -170,7 +216,11 @@ submitCreateUser() {
 
   exportUserReport() {
     this.loading = true;
-    this.userService.exportUserReport().subscribe({
+    
+    // Lấy username từ ô tìm kiếm (nếu có)
+    const username = this.searchText.trim() || undefined;
+    
+    this.userService.exportUserReport(username).subscribe({
       next: (blob) => {
         const file = new Blob([blob], { type: 'application/pdf' });
         const fileURL = URL.createObjectURL(file);
@@ -185,7 +235,12 @@ submitCreateUser() {
         // link.click();
         // URL.revokeObjectURL(fileURL);
 
-        this.toastr.success('Xuất báo cáo PDF thành công!', 'Thành công');
+        if (username) {
+          this.toastr.success(`Xuất báo cáo PDF cho user "${username}" thành công!`, 'Thành công');
+        } else {
+          this.toastr.success('Xuất báo cáo PDF tất cả người dùng thành công!', 'Thành công');
+        }
+        
         this.loading = false;
       },
       error: (err) => {

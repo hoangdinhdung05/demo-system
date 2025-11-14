@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../../../../core/services/products/product.service';
 import { ProductResponse } from '../../../../core/models/response/Product/ProductResponse';
 import { environment } from '../../../../../environments/environment';
@@ -28,7 +28,8 @@ export class ProductListComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -153,8 +154,7 @@ export class ProductListComponent implements OnInit {
   }
 
   viewProductDetails(product: ProductResponse): void {
-    // TODO: Navigate to product details page
-    console.log('View details:', product);
+    this.router.navigate(['/product', product.id]);
   }
 
   getProductImageUrl(product: ProductResponse): string {
