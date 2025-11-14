@@ -31,6 +31,21 @@ spring:
       port: 6379
       timeout: 60000ms
 
+  #Config rabbitmq
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        acknowledge-mode: manual  # Xác nhận thủ công để kiểm soát tốt hơn
+        prefetch: 1              # Số message consumer nhận cùng lúc
+        retry:
+          enabled: true
+          initial-interval: 3000
+          max-attempts: 3
+
   #Mail config
   mail:
     host: smtp.gmail.com
@@ -84,8 +99,5 @@ openapi:
 #Logging config
 logging:
   level:
-    root: INFO
-    com.hoangdung.movie_booking: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %highlight(%-5level) %cyan(%logger{36}) - %msg%n"
+    org.hibernate.SQL: INFO
 

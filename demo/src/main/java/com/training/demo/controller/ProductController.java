@@ -46,7 +46,7 @@ public class ProductController {
     @PatchMapping("/{id}")
     public ResponseEntity<?> updateProduct(@PathVariable Long id, @RequestBody ProductRequest request) {
         log.info("[Product] Update product with id: {}", id);
-        return ResponseEntity.ok(BaseResponse.success(BaseResponse.success(productService.updateProduct(id, request))));
+        return ResponseEntity.ok(BaseResponse.success(productService.updateProduct(id, request)));
     }
 
     /**

@@ -131,26 +131,19 @@ public class ProductServiceImpl implements ProductService {
         }
         existing.setCategory(category);
 
-        //Update image if provided
-        if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
-            // Delete old image
+        // Update image if new URL provided
+        if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
+            // Delete old image if exists
             String oldImageUrl = existing.getProductImageUrl();
-            try {
-                fileService.deleteByPublicUrl(oldImageUrl);
-            } catch (Exception e) {
-                log.error("[ProductService] Failed to delete old product image at URL: {}", oldImageUrl);
+            if (oldImageUrl != null && !oldImageUrl.isEmpty()) {
+                try {
+                    fileService.deleteByPublicUrl(oldImageUrl);
+                } catch (Exception e) {
+                    log.error("[ProductService] Failed to delete old product image at URL: {}", oldImageUrl);
+                }
             }
-
-            // Upload new image
-            String newImageUrl;
-            try {
-                newImageUrl = fileService
-                        .upload(com.training.demo.utils.enums.UploadKind.PRODUCT_IMAGE, request.getImageFile())
-                        .getPublicUrl();
-            } catch (Exception e) {
-                throw new BadRequestException("Failed to upload new product image: " + e.getMessage());
-            }
-            existing.setProductImageUrl(newImageUrl);
+            // Set new image URL
+            existing.setProductImageUrl(request.getImageUrl());
         }
 
         Product saved = productRepository.save(existing);
