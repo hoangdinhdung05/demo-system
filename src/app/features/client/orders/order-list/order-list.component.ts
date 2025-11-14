@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { OrderService } from 'src/app/core/services/orders/order.service';
 import { OrderResponse } from 'src/app/core/models/response/Order/OrderResponse';
@@ -39,7 +40,8 @@ export class OrderListComponent implements OnInit {
 
   constructor(
     private orderService: OrderService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -129,7 +131,7 @@ export class OrderListComponent implements OnInit {
   }
 
   viewOrderDetails(orderId: number) {
-    window.location.href = `/orders/${orderId}`;
+    this.router.navigate(['/orders', orderId]);
   }
 
   cancelOrder(order: OrderResponse) {

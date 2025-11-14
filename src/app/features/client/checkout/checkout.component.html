@@ -157,7 +157,7 @@
               >
                 <div class="item-image">
                   <img 
-                    [src]="item.productImageUrl || 'assets/images/no-image.png'" 
+                    [src]="getProductImageUrl(item)" 
                     [alt]="item.productName"
                   />
                 </div>

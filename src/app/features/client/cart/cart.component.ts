@@ -23,21 +23,14 @@ export class CartComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadCart();
-  }
-
-  loadCart(): void {
-    this.isLoading = true;
-    this.cartService.getCart().subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.cart = response.data;
-        }
+    // Subscribe to cart observable instead of loading manually
+    this.cartService.cart$.subscribe({
+      next: (cart) => {
+        this.cart = cart;
         this.isLoading = false;
       },
       error: (err) => {
         console.error('Error loading cart:', err);
-        this.toastService.error('Không thể tải giỏ hàng');
         this.isLoading = false;
       }
     });
@@ -60,8 +53,7 @@ export class CartComponent implements OnInit {
     this.updatingItems.add(item.id);
     this.cartService.updateCartItem(item.id, { quantity: newQuantity }).subscribe({
       next: (response) => {
-        if (response.success && response.data) {
-          this.cart = response.data;
+        if (response.success) {
           this.toastService.success('Đã cập nhật số lượng');
         }
         this.updatingItems.delete(item.id);
@@ -90,8 +82,7 @@ export class CartComponent implements OnInit {
     this.updatingItems.add(item.id);
     this.cartService.removeCartItem(item.id).subscribe({
       next: (response) => {
-        if (response.success && response.data) {
-          this.cart = response.data;
+        if (response.success) {
           this.toastService.success('Đã xóa sản phẩm khỏi giỏ hàng');
         }
         this.updatingItems.delete(item.id);

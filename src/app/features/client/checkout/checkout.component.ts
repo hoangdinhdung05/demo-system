@@ -5,9 +5,11 @@ import { CartService } from '../../../core/services/cart/cart.service';
 import { OrderService } from '../../../core/services/orders/order.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { CartResponse } from '../../../core/models/response/Cart/CartResponse';
+import { CartItemResponse } from '../../../core/models/response/Cart/CartItemResponse';
 import { CheckoutCartRequest } from '../../../core/models/request/Order/CheckoutCartRequest';
 import { PaymentMethod } from '../../../utils/PaymentMethod';
-import {ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-checkout',
@@ -165,5 +167,15 @@ export class CheckoutComponent implements OnInit {
       style: 'currency', 
       currency: 'VND' 
     }).format(amount);
+  }
+
+  /**
+   * Get product image URL with proper base path
+   */
+  getProductImageUrl(item: CartItemResponse): string {
+    if (!item.productImageUrl) {
+      return 'https://via.placeholder.com/100x100/0b6ff0/ffffff?text=No+Image';
+    }
+    return `${environment.assetBase}${item.productImageUrl.startsWith('/') ? '' : '/'}${item.productImageUrl}`;
   }
 }

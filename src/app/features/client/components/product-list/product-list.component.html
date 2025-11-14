@@ -86,9 +86,9 @@
    
            <!-- Price -->
            <div class="product-price">
-             <span class="current-price">${{ product.price }}</span>
+             <span class="current-price">{{ formatPrice(product.price) }}</span>
              <!-- <span *ngIf="product.originalPrice" class="original-price">
-               ${{ product.originalPrice }}
+               {{ formatPrice(product.originalPrice) }}
              </span> -->
            </div>
    
@@ -149,9 +149,9 @@
            <div class="product-price-action">
              <!-- Price -->
              <div class="product-price">
-               <span class="current-price">${{ product.price }}</span>
+               <span class="current-price">{{ formatPrice(product.price) }}</span>
                <!-- <span *ngIf="product.originalPrice" class="original-price">
-                 ${{ product.originalPrice }}
+                 {{ formatPrice(product.originalPrice) }}
                </span> -->
              </div>
    

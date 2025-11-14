@@ -39,7 +39,16 @@
           <h2>Sản phẩm nổi bật</h2>
           <p>Những sản phẩm được yêu thích nhất trong tuần</p>
         </div>
-        <app-product-list></app-product-list>
+        
+        <!-- Product Section with Filter -->
+        <div class="products-wrapper">
+          <div class="filter-sidebar">
+            <app-product-filter (filterChange)="onFilterChange($event)"></app-product-filter>
+          </div>
+          <div class="products-main">
+            <app-product-list></app-product-list>
+          </div>
+        </div>
       </section>
 
       <!-- Brands / Promotions row -->

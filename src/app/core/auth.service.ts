@@ -57,7 +57,17 @@ export class AuthService {
   }
 
   logout(): void {
-    this.logoutAPI().subscribe({ next: () => this.clearAllTokens(), error: () => this.clearAllTokens() });
+    this.logoutAPI().subscribe({ 
+      next: () => {
+        this.clearAllTokens();
+        // Reload trang để clear toàn bộ state
+        window.location.href = '/auth/login';
+      }, 
+      error: () => {
+        this.clearAllTokens();
+        window.location.href = '/auth/login';
+      }
+    });
   }
 
   private logoutAPI(): Observable<any> {

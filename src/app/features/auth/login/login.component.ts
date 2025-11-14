@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/core/auth.service';
+import { CartService } from 'src/app/core/services/cart/cart.service';
 import { LoginRequest } from 'src/app/core/models/request/login-request';
 import { ToastrService } from 'ngx-toastr';
  
@@ -17,6 +18,7 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private cartService: CartService,
     private router: Router,
     private toastr: ToastrService
   ) {
@@ -40,6 +42,9 @@ export class LoginComponent {
         const refresh_token = response.data.refreshToken;
         // AuthService.login() already saves tokens via tap; use helper to read roles
         this.toastr.success('Đăng nhập thành công!');
+
+        // Refresh cart sau khi đăng nhập thành công
+        this.cartService.refreshCart();
 
         const roles = this.authService.getRoles();
         const firstRole = roles.length ? roles[0] : null;

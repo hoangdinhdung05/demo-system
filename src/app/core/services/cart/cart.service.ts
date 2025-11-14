@@ -6,6 +6,7 @@ import { BaseResponse } from '../../models/response/base-response';
 import { CartResponse } from '../../models/response/Cart/CartResponse';
 import { AddToCartRequest } from '../../models/request/Cart/AddToCartRequest';
 import { UpdateCartItemRequest } from '../../models/request/Cart/UpdateCartItemRequest';
+import { AuthService } from '../../auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,15 +16,26 @@ export class CartService {
   private cartSubject = new BehaviorSubject<CartResponse | null>(null);
   public cart$ = this.cartSubject.asObservable();
   
-  constructor(private http: HttpClient) {
-    // Load cart on initialization
-    this.loadCart();
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {
+    // Chỉ load cart nếu user đã đăng nhập
+    if (this.authService.isAuthenticated()) {
+      this.loadCart();
+    }
   }
 
   /**
    * Tải giỏ hàng từ server
    */
   private loadCart(): void {
+    // Kiểm tra lại trước khi load
+    if (!this.authService.isAuthenticated()) {
+      this.cartSubject.next(null);
+      return;
+    }
+
     this.getCart().subscribe({
       next: (response) => {
         this.cartSubject.next(response.data);
@@ -107,6 +119,17 @@ export class CartService {
    * Refresh cart data
    */
   refreshCart(): void {
-    this.loadCart();
+    if (this.authService.isAuthenticated()) {
+      this.loadCart();
+    } else {
+      this.cartSubject.next(null);
+    }
+  }
+
+  /**
+   * Clear local cart state (dùng khi logout)
+   */
+  clearLocalCart(): void {
+    this.cartSubject.next(null);
   }
 }

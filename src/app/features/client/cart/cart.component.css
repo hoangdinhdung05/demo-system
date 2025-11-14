@@ -25,7 +25,7 @@
 }
 
 .page-header h1 i {
-  color: #ff6b6b;
+  color: #0b6ff0;
   margin-right: 10px;
 }
 
@@ -44,7 +44,7 @@
 }
 
 .loading-state i {
-  color: #ff6b6b;
+  color: #0b6ff0;
   margin-bottom: 20px;
 }
 
@@ -207,7 +207,7 @@
 .item-price {
   font-size: 18px;
   font-weight: 700;
-  color: #ff6b6b;
+  color: #0b6ff0;
   margin: 0 0 8px 0;
 }
 
@@ -367,7 +367,7 @@
 
 .updating-overlay i {
   font-size: 24px;
-  color: #ff6b6b;
+  color: #0b6ff0;
 }
 
 /* Cart Summary */
@@ -421,7 +421,7 @@
 
 .total-amount {
   font-size: 24px !important;
-  color: #ff6b6b !important;
+  color: #0b6ff0 !important;
 }
 
 .summary-divider {
@@ -439,7 +439,7 @@
   width: 100%;
   padding: 14px 20px;
   border: none;
-  border-radius: 6px;
+  border-radius: 10px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -451,40 +451,40 @@
 }
 
 .btn-checkout {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+  background: linear-gradient(90deg, #0b6ff0, #0754d6);
   color: white;
   margin-bottom: 12px;
 }
 
 .btn-checkout:hover {
-  background: linear-gradient(135deg, #ff5252 0%, #ff3838 100%);
+  background: linear-gradient(90deg, #0754d6, #0642b5);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+  box-shadow: 0 6px 20px rgba(11, 111, 240, 0.4);
 }
 
 .btn-continue {
   background: white;
-  color: #666;
-  border: 2px solid #e0e0e0;
+  color: #0b6ff0;
+  border: 2px solid #dbeafe;
 }
 
 .btn-continue:hover {
-  background: #f9f9f9;
-  border-color: #ccc;
-  color: #333;
+  background: #f4fbff;
+  border-color: #0b6ff0;
+  color: #0754d6;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+  background: linear-gradient(90deg, #0b6ff0, #0754d6);
   color: white;
   padding: 14px 30px;
   display: inline-flex;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #ff5252 0%, #ff3838 100%);
+  background: linear-gradient(90deg, #0754d6, #0642b5);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+  box-shadow: 0 6px 20px rgba(11, 111, 240, 0.4);
 }
 
 /* Promotions */
@@ -505,7 +505,7 @@
 }
 
 .promo-section h4 i {
-  color: #ff6b6b;
+  color: #0b6ff0;
 }
 
 .promo-list {

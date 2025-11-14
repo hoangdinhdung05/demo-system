@@ -212,6 +212,13 @@ export class ProductListComponent implements OnInit {
     return Array(5).fill(0).map((_, i) => i < Math.floor(rating) ? 1 : 0);
   }
 
+  formatPrice(price: number): string {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(price);
+  }
+
   searchProducts(name: string): void {
     if (!name.trim()) {
       // Nếu rỗng → load lại toàn bộ danh sách mặc định

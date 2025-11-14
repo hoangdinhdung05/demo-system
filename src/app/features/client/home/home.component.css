@@ -188,6 +188,24 @@
 /* Product Section */
 .product-section { background:transparent; padding:0 }
 
+/* Products Wrapper with Filter */
+.products-wrapper {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.filter-sidebar {
+  position: sticky;
+  top: 100px;
+  align-self: flex-start;
+}
+
+.products-main {
+  min-width: 0; /* Prevents grid blowout */
+}
+
 /* Sidebar - when enabled */
 .sidebar {
   width: 300px;
@@ -263,6 +281,16 @@
   
   .main-content {
     padding: 40px 0;
+  }
+  
+  /* Products Wrapper Responsive */
+  .products-wrapper {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .filter-sidebar {
+    position: static;
   }
 }
 
