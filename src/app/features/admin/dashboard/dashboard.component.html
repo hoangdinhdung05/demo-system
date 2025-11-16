@@ -6,7 +6,7 @@
     <div class="row g-3 mb-4">
       <!-- Users Card -->
       <div class="col-md-4 col-lg-3">
-        <div class="stat-card p-4 shadow-sm rounded-3 border-start border-primary border-4">
+        <div class="stat-card p-4 shadow-sm rounded-3 border-start border-primary border-4" (click)="navigateToUsers()" style="cursor: pointer;">
           <div class="d-flex justify-content-between align-items-start">
             <div>
               <div class="stat-header text-muted text-uppercase mb-2 small">Người dùng</div>
@@ -21,7 +21,7 @@
 
       <!-- Categories Card -->
       <div class="col-md-4 col-lg-3">
-        <div class="stat-card p-4 shadow-sm rounded-3 border-start border-info border-4">
+        <div class="stat-card p-4 shadow-sm rounded-3 border-start border-info border-4" (click)="navigateToCategories()" style="cursor: pointer;">
           <div class="d-flex justify-content-between align-items-start">
             <div>
               <div class="stat-header text-muted text-uppercase mb-2 small">Danh mục</div>
@@ -36,7 +36,7 @@
 
       <!-- Products Card -->
       <div class="col-md-4 col-lg-3">
-        <div class="stat-card p-4 shadow-sm rounded-3 border-start border-success border-4">
+        <div class="stat-card p-4 shadow-sm rounded-3 border-start border-success border-4" (click)="navigateToProducts()" style="cursor: pointer;">
           <div class="d-flex justify-content-between align-items-start">
             <div>
               <div class="stat-header text-muted text-uppercase mb-2 small">Sản phẩm</div>
@@ -51,7 +51,7 @@
 
       <!-- Total Orders Card -->
       <div class="col-md-4 col-lg-3">
-        <div class="stat-card p-4 shadow-sm rounded-3 border-start border-warning border-4">
+        <div class="stat-card p-4 shadow-sm rounded-3 border-start border-warning border-4" (click)="navigateToOrders()" style="cursor: pointer;">
           <div class="d-flex justify-content-between align-items-start">
             <div>
               <div class="stat-header text-muted text-uppercase mb-2 small">Tổng đơn hàng</div>
@@ -66,7 +66,7 @@
 
       <!-- Pending Orders Card -->
       <div class="col-md-4 col-lg-3">
-        <div class="stat-card p-4 shadow-sm rounded-3 border-start border-danger border-4">
+        <div class="stat-card p-4 shadow-sm rounded-3 border-start border-danger border-4" (click)="navigateToOrders()" style="cursor: pointer;">
           <div class="d-flex justify-content-between align-items-start">
             <div>
               <div class="stat-header text-muted text-uppercase mb-2 small">Chờ xử lý</div>
@@ -81,7 +81,7 @@
 
       <!-- Completed Orders Card -->
       <div class="col-md-4 col-lg-3">
-        <div class="stat-card p-4 shadow-sm rounded-3 border-start border-success border-4">
+        <div class="stat-card p-4 shadow-sm rounded-3 border-start border-success border-4" (click)="navigateToOrders()" style="cursor: pointer;">
           <div class="d-flex justify-content-between align-items-start">
             <div>
               <div class="stat-header text-muted text-uppercase mb-2 small">Hoàn thành</div>
@@ -96,7 +96,7 @@
 
       <!-- Total Revenue Card -->
       <div class="col-md-4 col-lg-3">
-        <div class="stat-card p-4 shadow-sm rounded-3 border-start border-primary border-4">
+        <div class="stat-card p-4 shadow-sm rounded-3 border-start border-primary border-4" (click)="navigateToPayments()" style="cursor: pointer;">
           <div class="d-flex justify-content-between align-items-start">
             <div>
               <div class="stat-header text-muted text-uppercase mb-2 small">Doanh thu</div>

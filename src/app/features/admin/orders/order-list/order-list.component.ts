@@ -2,10 +2,11 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { OrderService } from 'src/app/core/services/orders/order.service';
+import { PaymentService } from 'src/app/core/services/payments/payment.service';
 import { OrderResponse } from 'src/app/core/models/response/Order/OrderResponse';
 import { OrderStatus, OrderStatusLabels, OrderStatusColors } from 'src/app/utils/OrderStatus';
 import { PaymentMethodLabels } from 'src/app/utils/PaymentMethod';
-import { PaymentStatusLabels, PaymentStatusColors } from 'src/app/utils/PaymentStatus';
+import { PaymentStatus, PaymentStatusLabels, PaymentStatusColors } from 'src/app/utils/PaymentStatus';
 
 declare var bootstrap: any;
 
@@ -28,6 +29,7 @@ export class OrderListComponent implements OnInit {
   OrderStatus = OrderStatus;
   OrderStatusLabels = OrderStatusLabels;
   OrderStatusColors = OrderStatusColors;
+  PaymentStatus = PaymentStatus;
   PaymentMethodLabels = PaymentMethodLabels;
   PaymentStatusLabels = PaymentStatusLabels;
   PaymentStatusColors = PaymentStatusColors;
@@ -49,6 +51,7 @@ export class OrderListComponent implements OnInit {
 
   constructor(
     private orderService: OrderService,
+    private paymentService: PaymentService,
     private toastr: ToastrService,
     private fb: FormBuilder
   ) { }
@@ -184,6 +187,57 @@ export class OrderListComponent implements OnInit {
   viewOrderDetails(orderId: number) {
     // Navigate to order detail page or open modal
     window.location.href = `/admin/orders/${orderId}`;
+  }
+
+  confirmPayment(order: OrderResponse) {
+    if (order.paymentStatus !== PaymentStatus.PENDING) {
+      this.toastr.warning('Chỉ có thể xác nhận thanh toán đang chờ', 'Cảnh báo');
+      return;
+    }
+
+    if (!confirm(`Xác nhận thanh toán cho đơn hàng #${order.id}?`)) {
+      return;
+    }
+
+    this.loading = true;
+
+    // Lấy payment của order trước
+    this.paymentService.getOrderPayments(order.id).subscribe({
+      next: (response) => {
+        if (response.success && response.data && response.data.length > 0) {
+          const payment = response.data[0]; // Lấy payment đầu tiên
+          
+          const confirmRequest = {
+            status: PaymentStatus.PAID,
+            transactionId: payment.transactionId || `TXN-${Date.now()}`,
+            paymentInfo: 'Xác nhận bởi Admin'
+          };
+
+          this.paymentService.confirmPayment(payment.id, confirmRequest).subscribe({
+            next: (confirmResponse) => {
+              if (confirmResponse.success) {
+                this.toastr.success('Xác nhận thanh toán thành công', 'Thành công');
+                this.loadOrders(this.currentPage);
+              }
+              this.loading = false;
+            },
+            error: (error) => {
+              console.error('Error confirming payment:', error);
+              this.toastr.error(error.error?.message || 'Không thể xác nhận thanh toán', 'Lỗi');
+              this.loading = false;
+            }
+          });
+        } else {
+          this.toastr.warning('Không tìm thấy thông tin thanh toán', 'Cảnh báo');
+          this.loading = false;
+        }
+      },
+      error: (error) => {
+        console.error('Error loading payment:', error);
+        this.toastr.error('Không thể tải thông tin thanh toán', 'Lỗi');
+        this.loading = false;
+      }
+    });
   }
 
   formatCurrency(amount: number): string {

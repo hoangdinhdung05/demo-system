@@ -11,7 +11,11 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class PaymentsComponent implements OnInit {
   payments: PaymentResponse[] = [];
-  isLoading = false;
+  filteredPayments: PaymentResponse[] = [];
+  loading = false;
+  
+  // Search
+  searchText = '';
   
   // Pagination
   currentPage = 0;
@@ -22,13 +26,6 @@ export class PaymentsComponent implements OnInit {
   // Sorting
   sortBy = 'createdAt';
   sortDirection = 'DESC';
-  
-  // View state
-  selectedPayment: PaymentResponse | null = null;
-  showDetailModal = false;
-
-  // Math object for template
-  Math = Math;
 
   constructor(
     private paymentService: PaymentService,
@@ -40,24 +37,43 @@ export class PaymentsComponent implements OnInit {
   }
 
   loadPayments(): void {
-    this.isLoading = true;
+    this.loading = true;
     this.paymentService.getAllPayments(this.currentPage, this.pageSize, this.sortBy, this.sortDirection)
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
             this.payments = response.data.content;
+            this.filteredPayments = [...this.payments];
             this.totalElements = response.data.totalElements;
             this.totalPages = response.data.totalPages;
             this.currentPage = response.data.number;
           }
-          this.isLoading = false;
+          this.loading = false;
         },
         error: (error) => {
           console.error('Error loading payments:', error);
           this.toastr.error('Không thể tải danh sách thanh toán', 'Lỗi');
-          this.isLoading = false;
+          this.loading = false;
         }
       });
+  }
+
+  filterPayments(): void {
+    if (!this.searchText) {
+      this.filteredPayments = [...this.payments];
+      return;
+    }
+    
+    const searchLower = this.searchText.toLowerCase();
+    this.filteredPayments = this.payments.filter(payment => 
+      payment.transactionId?.toLowerCase().includes(searchLower) ||
+      payment.id.toString().includes(searchLower) ||
+      payment.orderId.toString().includes(searchLower)
+    );
+  }
+
+  exportPaymentReport(): void {
+    this.toastr.info('Chức năng xuất báo cáo đang được phát triển', 'Thông báo');
   }
 
   onPageChange(page: number): void {
@@ -92,7 +108,9 @@ export class PaymentsComponent implements OnInit {
     }
 
     const confirmRequest = {
-      transactionId: payment.transactionId || `TXN-${Date.now()}`
+      status: PaymentStatus.PAID,
+      transactionId: payment.transactionId || `TXN-${Date.now()}`,
+      paymentInfo: 'Xác nhận bởi Admin'
     };
 
     this.paymentService.confirmPayment(payment.id, confirmRequest)
@@ -110,14 +128,59 @@ export class PaymentsComponent implements OnInit {
       });
   }
 
-  viewPaymentDetails(payment: PaymentResponse): void {
-    this.selectedPayment = payment;
-    this.showDetailModal = true;
+  markPaymentFailed(payment: PaymentResponse): void {
+    const errorMessage = prompt('Nhập lý do thanh toán thất bại (tùy chọn):');
+    if (errorMessage === null) return; // User cancelled
+
+    const confirmRequest = {
+      status: PaymentStatus.FAILED,
+      errorMessage: errorMessage || 'Thanh toán thất bại',
+      paymentInfo: 'Đánh dấu thất bại bởi Admin'
+    };
+
+    this.paymentService.confirmPayment(payment.id, confirmRequest)
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.toastr.warning('Đã đánh dấu thanh toán thất bại', 'Thành công');
+            this.loadPayments();
+          }
+        },
+        error: (error) => {
+          console.error('Error marking payment as failed:', error);
+          this.toastr.error('Không thể cập nhật trạng thái', 'Lỗi');
+        }
+      });
   }
 
-  closeDetailModal(): void {
-    this.showDetailModal = false;
-    this.selectedPayment = null;
+  refundPayment(payment: PaymentResponse): void {
+    if (payment.status !== PaymentStatus.PAID) {
+      this.toastr.warning('Chỉ có thể hoàn tiền cho thanh toán đã thanh toán', 'Cảnh báo');
+      return;
+    }
+
+    if (!confirm(`Xác nhận hoàn tiền cho thanh toán #${payment.id}?`)) {
+      return;
+    }
+
+    const confirmRequest = {
+      status: PaymentStatus.REFUNDED,
+      paymentInfo: 'Hoàn tiền bởi Admin'
+    };
+
+    this.paymentService.confirmPayment(payment.id, confirmRequest)
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.toastr.info('Đã hoàn tiền thành công', 'Thành công');
+            this.loadPayments();
+          }
+        },
+        error: (error) => {
+          console.error('Error refunding payment:', error);
+          this.toastr.error('Không thể hoàn tiền', 'Lỗi');
+        }
+      });
   }
 
   getStatusBadgeClass(status: PaymentStatus): string {
@@ -156,5 +219,21 @@ export class PaymentsComponent implements OnInit {
 
   formatDate(dateString: string): string {
     return new Date(dateString).toLocaleString('vi-VN');
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxPagesToShow = 5;
+    let startPage = Math.max(0, this.currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(this.totalPages - 1, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage < maxPagesToShow - 1) {
+      startPage = Math.max(0, endPage - maxPagesToShow + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
   }
 }
