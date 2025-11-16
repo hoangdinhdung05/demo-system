@@ -1,5 +1,6 @@
 package com.training.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.training.demo.utils.enums.PaymentMethod;
 import com.training.demo.utils.enums.PaymentStatus;
 import jakarta.persistence.*;
@@ -25,6 +26,7 @@ public class Payment extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false, foreignKey = @ForeignKey(name = "fk_payment_order"))
+    @JsonBackReference("order-payments")
     private Order order;
 
     @Enumerated(EnumType.STRING)

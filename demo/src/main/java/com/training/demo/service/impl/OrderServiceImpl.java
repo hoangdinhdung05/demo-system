@@ -4,14 +4,11 @@ import com.training.demo.dto.request.Order.CheckoutCartRequest;
 import com.training.demo.dto.request.Order.CreateOrderRequest;
 import com.training.demo.dto.request.Order.OrderItemRequest;
 import com.training.demo.dto.request.Order.UpdateOrderStatusRequest;
+import com.training.demo.dto.response.Order.OrderItemResponse;
 import com.training.demo.dto.response.Order.OrderResponse;
 import com.training.demo.dto.response.System.PageResponse;
-import com.training.demo.entity.Order;
-import com.training.demo.entity.OrderItem;
-import com.training.demo.entity.Product;
-import com.training.demo.entity.User;
-import com.training.demo.entity.Cart;
-import com.training.demo.entity.CartItem;
+import com.training.demo.entity.*;
+import com.training.demo.utils.enums.PaymentMethod;
 import com.training.demo.exception.BadRequestException;
 import com.training.demo.exception.NotFoundException;
 import com.training.demo.mapper.OrderMapper;
@@ -20,6 +17,7 @@ import com.training.demo.repository.OrderRepository;
 import com.training.demo.repository.ProductRepository;
 import com.training.demo.repository.UserRepository;
 import com.training.demo.repository.CartRepository;
+import com.training.demo.repository.PaymentRepository;
 import com.training.demo.service.OrderService;
 import com.training.demo.utils.enums.OrderStatus;
 import com.training.demo.utils.enums.PaymentStatus;
@@ -44,6 +42,7 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
+    private final PaymentRepository paymentRepository;
     private final EmailProducer emailProducer;
 
     /**
@@ -109,16 +108,42 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalAmount(totalAmount);
         order = orderRepository.save(order);
 
+        // Tạo Payment record ngay sau khi tạo Order (để admin có thể tracking và confirm)
+        Payment payment = Payment.builder()
+                .order(order)
+                .paymentMethod(order.getPaymentMethod())
+                .amount(order.getTotalAmount())
+                .transactionId(generateTransactionId())
+                .status(PaymentStatus.PENDING)
+                .paymentInfo(getPaymentInfoMessage(order.getPaymentMethod()))
+                .build();
+        paymentRepository.save(payment);
+        log.info("[OrderService] Created payment record for order: {} with method: {}, transactionId: {}", 
+                order.getOrderNumber(), order.getPaymentMethod(), payment.getTransactionId());
+
         log.info("[OrderService] Order created successfully: {}", order.getOrderNumber());
 
         // Send email confirmation via RabbitMQ queue
         try {
+            // Convert entities to DTOs to avoid Jackson serialization issues
+            List<OrderItemResponse> itemDTOs = order.getOrderItems().stream()
+                    .map(item -> OrderItemResponse.builder()
+                            .id(item.getId())
+                            .productId(item.getProduct().getId())
+                            .productName(item.getProductName())
+                            .productImageUrl(item.getProductImageUrl())
+                            .quantity(item.getQuantity())
+                            .price(item.getPrice())
+                            .subtotal(item.getSubtotal())
+                            .build())
+                    .toList();
+            
             java.util.Map<String, Object> emailData = new java.util.HashMap<>();
             emailData.put("orderNumber", order.getOrderNumber());
             emailData.put("receiverName", order.getReceiverName());
             emailData.put("totalAmount", order.getTotalAmount());
             emailData.put("shippingAddress", order.getShippingAddress());
-            emailData.put("items", order.getOrderItems());
+            emailData.put("items", itemDTOs);
             
             emailProducer.sendOrderConfirmationEmail(user.getEmail(), emailData);
         } catch (Exception e) {
@@ -194,6 +219,19 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalAmount(totalAmount);
         order = orderRepository.save(order);
 
+        // Tạo Payment record ngay sau khi tạo Order (để admin có thể tracking và confirm)
+        Payment payment = Payment.builder()
+                .order(order)
+                .paymentMethod(order.getPaymentMethod())
+                .amount(order.getTotalAmount())
+                .transactionId(generateTransactionId())
+                .status(PaymentStatus.PENDING)
+                .paymentInfo(getPaymentInfoMessage(order.getPaymentMethod()))
+                .build();
+        paymentRepository.save(payment);
+        log.info("[OrderService] Created payment record for order: {} with method: {}, transactionId: {}", 
+                order.getOrderNumber(), order.getPaymentMethod(), payment.getTransactionId());
+
         // Clear cart after successful checkout
         cart.clearItems();
         cartRepository.save(cart);
@@ -202,12 +240,25 @@ public class OrderServiceImpl implements OrderService {
 
         // Send email confirmation via RabbitMQ queue
         try {
+            // Convert entities to DTOs to avoid Jackson serialization issues
+            List<OrderItemResponse> itemDTOs = order.getOrderItems().stream()
+                    .map(item -> OrderItemResponse.builder()
+                            .id(item.getId())
+                            .productId(item.getProduct().getId())
+                            .productName(item.getProductName())
+                            .productImageUrl(item.getProductImageUrl())
+                            .quantity(item.getQuantity())
+                            .price(item.getPrice())
+                            .subtotal(item.getSubtotal())
+                            .build())
+                    .toList();
+            
             java.util.Map<String, Object> emailData = new java.util.HashMap<>();
             emailData.put("orderNumber", order.getOrderNumber());
             emailData.put("receiverName", order.getReceiverName());
             emailData.put("totalAmount", order.getTotalAmount());
             emailData.put("shippingAddress", order.getShippingAddress());
-            emailData.put("items", order.getOrderItems());
+            emailData.put("items", itemDTOs);
             
             emailProducer.sendOrderConfirmationEmail(user.getEmail(), emailData);
         } catch (Exception e) {
@@ -419,6 +470,49 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return orderNumber;
+    }
+
+    /**
+     * Get payment info message based on payment method
+     */
+    private String getPaymentInfoMessage(PaymentMethod method) {
+        return switch (method) {
+            case COD -> "Cash on Delivery - Payment will be collected upon delivery";
+            case VNPAY -> "VNPay - Waiting for payment confirmation";
+            case CREDIT_CARD -> "Credit Card - Pending payment processing";
+            case MOMO -> "MoMo - Waiting for payment confirmation";
+            case BANK_TRANSFER -> "Bank Transfer - Pending payment verification";
+        };
+    }
+
+    /**
+     * Generate unique transaction ID for payment
+     */
+    private String generateTransactionId() {
+        String txnId = "TXN-" + java.util.UUID.randomUUID().toString().substring(0, 18).toUpperCase();
+        
+        // Check uniqueness
+        while (paymentRepository.existsByTransactionId(txnId)) {
+            txnId = "TXN-" + java.util.UUID.randomUUID().toString().substring(0, 18).toUpperCase();
+        }
+        
+        return txnId;
+    }
+
+    /**
+     * Đếm tổng số đơn hàng (ADMIN)
+     */
+    @Override
+    public long countAllOrders() {
+        return orderRepository.count();
+    }
+
+    /**
+     * Đếm đơn hàng theo trạng thái (ADMIN)
+     */
+    @Override
+    public long countOrdersByStatus(OrderStatus status) {
+        return orderRepository.countByStatus(status);
     }
 
     /**

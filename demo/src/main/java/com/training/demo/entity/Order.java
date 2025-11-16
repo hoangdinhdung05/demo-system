@@ -1,5 +1,6 @@
 package com.training.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.training.demo.utils.enums.OrderStatus;
 import com.training.demo.utils.enums.PaymentMethod;
 import com.training.demo.utils.enums.PaymentStatus;
@@ -63,10 +64,12 @@ public class Order extends BaseEntity {
     private String note;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("order-orderItems")
     @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @JsonManagedReference("order-payments")
     @Builder.Default
     private List<Payment> payments = new ArrayList<>();
 

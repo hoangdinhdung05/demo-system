@@ -1,5 +1,6 @@
 package com.training.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,6 +18,7 @@ public class UserHasRole extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @JsonBackReference("user-userHasRoles")
     private User user;
 
     @ManyToOne(fetch = FetchType.EAGER)

@@ -149,4 +149,30 @@ public class OrderController {
                 orderService.updateOrderStatus(orderId, request)
         ));
     }
+
+    /**
+     * Đếm tổng số đơn hàng (ADMIN)
+     */
+    @GetMapping("/admin/count")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> countAllOrders() {
+        log.info("[OrderController] Admin counting all orders");
+        
+        return ResponseEntity.ok(BaseResponse.success(
+                orderService.countAllOrders()
+        ));
+    }
+
+    /**
+     * Đếm đơn hàng theo trạng thái (ADMIN)
+     */
+    @GetMapping("/admin/count/status/{status}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> countOrdersByStatus(@PathVariable OrderStatus status) {
+        log.info("[OrderController] Admin counting orders by status: {}", status);
+        
+        return ResponseEntity.ok(BaseResponse.success(
+                orderService.countOrdersByStatus(status)
+        ));
+    }
 }

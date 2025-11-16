@@ -1,5 +1,6 @@
 package com.training.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -24,6 +25,7 @@ public class CartItem extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false, foreignKey = @ForeignKey(name = "fk_cart_item_cart"))
+    @JsonBackReference("cart-cartItems")
     private Cart cart;
 
     @ManyToOne(fetch = FetchType.LAZY)

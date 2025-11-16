@@ -1,6 +1,7 @@
 package com.training.demo.dto.request.Payment;
 
-import jakarta.validation.constraints.NotBlank;
+import com.training.demo.utils.enums.PaymentStatus;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,8 +13,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ConfirmPaymentRequest {
 
-    @NotBlank(message = "Transaction ID is required")
-    private String transactionId;
+    @NotNull(message = "Payment status is required")
+    private PaymentStatus status; // PAID, FAILED, REFUNDED
 
-    private String paymentInfo;
+    private String transactionId; // Transaction ID từ gateway (VNPay, MoMo)
+    
+    private String paymentInfo; // Thông tin bổ sung từ gateway
+    
+    private String errorMessage; // Thông tin lỗi nếu thanh toán thất bại
 }

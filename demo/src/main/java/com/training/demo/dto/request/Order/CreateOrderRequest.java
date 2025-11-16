@@ -1,6 +1,7 @@
 package com.training.demo.dto.request.Order;
 
 import com.training.demo.utils.enums.PaymentMethod;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,15 +16,17 @@ import java.util.List;
 public class CreateOrderRequest {
 
     @NotBlank(message = "Shipping address is required")
-    @Size(max = 500, message = "Shipping address must not exceed 500 characters")
+    @Size(min = 10, max = 500, message = "Shipping address must be between 10 and 500 characters")
     private String shippingAddress;
 
     @NotBlank(message = "Phone number is required")
-    @Pattern(regexp = "^[0-9]{10,11}$", message = "Phone number must be 10-11 digits")
+    @Pattern(regexp = "^(0|\\+84)[3|5|7|8|9][0-9]{8}$",
+            message = "Invalid Vietnamese phone number format")
     private String phoneNumber;
 
     @NotBlank(message = "Receiver name is required")
-    @Size(max = 200, message = "Receiver name must not exceed 200 characters")
+    @Size(min = 2, max = 200, message = "Receiver name must be between 2 and 200 characters")
+    @Pattern(regexp = "^[\\p{L}\\s]+$", message = "Receiver name must contain only letters and spaces")
     private String receiverName;
 
     @NotNull(message = "Payment method is required")
@@ -33,5 +36,7 @@ public class CreateOrderRequest {
     private String note;
 
     @NotEmpty(message = "Order items cannot be empty")
+    @Size(min = 1, max = 50, message = "Order must contain between 1 and 50 items")
+    @Valid // ✅ Important: validate nested objects
     private List<OrderItemRequest> items;
 }

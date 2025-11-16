@@ -1,5 +1,6 @@
 package com.training.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -21,6 +22,7 @@ public class OrderItem extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false, foreignKey = @ForeignKey(name = "fk_order_item_order"))
+    @JsonBackReference("order-orderItems")
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -1,5 +1,6 @@
 package com.training.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -25,6 +26,7 @@ public class Cart extends BaseEntity {
     private User user;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("cart-cartItems")
     @Builder.Default
     private List<CartItem> cartItems = new ArrayList<>();
 

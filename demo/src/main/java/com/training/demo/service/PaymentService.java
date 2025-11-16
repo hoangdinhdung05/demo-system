@@ -43,4 +43,14 @@ public interface PaymentService {
      * Hủy payment
      */
     PaymentResponse cancelPayment(Long paymentId);
+
+    /**
+     * Đếm tổng số thanh toán (ADMIN)
+     */
+    long countAllPayments();
+
+    /**
+     * Tính tổng doanh thu từ các thanh toán thành công (ADMIN)
+     */
+    java.math.BigDecimal getTotalRevenue();
 }

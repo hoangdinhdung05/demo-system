@@ -76,4 +76,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * Tìm orders theo receiver name
      */
     Page<Order> findByReceiverNameContainingIgnoreCase(String receiverName, Pageable pageable);
+
+    /**
+     * Đếm đơn hàng theo trạng thái
+     */
+    long countByStatus(OrderStatus status);
 }

@@ -42,4 +42,10 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
      * Đếm số lượng payment của order
      */
     long countByOrderId(Long orderId);
+
+    /**
+     * Tính tổng doanh thu từ các thanh toán thành công
+     */
+    @Query("SELECT COALESCE(SUM(p.amount), 0) FROM Payment p WHERE p.status = 'PAID'")
+    java.math.BigDecimal calculateTotalRevenue();
 }

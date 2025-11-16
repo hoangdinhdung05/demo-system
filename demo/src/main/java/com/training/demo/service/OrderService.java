@@ -54,4 +54,14 @@ public interface OrderService {
      * Lấy order theo order number
      */
     OrderResponse getOrderByOrderNumber(String orderNumber);
+
+    /**
+     * Đếm tổng số đơn hàng (ADMIN)
+     */
+    long countAllOrders();
+
+    /**
+     * Đếm đơn hàng theo trạng thái (ADMIN)
+     */
+    long countOrdersByStatus(OrderStatus status);
 }

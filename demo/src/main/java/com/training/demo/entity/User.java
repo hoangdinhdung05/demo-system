@@ -1,5 +1,6 @@
 package com.training.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.training.demo.utils.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -45,6 +46,7 @@ public class User extends BaseEntity {
             mappedBy = "user",
             orphanRemoval = true
     )
+    @JsonManagedReference("user-userHasRoles")
     @Builder.Default
     private Set<UserHasRole> userHasRoles = new HashSet<>();
 

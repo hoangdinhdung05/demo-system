@@ -121,4 +121,30 @@ public class PaymentController {
                 paymentService.cancelPayment(paymentId)
         ));
     }
+
+    /**
+     * Đếm tổng số thanh toán (ADMIN)
+     */
+    @GetMapping("/admin/count")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> countAllPayments() {
+        log.info("[PaymentController] Admin counting all payments");
+        
+        return ResponseEntity.ok(BaseResponse.success(
+                paymentService.countAllPayments()
+        ));
+    }
+
+    /**
+     * Tính tổng doanh thu (ADMIN)
+     */
+    @GetMapping("/admin/total-revenue")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> getTotalRevenue() {
+        log.info("[PaymentController] Admin getting total revenue");
+        
+        return ResponseEntity.ok(BaseResponse.success(
+                paymentService.getTotalRevenue()
+        ));
+    }
 }

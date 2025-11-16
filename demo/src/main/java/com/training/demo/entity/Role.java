@@ -1,5 +1,6 @@
 package com.training.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.training.demo.utils.enums.RoleType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,8 +24,12 @@ public class Role extends BaseEntity {
     private String description;
 
     @OneToMany(mappedBy = "role")
+    @JsonIgnore
+    @Builder.Default
     private Set<UserHasRole> userHasRoles = new HashSet<>();
 
     @OneToMany(mappedBy = "role")
+    @JsonIgnore
+    @Builder.Default
     private Set<RoleHasPermission> roles = new HashSet<>();
 }
