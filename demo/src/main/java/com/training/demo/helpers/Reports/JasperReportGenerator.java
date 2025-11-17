@@ -2,6 +2,8 @@ package com.training.demo.helpers.Reports;
 
 import com.training.demo.dto.response.Product.ExportProductResponse;
 import com.training.demo.dto.response.User.ExportUserResponse;
+import com.training.demo.dto.response.Order.ExportOrderResponse;
+import com.training.demo.dto.response.Payment.ExportPaymentResponse;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
@@ -16,6 +18,8 @@ public class JasperReportGenerator {
 
     private JasperReport userReportTemplate;
     private JasperReport productReportTemplate;
+    private JasperReport orderReportTemplate;
+    private JasperReport paymentReportTemplate;
 
     /**
      * Constructor - Compile templates 1 lần khi khởi tạo
@@ -29,6 +33,14 @@ public class JasperReportGenerator {
             log.info("[JasperReportGenerator] Compiling Product Report Template...");
             this.productReportTemplate = compileProductReportTemplate();
             log.info("[JasperReportGenerator] Product Report Template compiled successfully");
+
+            log.info("[JasperReportGenerator] Compiling Order Report Template...");
+            this.orderReportTemplate = compileOrderReportTemplate();
+            log.info("[JasperReportGenerator] Order Report Template compiled successfully");
+
+            log.info("[JasperReportGenerator] Compiling Payment Report Template...");
+            this.paymentReportTemplate = compilePaymentReportTemplate();
+            log.info("[JasperReportGenerator] Payment Report Template compiled successfully");
         } catch (JRException e) {
             log.error("[JasperReportGenerator] Failed to compile templates", e);
             throw new RuntimeException("Failed to initialize JasperReportGenerator", e);
@@ -51,6 +63,24 @@ public class JasperReportGenerator {
         log.debug("[JasperReportGenerator] Filling product report with {} records", products.size());
         JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(products);
         return JasperFillManager.fillReport(productReportTemplate, new HashMap<>(), dataSource);
+    }
+
+    /**
+     * Generate Order Report - Chỉ fill data vào template đã compile
+     */
+    public JasperPrint generateOrderReport(List<ExportOrderResponse> orders) throws JRException {
+        log.debug("[JasperReportGenerator] Filling order report with {} records", orders.size());
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(orders);
+        return JasperFillManager.fillReport(orderReportTemplate, new HashMap<>(), dataSource);
+    }
+
+    /**
+     * Generate Payment Report - Chỉ fill data vào template đã compile
+     */
+    public JasperPrint generatePaymentReport(List<ExportPaymentResponse> payments) throws JRException {
+        log.debug("[JasperReportGenerator] Filling payment report with {} records", payments.size());
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(payments);
+        return JasperFillManager.fillReport(paymentReportTemplate, new HashMap<>(), dataSource);
     }
 
     // ============================================================
@@ -400,6 +430,322 @@ public class JasperReportGenerator {
         style.addConditionalStyle(lowStock);
         style.addConditionalStyle(mediumStock);
         style.addConditionalStyle(highStock);
+        design.addStyle(style);
+
+        field.setStyle(style);
+    }
+
+    // ============================================================
+    // ORDER REPORT TEMPLATE
+    // ============================================================
+
+    private JasperReport compileOrderReportTemplate() throws JRException {
+        JasperDesign jasperDesign = new JasperDesign();
+        jasperDesign.setName("order_report");
+        jasperDesign.setPageWidth(842);  // A4 Landscape
+        jasperDesign.setPageHeight(595);
+        jasperDesign.setColumnWidth(802);
+        jasperDesign.setLeftMargin(20);
+        jasperDesign.setRightMargin(20);
+        jasperDesign.setTopMargin(20);
+        jasperDesign.setBottomMargin(20);
+
+        // ====== Fields ======
+        String[][] fields = {
+                {"id", "java.lang.Long"},
+                {"orderNumber", "java.lang.String"},
+                {"username", "java.lang.String"},
+                {"receiverName", "java.lang.String"},
+                {"phoneNumber", "java.lang.String"},
+                {"shippingAddress", "java.lang.String"},
+                {"totalAmount", "java.math.BigDecimal"},
+                {"status", "java.lang.String"},
+                {"paymentMethod", "java.lang.String"},
+                {"paymentStatus", "java.lang.String"},
+                {"createdAt", "java.time.LocalDateTime"},
+                {"note", "java.lang.String"}
+        };
+        for (String[] f : fields) {
+            JRDesignField field = new JRDesignField();
+            field.setName(f[0]);
+            field.setValueClassName(f[1]);
+            jasperDesign.addField(field);
+        }
+
+        // ====== Title ======
+        JRDesignBand titleBand = new JRDesignBand();
+        titleBand.setHeight(50);
+
+        JRDesignStaticText titleText = new JRDesignStaticText();
+        titleText.setX(0);
+        titleText.setY(10);
+        titleText.setWidth(802);
+        titleText.setHeight(30);
+        titleText.setText("ORDER MANAGEMENT REPORT");
+        titleText.setHorizontalTextAlign(HorizontalTextAlignEnum.CENTER);
+        titleText.setVerticalTextAlign(VerticalTextAlignEnum.MIDDLE);
+        titleText.setFontSize(20f);
+        titleText.setBold(true);
+        titleText.setForecolor(new Color(40, 40, 40));
+
+        titleBand.addElement(titleText);
+        jasperDesign.setTitle(titleBand);
+
+        // ====== Column Header ======
+        JRDesignBand columnHeader = new JRDesignBand();
+        columnHeader.setHeight(25);
+
+        int x = 0;
+        columnHeader.addElement(createHeaderCell("ID", x, 40));            x += 40;
+        columnHeader.addElement(createHeaderCell("Order #", x, 80));      x += 80;
+        columnHeader.addElement(createHeaderCell("Customer", x, 100));     x += 100;
+        columnHeader.addElement(createHeaderCell("Receiver", x, 100));     x += 100;
+        columnHeader.addElement(createHeaderCell("Phone", x, 90));         x += 90;
+        columnHeader.addElement(createHeaderCell("Amount", x, 80));        x += 80;
+        columnHeader.addElement(createHeaderCell("Status", x, 80));        x += 80;
+        columnHeader.addElement(createHeaderCell("Payment", x, 80));       x += 80;
+        columnHeader.addElement(createHeaderCell("P.Status", x, 72));      x += 72;
+        columnHeader.addElement(createHeaderCell("Created", x, 80));
+        jasperDesign.setColumnHeader(columnHeader);
+
+        // ====== Detail ======
+        JRDesignBand detailBand = new JRDesignBand();
+        detailBand.setHeight(20);
+
+        int dx = 0;
+        detailBand.addElement(createDetailCell("String.valueOf($F{id})", dx, 40)); dx += 40;
+        detailBand.addElement(createDetailCell("$F{orderNumber}", dx, 80)); dx += 80;
+        detailBand.addElement(createDetailCell("($F{username} == null) ? \"—\" : $F{username}", dx, 100)); dx += 100;
+        detailBand.addElement(createDetailCell("($F{receiverName} == null) ? \"—\" : $F{receiverName}", dx, 100)); dx += 100;
+        detailBand.addElement(createDetailCell("($F{phoneNumber} == null) ? \"—\" : $F{phoneNumber}", dx, 90)); dx += 90;
+        detailBand.addElement(createDetailCell("($F{totalAmount} == null) ? \"—\" : \"$\" + String.format(\"%.2f\", $F{totalAmount})", dx, 80)); dx += 80;
+
+        // Order Status with conditional color
+        JRDesignTextField orderStatusField = createDetailCell("$F{status}", dx, 80);
+        applyConditionalOrderStatusColor(jasperDesign, orderStatusField);
+        detailBand.addElement(orderStatusField);
+        dx += 80;
+
+        detailBand.addElement(createDetailCell("($F{paymentMethod} == null) ? \"—\" : $F{paymentMethod}", dx, 80)); dx += 80;
+
+        // Payment Status with conditional color
+        JRDesignTextField paymentStatusField = createDetailCell("($F{paymentStatus} == null) ? \"—\" : $F{paymentStatus}", dx, 72);
+        applyConditionalPaymentStatusColor(jasperDesign, paymentStatusField);
+        detailBand.addElement(paymentStatusField);
+        dx += 72;
+
+        // Created Date
+        detailBand.addElement(createDetailCell(
+                "($F{createdAt} == null) ? \"—\" : $F{createdAt}.format(java.time.format.DateTimeFormatter.ofPattern(\"dd/MM/yyyy\"))",
+                dx, 80));
+
+        ((JRDesignSection) jasperDesign.getDetailSection()).addBand(detailBand);
+
+        // ====== Footer ======
+        JRDesignBand footerBand = new JRDesignBand();
+        footerBand.setHeight(25);
+
+        JRDesignTextField footerText = new JRDesignTextField();
+        footerText.setX(0);
+        footerText.setY(0);
+        footerText.setWidth(802);
+        footerText.setHeight(20);
+        footerText.setExpression(new JRDesignExpression("\"Generated by Admin | Page \" + $V{PAGE_NUMBER}"));
+        footerText.setHorizontalTextAlign(HorizontalTextAlignEnum.RIGHT);
+        footerText.setVerticalTextAlign(VerticalTextAlignEnum.MIDDLE);
+        footerText.setFontSize(9f);
+        footerText.setForecolor(Color.DARK_GRAY);
+
+        footerBand.addElement(footerText);
+        jasperDesign.setPageFooter(footerBand);
+
+        return JasperCompileManager.compileReport(jasperDesign);
+    }
+
+    // ============================================================
+    // PAYMENT REPORT TEMPLATE
+    // ============================================================
+
+    private JasperReport compilePaymentReportTemplate() throws JRException {
+        JasperDesign jasperDesign = new JasperDesign();
+        jasperDesign.setName("payment_report");
+        jasperDesign.setPageWidth(842);  // A4 Landscape
+        jasperDesign.setPageHeight(595);
+        jasperDesign.setColumnWidth(802);
+        jasperDesign.setLeftMargin(20);
+        jasperDesign.setRightMargin(20);
+        jasperDesign.setTopMargin(20);
+        jasperDesign.setBottomMargin(20);
+
+        // ====== Fields ======
+        String[][] fields = {
+                {"id", "java.lang.Long"},
+                {"orderId", "java.lang.Long"},
+                {"orderNumber", "java.lang.String"},
+                {"username", "java.lang.String"},
+                {"paymentMethod", "java.lang.String"},
+                {"amount", "java.math.BigDecimal"},
+                {"status", "java.lang.String"},
+                {"transactionId", "java.lang.String"},
+                {"paymentDate", "java.time.LocalDateTime"},
+                {"paymentInfo", "java.lang.String"}
+        };
+        for (String[] f : fields) {
+            JRDesignField field = new JRDesignField();
+            field.setName(f[0]);
+            field.setValueClassName(f[1]);
+            jasperDesign.addField(field);
+        }
+
+        // ====== Title ======
+        JRDesignBand titleBand = new JRDesignBand();
+        titleBand.setHeight(50);
+
+        JRDesignStaticText titleText = new JRDesignStaticText();
+        titleText.setX(0);
+        titleText.setY(10);
+        titleText.setWidth(802);
+        titleText.setHeight(30);
+        titleText.setText("PAYMENT TRANSACTION REPORT");
+        titleText.setHorizontalTextAlign(HorizontalTextAlignEnum.CENTER);
+        titleText.setVerticalTextAlign(VerticalTextAlignEnum.MIDDLE);
+        titleText.setFontSize(20f);
+        titleText.setBold(true);
+        titleText.setForecolor(new Color(40, 40, 40));
+
+        titleBand.addElement(titleText);
+        jasperDesign.setTitle(titleBand);
+
+        // ====== Column Header ======
+        JRDesignBand columnHeader = new JRDesignBand();
+        columnHeader.setHeight(25);
+
+        int x = 0;
+        columnHeader.addElement(createHeaderCell("ID", x, 40));           x += 40;
+        columnHeader.addElement(createHeaderCell("Order ID", x, 60));    x += 60;
+        columnHeader.addElement(createHeaderCell("Order #", x, 90));     x += 90;
+        columnHeader.addElement(createHeaderCell("Username", x, 120));    x += 120;
+        columnHeader.addElement(createHeaderCell("Method", x, 100));      x += 100;
+        columnHeader.addElement(createHeaderCell("Amount", x, 90));       x += 90;
+        columnHeader.addElement(createHeaderCell("Status", x, 80));       x += 80;
+        columnHeader.addElement(createHeaderCell("Transaction ID", x, 122)); x += 122;
+        columnHeader.addElement(createHeaderCell("Payment Date", x, 100));
+        jasperDesign.setColumnHeader(columnHeader);
+
+        // ====== Detail ======
+        JRDesignBand detailBand = new JRDesignBand();
+        detailBand.setHeight(20);
+
+        int dx = 0;
+        detailBand.addElement(createDetailCell("String.valueOf($F{id})", dx, 40)); dx += 40;
+        detailBand.addElement(createDetailCell("String.valueOf($F{orderId})", dx, 60)); dx += 60;
+        detailBand.addElement(createDetailCell("($F{orderNumber} == null) ? \"—\" : $F{orderNumber}", dx, 90)); dx += 90;
+        detailBand.addElement(createDetailCell("($F{username} == null) ? \"—\" : $F{username}", dx, 120)); dx += 120;
+        detailBand.addElement(createDetailCell("($F{paymentMethod} == null) ? \"—\" : $F{paymentMethod}", dx, 100)); dx += 100;
+        detailBand.addElement(createDetailCell("($F{amount} == null) ? \"—\" : \"$\" + String.format(\"%.2f\", $F{amount}.doubleValue())", dx, 90)); dx += 90;
+
+        // Payment Status with conditional color
+        JRDesignTextField statusField = createDetailCell("($F{status} == null) ? \"—\" : $F{status}", dx, 80);
+        applyConditionalPaymentStatusColor(jasperDesign, statusField);
+        detailBand.addElement(statusField);
+        dx += 80;
+
+        detailBand.addElement(createDetailCell("($F{transactionId} == null) ? \"—\" : $F{transactionId}", dx, 122)); dx += 122;
+        detailBand.addElement(createDetailCell(
+                "($F{paymentDate} == null) ? \"—\" : $F{paymentDate}.format(java.time.format.DateTimeFormatter.ofPattern(\"dd/MM/yyyy HH:mm\"))",
+                dx, 100));
+
+        ((JRDesignSection) jasperDesign.getDetailSection()).addBand(detailBand);
+
+        // ====== Footer ======
+        JRDesignBand footerBand = new JRDesignBand();
+        footerBand.setHeight(25);
+
+        JRDesignTextField footerText = new JRDesignTextField();
+        footerText.setX(0);
+        footerText.setY(0);
+        footerText.setWidth(802);
+        footerText.setHeight(20);
+        footerText.setExpression(new JRDesignExpression("\"Generated by Admin | Page \" + $V{PAGE_NUMBER}"));
+        footerText.setHorizontalTextAlign(HorizontalTextAlignEnum.RIGHT);
+        footerText.setVerticalTextAlign(VerticalTextAlignEnum.MIDDLE);
+        footerText.setFontSize(9f);
+        footerText.setForecolor(Color.DARK_GRAY);
+
+        footerBand.addElement(footerText);
+        jasperDesign.setPageFooter(footerBand);
+
+        return JasperCompileManager.compileReport(jasperDesign);
+    }
+
+    // ============================================================
+    // CONDITIONAL STYLES FOR ORDER & PAYMENT
+    // ============================================================
+
+    private void applyConditionalOrderStatusColor(JasperDesign design, JRDesignTextField field) throws JRException {
+        JRDesignStyle style = new JRDesignStyle();
+        style.setName("OrderStatusStyle");
+
+        JRDesignConditionalStyle pending = new JRDesignConditionalStyle();
+        pending.setConditionExpression(new JRDesignExpression("$F{status} != null && $F{status}.equals(\"PENDING\")"));
+        pending.setBackcolor(new Color(255, 243, 205));
+        pending.setMode(ModeEnum.OPAQUE);
+
+        JRDesignConditionalStyle confirmed = new JRDesignConditionalStyle();
+        confirmed.setConditionExpression(new JRDesignExpression("$F{status} != null && $F{status}.equals(\"CONFIRMED\")"));
+        confirmed.setBackcolor(new Color(209, 236, 241));
+        confirmed.setMode(ModeEnum.OPAQUE);
+
+        JRDesignConditionalStyle shipping = new JRDesignConditionalStyle();
+        shipping.setConditionExpression(new JRDesignExpression("$F{status} != null && $F{status}.equals(\"SHIPPING\")"));
+        shipping.setBackcolor(new Color(187, 222, 251));
+        shipping.setMode(ModeEnum.OPAQUE);
+
+        JRDesignConditionalStyle delivered = new JRDesignConditionalStyle();
+        delivered.setConditionExpression(new JRDesignExpression("$F{status} != null && $F{status}.equals(\"DELIVERED\")"));
+        delivered.setBackcolor(new Color(198, 239, 206));
+        delivered.setMode(ModeEnum.OPAQUE);
+
+        JRDesignConditionalStyle cancelled = new JRDesignConditionalStyle();
+        cancelled.setConditionExpression(new JRDesignExpression("$F{status} != null && $F{status}.equals(\"CANCELLED\")"));
+        cancelled.setBackcolor(new Color(244, 204, 204));
+        cancelled.setMode(ModeEnum.OPAQUE);
+
+        style.addConditionalStyle(pending);
+        style.addConditionalStyle(confirmed);
+        style.addConditionalStyle(shipping);
+        style.addConditionalStyle(delivered);
+        style.addConditionalStyle(cancelled);
+        design.addStyle(style);
+
+        field.setStyle(style);
+    }
+
+    private void applyConditionalPaymentStatusColor(JasperDesign design, JRDesignTextField field) throws JRException {
+        JRDesignStyle style = new JRDesignStyle();
+        style.setName("PaymentStatusStyle");
+
+        JRDesignConditionalStyle paid = new JRDesignConditionalStyle();
+        paid.setConditionExpression(new JRDesignExpression("$F{status} != null && ($F{status}.equals(\"PAID\") || $F{paymentStatus}.equals(\"PAID\"))"));
+        paid.setBackcolor(new Color(198, 239, 206));
+        paid.setForecolor(new Color(0, 100, 0));
+        paid.setMode(ModeEnum.OPAQUE);
+        paid.setBold(true);
+
+        JRDesignConditionalStyle pending = new JRDesignConditionalStyle();
+        pending.setConditionExpression(new JRDesignExpression("$F{status} != null && ($F{status}.equals(\"PENDING\") || $F{paymentStatus}.equals(\"PENDING\"))"));
+        pending.setBackcolor(new Color(255, 243, 205));
+        pending.setMode(ModeEnum.OPAQUE);
+
+        JRDesignConditionalStyle failed = new JRDesignConditionalStyle();
+        failed.setConditionExpression(new JRDesignExpression("$F{status} != null && ($F{status}.equals(\"FAILED\") || $F{paymentStatus}.equals(\"FAILED\"))"));
+        failed.setBackcolor(new Color(244, 204, 204));
+        failed.setForecolor(new Color(139, 0, 0));
+        failed.setMode(ModeEnum.OPAQUE);
+
+        style.addConditionalStyle(paid);
+        style.addConditionalStyle(pending);
+        style.addConditionalStyle(failed);
         design.addStyle(style);
 
         field.setStyle(style);

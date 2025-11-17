@@ -2,13 +2,18 @@ package com.training.demo.consumer;
 
 import com.rabbitmq.client.Channel;
 import com.training.demo.dto.ExportMessageDTO;
+import com.training.demo.dto.response.Order.ExportOrderResponse;
+import com.training.demo.dto.response.Payment.ExportPaymentResponse;
 import com.training.demo.dto.response.Product.ExportProductResponse;
 import com.training.demo.dto.response.User.ExportUserResponse;
 import com.training.demo.helpers.Reports.JasperReportGenerator;
-import com.training.demo.producer.EmailProducer;
+import com.training.demo.repository.OrderRepository;
+import com.training.demo.repository.PaymentRepository;
 import com.training.demo.repository.ProductRepository;
 import com.training.demo.repository.UserRepository;
 import com.training.demo.utils.constants.RabbitMQConstants;
+import com.training.demo.utils.enums.OrderStatus;
+import com.training.demo.utils.enums.PaymentStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.JRException;
@@ -25,7 +30,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,13 +38,13 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ExportConsumer {
 
-    private final JasperReportGenerator reportGenerator;
+    private final JasperReportGenerator jasperReportGenerator;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
-    private final EmailProducer emailProducer;
+    private final OrderRepository orderRepository;
+    private final PaymentRepository paymentRepository;
 
     private static final String EXPORT_DIR = "exports/";
-    private static final int MAX_RETRY_COUNT = 3;
 
     @RabbitListener(queues = RabbitMQConstants.EXPORT_QUEUE)
     public void processExportRequest(
@@ -72,6 +76,12 @@ public class ExportConsumer {
                 case "PRODUCT_PDF":
                     pdfBytes = generateProductReport(exportMessage);
                     break;
+                case "ORDER_PDF":
+                    pdfBytes = generateOrderReport(exportMessage);
+                    break;
+                case "PAYMENT_PDF":
+                    pdfBytes = generatePaymentReport(exportMessage);
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown export type: " + exportMessage.getExportType());
             }
@@ -82,9 +92,6 @@ public class ExportConsumer {
             }
 
             log.info("[ExportConsumer] Export completed - File saved: {}", filePath);
-
-            // Send email with download link
-            sendExportCompletionEmail(exportMessage, filePath);
 
             // Acknowledge success
             channel.basicAck(deliveryTag, false);
@@ -107,7 +114,7 @@ public class ExportConsumer {
         log.info("[ExportConsumer] Generating user report, filter: {}", username);
         List<ExportUserResponse> users = userRepository.findAllWithRoles(username);
         
-        JasperPrint jasperPrint = reportGenerator.generateUserReport(users);
+        JasperPrint jasperPrint = jasperReportGenerator.generateUserReport(users);
         
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
@@ -124,7 +131,7 @@ public class ExportConsumer {
         log.info("[ExportConsumer] Generating product report, filter: {}", productName);
         List<ExportProductResponse> products = productRepository.findAllProjectedWithCategory(productName);
         
-        JasperPrint jasperPrint = reportGenerator.generateProductReport(products);
+        JasperPrint jasperPrint = jasperReportGenerator.generateProductReport(products);
         
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
@@ -133,36 +140,60 @@ public class ExportConsumer {
     }
 
     /**
-     * Send email notification when export is completed
+     * Generate order report PDF
      */
-    private void sendExportCompletionEmail(ExportMessageDTO exportMessage, String filePath) {
-        try {
-            // TODO: Get user email from userId
-            // For now, using a simple message
-            
-            Map<String, Object> emailData = new HashMap<>();
-            emailData.put("fileName", exportMessage.getFileName());
-            emailData.put("exportType", exportMessage.getExportType());
-            emailData.put("filePath", filePath);
-            emailData.put("downloadUrl", "http://localhost:8080/api/exports/download/" + exportMessage.getFileName());
-            
-            String subject = "Export Completed - " + exportMessage.getFileName();
-            String content = String.format(
-                    "Your export request has been completed.\n\n" +
-                    "File: %s\n" +
-                    "Type: %s\n" +
-                    "Download URL: %s\n\n" +
-                    "This link will be available for 24 hours.",
-                    exportMessage.getFileName(),
-                    exportMessage.getExportType(),
-                    emailData.get("downloadUrl")
-            );
-            
-            // emailProducer.sendSimpleEmail(userEmail, subject, content);
-            log.info("[ExportConsumer] Export completion email would be sent for file: {}", exportMessage.getFileName());
-            
-        } catch (Exception e) {
-            log.error("[ExportConsumer] Failed to send export completion email", e);
+    private byte[] generateOrderReport(ExportMessageDTO exportMessage) throws JRException {
+        // Lấy map ra, log luôn cho chắc
+        Map<String, Object> params = exportMessage.getParameters();
+        log.info("[ExportConsumer] Raw parameters: {}", params);
+
+        String orderNumber = (String) params.get("orderNumber");
+        String username    = (String) params.get("username");
+        Object statusObj   = params.get("status");
+
+        OrderStatus orderStatus = null;
+        if (statusObj != null) {
+            // Nếu Producer put enum trực tiếp, nó sẽ deserialize thành LinkedHashMap/String tùy config.
+            // Để an toàn hơn, nên cho Producer gửi status.name() (String).
+            // Tạm thời xử lý kiểu String:
+            String statusStr = statusObj.toString();
+            if (!statusStr.isBlank()) {
+                orderStatus = OrderStatus.valueOf(statusStr);
+            }
         }
+
+        log.info("[ExportConsumer] Generating order report, filter: orderNumber={}, username={}, status={}",
+                orderNumber, username, orderStatus);
+
+        List<ExportOrderResponse> orders =
+                orderRepository.findAllForExport(orderNumber, username, orderStatus);
+
+        JasperPrint jasperPrint = jasperReportGenerator.generateOrderReport(orders);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+
+        return outputStream.toByteArray();
     }
+
+
+    /**
+     * Generate payment report PDF
+     */
+    private byte[] generatePaymentReport(ExportMessageDTO exportMessage) throws JRException {
+        String statusStr = (String) exportMessage.getParameters().get("status");
+        PaymentStatus status = statusStr != null ? PaymentStatus.valueOf(statusStr) : null;
+        
+        log.info("[ExportConsumer] Generating payment report, filter: {}", status);
+        List<ExportPaymentResponse> payments = paymentRepository.findAllForExport(status);
+        
+        JasperPrint jasperPrint = jasperReportGenerator.generatePaymentReport(payments);
+        
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+        
+        return outputStream.toByteArray();
+    }
+
+
 }

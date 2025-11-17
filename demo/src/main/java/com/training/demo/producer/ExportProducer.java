@@ -2,6 +2,7 @@ package com.training.demo.producer;
 
 import com.training.demo.dto.ExportMessageDTO;
 import com.training.demo.utils.constants.RabbitMQConstants;
+import com.training.demo.utils.enums.OrderStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -68,6 +69,42 @@ public class ExportProducer {
                 .userId(userId)
                 .exportType("PRODUCT_PDF")
                 .fileName("products_report_" + System.currentTimeMillis() + ".pdf")
+                .parameters(params)
+                .build();
+
+        sendExportRequest(message);
+    }
+
+    /**
+     * Export orders report
+     */
+    public void exportOrderReport(Long userId, String orderNumber, String username, OrderStatus status, String fileName) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("orderNumber", orderNumber);
+        params.put("username", username);
+        params.put("status", status != null ? status.name() : null); // gửi String
+
+        ExportMessageDTO message = ExportMessageDTO.builder()
+                .userId(userId)
+                .exportType("ORDER_PDF")
+                .fileName(fileName)
+                .parameters(params)
+                .build();
+
+        sendExportRequest(message);
+    }
+
+    /**
+     * Export payments report
+     */
+    public void exportPaymentReport(Long userId, String status) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("status", status);
+
+        ExportMessageDTO message = ExportMessageDTO.builder()
+                .userId(userId)
+                .exportType("PAYMENT_PDF")
+                .fileName("payments_report_" + System.currentTimeMillis() + ".pdf")
                 .parameters(params)
                 .build();
 

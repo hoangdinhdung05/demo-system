@@ -1,5 +1,7 @@
 package com.training.demo.repository;
 
+import com.training.demo.dto.response.Order.ExportOrderResponse;
+import com.training.demo.dto.response.Order.OrderResponse;
 import com.training.demo.entity.Order;
 import com.training.demo.utils.enums.OrderStatus;
 import org.springframework.data.domain.Page;
@@ -81,4 +83,40 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * Đếm đơn hàng theo trạng thái
      */
     long countByStatus(OrderStatus status);
+
+
+    /**
+     * Lấy tất cả đơn hàng để xuất file
+     * @param orderNumber search by order number
+     * @param username search by username
+     * @param status search by order status
+     * @return list of ExportOrderResponse
+     */
+    @Query("""
+    SELECT new com.training.demo.dto.response.Order.ExportOrderResponse(
+        o.id,
+        o.orderNumber,
+        u.username,
+        o.receiverName,
+        o.phoneNumber,
+        o.shippingAddress,
+        o.totalAmount,
+        CAST(o.status AS string),
+        CAST(o.paymentMethod AS string),
+        CAST(o.paymentStatus AS string),
+        o.createdAt,
+        o.note
+    )
+    FROM Order o
+    LEFT JOIN o.user u
+    WHERE (:orderNumber IS NULL OR o.orderNumber LIKE CONCAT('%', :orderNumber, '%'))
+      AND (:username IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :username, '%')))
+      AND (:status IS NULL OR o.status = :status)
+    ORDER BY o.createdAt DESC
+    """)
+    List<ExportOrderResponse> findAllForExport(
+            @Param("orderNumber") String orderNumber,
+            @Param("username") String username,
+            @Param("status") OrderStatus status
+    );
 }

@@ -407,7 +407,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public PageResponse<OrderResponse> getAllOrders(OrderStatus status, Pageable pageable) {
-        log.info("[OrderService] Getting all orders, status: {}", status);
+            log.info("[OrderService] Getting all orders, status: {}", status);
 
         Page<Order> orderPage;
         if (status != null) {

@@ -1,10 +1,16 @@
 package com.training.demo.service;
 
+import com.training.demo.dto.response.Order.ExportOrderResponse;
+import com.training.demo.dto.response.Payment.ExportPaymentResponse;
 import com.training.demo.dto.response.Product.ExportProductResponse;
 import com.training.demo.dto.response.User.ExportUserResponse;
 import com.training.demo.helpers.Reports.JasperReportGenerator;
+import com.training.demo.repository.OrderRepository;
+import com.training.demo.repository.PaymentRepository;
 import com.training.demo.repository.ProductRepository;
 import com.training.demo.repository.UserRepository;
+import com.training.demo.utils.enums.OrderStatus;
+import com.training.demo.utils.enums.PaymentStatus;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
 import org.springframework.stereotype.Service;
@@ -18,14 +24,20 @@ public class JasperReportService {
     private final JasperReportGenerator reportGenerator;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
+    private final PaymentRepository paymentRepository;
 
     public JasperReportService(
             JasperReportGenerator reportGenerator,
             UserRepository userRepository,
-            ProductRepository productRepository) {
+            ProductRepository productRepository,
+            OrderRepository orderRepository,
+            PaymentRepository paymentRepository) {
         this.reportGenerator = reportGenerator;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
+        this.orderRepository = orderRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     public byte[] generateUserReportPdf(String username) {
@@ -67,6 +79,50 @@ public class JasperReportService {
         } catch (JRException e) {
             log.error("[JasperReportService] Error generating product report: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to generate product report", e);
+        }
+    }
+
+    public byte[] generateOrderReportPdf(String orderNumber, String customerOrder, OrderStatus orderStatus) {
+        try {
+            log.info("[JasperReportService] Fetching orders from database");
+            List<ExportOrderResponse> orders = orderRepository.findAllForExport(orderNumber, customerOrder, orderStatus);
+            log.info("[JasperReportService] {} orders fetched", orders.size());
+
+            log.info("[JasperReportService] Start generating Jasper order report");
+            JasperPrint jasperPrint = reportGenerator.generateOrderReport(orders);
+            log.info("[JasperReportService] Order report generated successfully");
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+            log.info("[JasperReportService] Order report exported to PDF stream");
+
+            return outputStream.toByteArray();
+        } catch (JRException e) {
+            log.error("[JasperReportService] Error generating order report: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to generate order report", e);
+        }
+    }
+
+    public byte[] generatePaymentReportPdf(String status) {
+        try {
+            PaymentStatus paymentStatus = status != null ? PaymentStatus.valueOf(status) : null;
+            
+            log.info("[JasperReportService] Fetching payments from database");
+            List<ExportPaymentResponse> payments = paymentRepository.findAllForExport(paymentStatus);
+            log.info("[JasperReportService] {} payments fetched", payments.size());
+
+            log.info("[JasperReportService] Start generating Jasper payment report");
+            JasperPrint jasperPrint = reportGenerator.generatePaymentReport(payments);
+            log.info("[JasperReportService] Payment report generated successfully");
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+            log.info("[JasperReportService] Payment report exported to PDF stream");
+
+            return outputStream.toByteArray();
+        } catch (JRException e) {
+            log.error("[JasperReportService] Error generating payment report: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to generate payment report", e);
         }
     }
 }

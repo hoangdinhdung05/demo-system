@@ -37,6 +37,12 @@ public class OrderMapper {
     public static OrderItemResponse toOrderItemResponse(OrderItem item) {
         if (item == null) return null;
 
+        // If productImageUrl is null in OrderItem, try to get it from Product
+        String imageUrl = item.getProductImageUrl();
+        if (imageUrl == null && item.getProduct() != null) {
+            imageUrl = item.getProduct().getProductImageUrl();
+        }
+
         return OrderItemResponse.builder()
                 .id(item.getId())
                 .productId(item.getProduct() != null ? item.getProduct().getId() : null)
@@ -44,7 +50,7 @@ public class OrderMapper {
                 .quantity(item.getQuantity())
                 .price(item.getPrice())
                 .subtotal(item.getSubtotal())
-                .productImageUrl(item.getProductImageUrl())
+                .productImageUrl(imageUrl)
                 .build();
     }
 }
