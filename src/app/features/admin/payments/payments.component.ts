@@ -73,7 +73,19 @@ export class PaymentsComponent implements OnInit {
   }
 
   exportPaymentReport(): void {
-    this.toastr.info('Chức năng xuất báo cáo đang được phát triển', 'Thông báo');
+    this.toastr.info('Đang tạo báo cáo thanh toán...', 'Thông báo');
+    
+    this.paymentService.exportPaymentsAsync().subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastr.success('Yêu cầu xuất báo cáo đã được gửi. Bạn sẽ nhận được email khi file sẵn sàng.', 'Thành công');
+        }
+      },
+      error: (error) => {
+        console.error('Error requesting payment report export:', error);
+        this.toastr.error('Không thể gửi yêu cầu xuất báo cáo', 'Lỗi');
+      }
+    });
   }
 
   onPageChange(page: number): void {

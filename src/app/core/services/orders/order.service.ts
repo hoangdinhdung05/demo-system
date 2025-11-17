@@ -113,4 +113,18 @@ export class OrderService {
   updateOrderStatus(orderId: number, request: UpdateOrderStatusRequest): Observable<BaseResponse<OrderResponse>> {
     return this.http.patch<BaseResponse<OrderResponse>>(`${this.apiUrl}/admin/${orderId}/status`, request);
   }
+
+  /**
+   * Xuất báo cáo đơn hàng bất đồng bộ (ADMIN)
+   */
+  exportOrdersAsync(orderNumber?: string, status?: string): Observable<BaseResponse<string>> {
+    let params = new HttpParams();
+    if (orderNumber) {
+      params = params.set('orderNumber', orderNumber);
+    }
+    if (status) {
+      params = params.set('status', status);
+    }
+    return this.http.get<BaseResponse<string>>(`${environment.apiUrl}/reports/orders/async`, { params });
+  }
 }

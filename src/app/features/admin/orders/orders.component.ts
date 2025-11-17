@@ -6,6 +6,7 @@ import { UpdateOrderStatusRequest } from '../../../core/models/request/Order/Upd
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-admin-orders',
@@ -15,6 +16,10 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 export class AdminOrdersComponent implements OnInit {
   orders: OrderResponse[] = [];
   isLoading = false;
+
+  imageUrl(product: any) {
+    return `${environment.assetBase}${product.productImageUrl}`;
+  }
   
   // Pagination
   currentPage = 0;
@@ -223,226 +228,38 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   exportOrderPDF(order: OrderResponse): void {
+    // Export PDF không còn ở FE nữa, chuyển sang gọi API backend
     this.toastr.info('Đang tạo PDF đơn hàng...', 'Thông báo');
     
-    // Create HTML content for single order PDF
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
-          .header { text-align: center; margin-bottom: 30px; }
-          .header h1 { color: #333; margin: 0; }
-          .header p { color: #666; margin: 5px 0; }
-          .section { margin: 20px 0; }
-          .section h3 { background: #4CAF50; color: white; padding: 10px; margin: 0 0 10px 0; }
-          .info-row { display: flex; margin: 8px 0; }
-          .info-label { font-weight: bold; width: 150px; }
-          .info-value { flex: 1; }
-          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-          th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-          th { background-color: #f5f5f5; font-weight: bold; }
-          .total-row { font-weight: bold; background-color: #f9f9f9; }
-          .status-badge { padding: 5px 10px; border-radius: 4px; display: inline-block; }
-          .badge-warning { background-color: #ffc107; color: #000; }
-          .badge-info { background-color: #17a2b8; color: white; }
-          .badge-primary { background-color: #007bff; color: white; }
-          .badge-success { background-color: #28a745; color: white; }
-          .badge-danger { background-color: #dc3545; color: white; }
-          .footer { margin-top: 40px; text-align: center; color: #666; font-size: 12px; border-top: 1px solid #ddd; padding-top: 20px; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>HÓA ĐƠN ĐẶT HÀNG</h1>
-          <p>Mã đơn hàng: #${order.orderNumber}</p>
-          <p>Ngày tạo: ${this.formatDate(order.createdAt)}</p>
-        </div>
-
-        <div class="section">
-          <h3>Thông tin khách hàng</h3>
-          <div class="info-row">
-            <span class="info-label">Người nhận:</span>
-            <span class="info-value">${order.receiverName}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Số điện thoại:</span>
-            <span class="info-value">${order.phoneNumber}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Địa chỉ:</span>
-            <span class="info-value">${order.shippingAddress}</span>
-          </div>
-        </div>
-
-        <div class="section">
-          <h3>Thông tin đơn hàng</h3>
-          <div class="info-row">
-            <span class="info-label">Trạng thái:</span>
-            <span class="info-value">
-              <span class="status-badge ${this.getStatusBadgeClass(order.status).replace('badge-', 'badge-')}">
-                ${this.getStatusLabel(order.status)}
-              </span>
-            </span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Phương thức TT:</span>
-            <span class="info-value">${order.paymentMethod}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Trạng thái TT:</span>
-            <span class="info-value">
-              <span class="status-badge ${order.paymentStatus === 'PAID' ? 'badge-success' : 'badge-warning'}">
-                ${order.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}
-              </span>
-            </span>
-          </div>
-        </div>
-
-        <div class="section">
-          <h3>Chi tiết sản phẩm</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>STT</th>
-                <th>Tên sản phẩm</th>
-                <th>Số lượng</th>
-                <th>Đơn giá</th>
-                <th>Thành tiền</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${order.items.map((item, index) => `
-                <tr>
-                  <td>${index + 1}</td>
-                  <td>${item.productName}</td>
-                  <td>${item.quantity}</td>
-                  <td>${this.formatCurrency(item.price)}</td>
-                  <td>${this.formatCurrency(item.quantity * item.price)}</td>
-                </tr>
-              `).join('')}
-              <tr class="total-row">
-                <td colspan="4" style="text-align: right;">Tổng cộng:</td>
-                <td style="color: #dc3545;">${this.formatCurrency(order.totalAmount)}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        ${order.note ? `
-        <div class="section">
-          <h3>Ghi chú</h3>
-          <p>${order.note}</p>
-        </div>
-        ` : ''}
-
-        <div class="footer">
-          <p>Cảm ơn quý khách đã đặt hàng!</p>
-          <p>© ${new Date().getFullYear()} - Hệ thống quản lý bán hàng</p>
-        </div>
-      </body>
-      </html>
-    `;
-
-    // Create a new window and print
-    const printWindow = window.open('', '', 'height=600,width=800');
-    if (printWindow) {
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
-      printWindow.focus();
-      
-      setTimeout(() => {
-        printWindow.print();
-        this.toastr.success('PDF đơn hàng đã được tạo', 'Thành công');
-      }, 250);
-    } else {
-      this.toastr.error('Không thể mở cửa sổ in', 'Lỗi');
-    }
+    this.orderService.exportOrdersAsync(order.orderNumber).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastr.success('Yêu cầu xuất PDF đã được gửi. Bạn sẽ nhận được email khi file sẵn sàng.', 'Thành công');
+        }
+      },
+      error: (error) => {
+        console.error('Error requesting PDF export:', error);
+        this.toastr.error('Không thể gửi yêu cầu xuất PDF', 'Lỗi');
+      }
+    });
   }
 
   exportOrdersReport(): void {
     this.toastr.info('Đang tạo báo cáo PDF...', 'Thông báo');
+
+    const customerOrder = this.searchTerm.trim() || undefined;
+    const status = this.selectedStatus;
     
-    // Create report content
-    const reportData = this.orders.map((order, index) => ({
-      stt: index + 1 + (this.currentPage * this.pageSize),
-      orderId: order.id,
-      customerName: order.receiverName || order.username || 'N/A',
-      totalAmount: this.formatCurrency(order.totalAmount),
-      status: this.getStatusLabel(order.status),
-      createdAt: this.formatDate(order.createdAt)
-    }));
-
-    // Create HTML content for PDF
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
-          h1 { text-align: center; color: #333; }
-          .info { text-align: center; margin-bottom: 20px; color: #666; }
-          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-          th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-          th { background-color: #4CAF50; color: white; }
-          tr:nth-child(even) { background-color: #f2f2f2; }
-          .footer { margin-top: 30px; text-align: center; color: #666; font-size: 12px; }
-        </style>
-      </head>
-      <body>
-        <h1>BÁO CÁO QUẢN LÝ ĐƠN HÀNG</h1>
-        <div class="info">
-          <p>Ngày xuất: ${new Date().toLocaleString('vi-VN')}</p>
-          <p>Tổng số đơn hàng: ${this.totalElements}</p>
-          ${this.selectedStatus ? `<p>Trạng thái lọc: ${this.getStatusLabel(this.selectedStatus)}</p>` : ''}
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>STT</th>
-              <th>Mã ĐH</th>
-              <th>Khách hàng</th>
-              <th>Tổng tiền</th>
-              <th>Trạng thái</th>
-              <th>Ngày tạo</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${reportData.map(row => `
-              <tr>
-                <td>${row.stt}</td>
-                <td>#${row.orderId}</td>
-                <td>${row.customerName}</td>
-                <td>${row.totalAmount}</td>
-                <td>${row.status}</td>
-                <td>${row.createdAt}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        <div class="footer">
-          <p>© ${new Date().getFullYear()} - Hệ thống quản lý đơn hàng</p>
-        </div>
-      </body>
-      </html>
-    `;
-
-    // Create a new window and print
-    const printWindow = window.open('', '', 'height=600,width=800');
-    if (printWindow) {
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
-      printWindow.focus();
-      
-      setTimeout(() => {
-        printWindow.print();
-        this.toastr.success('Báo cáo đã được tạo', 'Thành công');
-      }, 250);
-    } else {
-      this.toastr.error('Không thể mở cửa sổ in', 'Lỗi');
-    }
+    this.orderService.exportOrdersAsync(customerOrder, status).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.toastr.success('Yêu cầu xuất báo cáo PDF đã được gửi. Bạn sẽ nhận được email khi file sẵn sàng.', 'Thành công');
+        }
+      },
+      error: (error) => {
+        console.error('Error requesting report export:', error);
+        this.toastr.error('Không thể gửi yêu cầu xuất báo cáo', 'Lỗi');
+      }
+    });
   }
 }

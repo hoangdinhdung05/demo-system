@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -86,5 +86,16 @@ export class PaymentService {
    */
   getTotalRevenue(): Observable<number> {
     return this.http.get<number>(`${this.apiUrl}/admin/total-revenue`);
+  }
+
+  /**
+   * Xuất báo cáo thanh toán bất đồng bộ (ADMIN)
+   */
+  exportPaymentsAsync(status?: string): Observable<BaseResponse<string>> {
+    let params = new HttpParams();
+    if (status) {
+      params = params.set('status', status);
+    }
+    return this.http.get<BaseResponse<string>>(`${environment.apiUrl}/reports/payments/async`, { params });
   }
 }

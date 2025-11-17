@@ -46,6 +46,7 @@
             <tr>
               <th class="text-center">#</th>
               <th class="text-center">Mã đơn hàng</th>
+              <th class="text-center">Username</th>
               <th>Khách hàng</th>
               <th class="text-end">Số tiền</th>
               <th class="text-center">Trạng thái</th>
@@ -59,6 +60,9 @@
               <td class="text-center">{{ i + 1 + (currentPage * pageSize) }}</td>
               <td class="text-center">
                 <strong>{{ order.orderNumber }}</strong>
+              </td>
+              <td class="text-center">
+                <strong>{{ order.username }}</strong>
               </td>
               <td>
                 <div>{{ order.receiverName }}</div>
@@ -98,7 +102,7 @@
               </td>
             </tr>
             <tr *ngIf="orders.length === 0">
-              <td colspan="8" class="text-center py-4">
+              <td colspan="9" class="text-center py-4">
                 <p class="text-muted mb-0">Không có đơn hàng nào</p>
               </td>
             </tr>
@@ -248,12 +252,9 @@
                 <tr *ngFor="let item of selectedOrder.items; let i = index">
                   <td class="text-center">{{ i + 1 }}</td>
                   <td>
-                    <img 
-                      [src]="item.productImageUrl || 'assets/images/no-image.png'" 
-                      [alt]="item.productName"
+                    <img [src]="imageUrl(item)" [alt]="item.productName"
                       class="img-thumbnail"
                       style="width: 60px; height: 60px; object-fit: cover;"
-                      onerror="this.src='assets/images/no-image.png'"
                     />
                   </td>
                   <td>
