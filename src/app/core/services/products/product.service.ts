@@ -75,4 +75,15 @@ export class ProductService {
     const params = new HttpParams().set('name', name.toString());
     return this.http.post<BaseResponse<ProductResponse[]>>(`${this.apiUrl}/search`, null, { params });
   }
+
+  /**
+   * Search products by category name with pagination
+   */
+  searchByCategory(categoryName: string, pageNumber: number = 0, pageSize: number = 12): Observable<BaseResponse<PageResponse<ProductResponse>>> {
+    const params = new HttpParams()
+      .set('name', categoryName)
+      .set('pageNumber', pageNumber.toString())
+      .set('pageSize', pageSize.toString());
+    return this.http.post<BaseResponse<PageResponse<ProductResponse>>>(`${this.apiUrl}/search-category`, null, { params });
+  }
 }

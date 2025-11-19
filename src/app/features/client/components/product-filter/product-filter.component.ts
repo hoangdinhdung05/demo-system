@@ -24,7 +24,7 @@ export class ProductFilterComponent implements OnInit {
   categories: CategoryWithCount[] = [];
   isLoadingCategories = false;
 
-  selectedCategories: number[] = [];
+  selectedCategory: number | null = null;
   priceRange = { min: 0, max: 10000 };
   sortBy = 'name';
   inStock = false;
@@ -37,7 +37,9 @@ export class ProductFilterComponent implements OnInit {
     { value: 'newest', label: 'Mới nhất' }
   ];
 
-  constructor(private categoryService: CategoryService) { }
+  constructor(
+    private categoryService: CategoryService
+  ) { }
 
   ngOnInit(): void {
     this.loadCategories();
@@ -69,24 +71,12 @@ export class ProductFilterComponent implements OnInit {
     });
   }
 
-  onCategoryChange(categoryId: number, isChecked: boolean): void {
-    if (isChecked) {
-      this.selectedCategories.push(categoryId);
-    } else {
-      const index = this.selectedCategories.indexOf(categoryId);
-      if (index > -1) {
-        this.selectedCategories.splice(index, 1);
-      }
-    }
-    this.emitFilterChange();
-  }
-
   toggleCategory(categoryId: number): void {
-    const index = this.selectedCategories.indexOf(categoryId);
-    if (index > -1) {
-      this.selectedCategories.splice(index, 1);
+    // If clicking the same category, deselect it
+    if (this.selectedCategory === categoryId) {
+      this.selectedCategory = null;
     } else {
-      this.selectedCategories.push(categoryId);
+      this.selectedCategory = categoryId;
     }
     this.emitFilterChange();
   }
@@ -104,7 +94,7 @@ export class ProductFilterComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.selectedCategories = [];
+    this.selectedCategory = null;
     this.priceRange = { min: 0, max: 10000 };
     this.sortBy = 'name';
     this.inStock = false;
@@ -113,7 +103,7 @@ export class ProductFilterComponent implements OnInit {
 
   private emitFilterChange(): void {
     const filters: FilterOptions = {
-      categories: this.selectedCategories,
+      categories: this.selectedCategory !== null ? [this.selectedCategory] : [],
       priceRange: this.priceRange,
       sortBy: this.sortBy,
       inStock: this.inStock

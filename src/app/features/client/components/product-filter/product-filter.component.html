@@ -11,18 +11,19 @@
     <h5 class="filter-title">
       <i class="fas fa-list"></i> Danh mục
     </h5>
-    <div class="filter-content">
+    <div class="filter-content category-filter-content">
       <div *ngIf="isLoadingCategories" class="loading-categories">
         <i class="fas fa-spinner fa-spin"></i> Đang tải danh mục...
       </div>
       <div *ngFor="let category of categories" class="category-item">
-        <label class="checkbox-container">
+        <label class="radio-container">
           <input 
-            type="checkbox" 
-            [checked]="selectedCategories.includes(category.id)"
+            type="radio" 
+            name="category"
+            [checked]="selectedCategory === category.id"
             (change)="toggleCategory(category.id)"
           />
-          <span class="checkmark"></span>
+          <span class="radio-mark"></span>
           <span class="category-name">{{ category.name }}</span>
           <span class="category-count" *ngIf="category.count !== undefined">({{ category.count }})</span>
         </label>

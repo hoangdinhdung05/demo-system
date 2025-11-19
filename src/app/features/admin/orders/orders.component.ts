@@ -253,7 +253,7 @@ export class AdminOrdersComponent implements OnInit {
     this.orderService.exportOrdersAsync(customerOrder, status).subscribe({
       next: (response) => {
         if (response.success) {
-          this.toastr.success('Yêu cầu xuất báo cáo PDF đã được gửi. Bạn sẽ nhận được email khi file sẵn sàng.', 'Thành công');
+          this.toastr.success('Yêu cầu xuất báo cáo PDF đã được gửi. Bạn sẽ nhận được khi file sẵn sàng.', 'Thành công');
         }
       },
       error: (error) => {

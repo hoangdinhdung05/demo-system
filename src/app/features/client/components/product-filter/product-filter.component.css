@@ -77,6 +77,11 @@
   padding-left: 1.5rem;
 }
 
+/* Remove left padding for category filter to align with title */
+.category-filter-content {
+  padding-left: 0;
+}
+
 /* Category Items */
 .category-item {
   margin-bottom: 0.75rem;
@@ -96,6 +101,69 @@
   color: #007bff;
 }
 
+/* Radio Button Styles */
+.radio-container {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  font-size: 0.875rem;
+  padding: 0.625rem 0.75rem;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  margin: 0;
+}
+
+.radio-container:hover {
+  background: #f1f5f9;
+}
+
+.radio-container input[type="radio"] {
+  opacity: 0;
+  position: absolute;
+  cursor: pointer;
+}
+
+.radio-mark {
+  height: 20px;
+  width: 20px;
+  background-color: #fff;
+  border: 2px solid #cbd5e1;
+  border-radius: 50%;
+  margin-right: 0.75rem;
+  position: relative;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.radio-container:hover .radio-mark {
+  border-color: #0b6ff0;
+  box-shadow: 0 0 0 3px rgba(11, 111, 240, 0.1);
+}
+
+.radio-container input:checked + .radio-mark {
+  background-color: #fff;
+  border-color: #0b6ff0;
+  border-width: 2px;
+}
+
+.radio-mark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 4px;
+  top: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0b6ff0;
+}
+
+.radio-container input:checked + .radio-mark:after {
+  display: block;
+}
+
+/* Keep checkbox styles for other uses */
 .checkbox-container {
   display: flex;
   align-items: center;

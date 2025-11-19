@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../../../../core/services/products/product.service';
 import { CartService } from '../../../../core/services/cart/cart.service';
@@ -7,16 +7,20 @@ import { ProductResponse } from '../../../../core/models/response/Product/Produc
 import { AddToCartRequest } from '../../../../core/models/request/Cart/AddToCartRequest';
 import { environment } from '../../../../../environments/environment';
 import { ToastrService } from 'ngx-toastr';
+import { FilterOptions } from '../product-filter/product-filter.component';
+import { CategoryService } from '../../../../core/services/categories/category.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-product-list',
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit {
-  // Remove filter-related @Input and @OnChanges
+export class ProductListComponent implements OnInit, OnChanges {
+  @Input() filterOptions: FilterOptions | null = null;
+  
   allProducts: ProductResponse[] = [];
-  displayedProducts: ProductResponse[] = []; // Changed from filteredProducts
+  displayedProducts: ProductResponse[] = [];
   viewMode: 'grid' | 'list' = 'grid';
   isLoading = false;
   
@@ -36,7 +40,8 @@ export class ProductListComponent implements OnInit {
     private authService: AuthService,
     private toastr: ToastrService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private categoryService: CategoryService
   ) { }
 
   ngOnInit(): void {
@@ -45,10 +50,25 @@ export class ProductListComponent implements OnInit {
       const searchQuery = params['search'];
       if (searchQuery) {
         this.searchProducts(searchQuery);
-      } else {
+      } else if (!this.filterOptions || this.filterOptions.categories.length === 0) {
+        // Only load all products if no filters are active
         this.loadProducts();
+      } else {
+        // Load with filters
+        this.loadProductsWithFilters();
       }
     });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['filterOptions'] && !changes['filterOptions'].firstChange) {
+      const options = changes['filterOptions'].currentValue;
+      if (options) {
+        // Reset to first page when filters change
+        this.currentPage = 0;
+        this.loadProductsWithFilters();
+      }
+    }
   }
 
   loadProducts(page: number = 0): void {
@@ -87,21 +107,130 @@ export class ProductListComponent implements OnInit {
     });
   }
 
+  loadProductsWithFilters(page: number = 0): void {
+    if (!this.filterOptions) {
+      this.loadProducts(page);
+      return;
+    }
+
+    // If no category filter, load all products
+    if (this.filterOptions.categories.length === 0) {
+      this.loadProducts(page);
+      return;
+    }
+
+    this.isLoading = true;
+    this.currentPage = page;
+    this.isSearching = false;
+
+    // Load categories first to get category names
+    this.categoryService.getAllCategories(0, 100).subscribe({
+      next: (catResponse) => {
+        if (!catResponse.success || !catResponse.data) {
+          this.loadProducts(page);
+          return;
+        }
+
+        const categories = catResponse.data.content;
+        const categoryRequests = this.filterOptions!.categories
+          .map(categoryId => categories.find(c => c.id === categoryId))
+          .filter(category => category !== undefined)
+          .map(category => this.productService.searchByCategory(category!.name, this.currentPage, this.pageSize));
+
+        if (categoryRequests.length === 0) {
+          this.displayedProducts = [];
+          this.totalElements = 0;
+          this.totalPages = 0;
+          this.isLoading = false;
+          return;
+        }
+
+        // For single category, use its pagination directly
+        if (categoryRequests.length === 1) {
+          categoryRequests[0].subscribe({
+            next: (response) => {
+              if (response.success && response.data) {
+                const pageData = response.data as any;
+                this.displayedProducts = pageData.content || [];
+                this.totalElements = pageData.totalElements || 0;
+                this.totalPages = pageData.totalPages || 0;
+              }
+              this.isLoading = false;
+            },
+            error: (error) => {
+              console.error('Error loading products:', error);
+              this.displayedProducts = [];
+              this.isLoading = false;
+            }
+          });
+        } else {
+          // For multiple categories, merge results (pagination becomes approximate)
+          forkJoin(categoryRequests).subscribe({
+            next: (responses) => {
+              const allProducts: ProductResponse[] = [];
+              let totalAvailable = 0;
+
+              responses.forEach(response => {
+                if (response.success && response.data) {
+                  const pageData = response.data as any;
+                  const products = pageData.content || [];
+                  allProducts.push(...products);
+                  totalAvailable += pageData.totalElements || 0;
+                }
+              });
+
+              // Remove duplicates
+              const uniqueProducts = Array.from(
+                new Map(allProducts.map(p => [p.id, p])).values()
+              );
+
+              this.displayedProducts = uniqueProducts;
+              this.totalElements = totalAvailable;
+              this.totalPages = Math.ceil(totalAvailable / this.pageSize);
+              this.isLoading = false;
+            },
+            error: (error) => {
+              console.error('Error loading products:', error);
+              this.displayedProducts = [];
+              this.isLoading = false;
+            }
+          });
+        }
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.loadProducts(page);
+      }
+    });
+  }
+
   nextPage(): void { 
     if (this.currentPage < this.totalPages - 1) {
-      this.loadProducts(this.currentPage + 1); 
+      if (this.filterOptions && this.filterOptions.categories.length > 0) {
+        this.loadProductsWithFilters(this.currentPage + 1);
+      } else {
+        this.loadProducts(this.currentPage + 1);
+      }
     }
   }
   
   previousPage(): void { 
     if (this.currentPage > 0) {
-      this.loadProducts(this.currentPage - 1); 
+      if (this.filterOptions && this.filterOptions.categories.length > 0) {
+        this.loadProductsWithFilters(this.currentPage - 1);
+      } else {
+        this.loadProducts(this.currentPage - 1);
+      }
     }
   }
   
   goToPage(page: number): void { 
     if (page >= 0 && page < this.totalPages) {
-      this.loadProducts(page); 
+      if (this.filterOptions && this.filterOptions.categories.length > 0) {
+        this.loadProductsWithFilters(page);
+      } else {
+        this.loadProducts(page);
+      }
     }
   }
 
