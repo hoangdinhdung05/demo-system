@@ -5,6 +5,4 @@ import java.util.List;
 
 public interface ProductRepositoryCustom {
     List<ProductResponse> searchByName(String name);
-
-    List<ProductResponse> searchByCategory(String category);
 }

@@ -85,9 +85,11 @@ public interface ProductService {
     List<ProductResponse> findByName(String name);
 
     /**
-     * Find products by category (case-insensitive, exact match)
-     * @param category product category
-     * @return list of product responses matching the category
+     * Find products by category name with pagination
+     * @param category category name
+     * @param pageSize number of items per page
+     * @param pageNumber page number
+     * @return paginated product responses matching the category
      */
-    List<ProductResponse> findByCategory(String category);
+    PageResponse<ProductResponse> findByCategory(String category, int pageSize, int pageNumber);
 }

@@ -4,12 +4,10 @@ import com.training.demo.dto.request.Product.ProductCreateRequest;
 import com.training.demo.dto.request.Product.ProductRequest;
 import com.training.demo.dto.response.Product.ProductResponse;
 import com.training.demo.dto.response.System.PageResponse;
-import com.training.demo.dto.response.User.UserResponse;
 import com.training.demo.entity.Category;
 import com.training.demo.entity.Product;
 import com.training.demo.exception.BadRequestException;
 import com.training.demo.mapper.ProductMapper;
-import com.training.demo.mapper.UserMapper;
 import com.training.demo.repository.CategoryRepository;
 import com.training.demo.repository.ProductRepository;
 import com.training.demo.repository.specification.ProductSpecs;
@@ -290,15 +288,21 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * Find products by category (case-insensitive, exact match)
-     *
-     * @param category product category
-     * @return list of product responses matching the category
+     * Find products by category name with pagination
+     * @param category category name
+     * @param pageSize number of items per page
+     * @param pageNumber page number
+     * @return paginated product responses matching the category
      */
     @Override
-    public List<ProductResponse> findByCategory(String category) {
+    public PageResponse<ProductResponse> findByCategory(String category, int pageSize, int pageNumber) {
         log.info("[ProductService] Finding products by category: {}", category);
-        return productRepository.searchByCategory(category);
+
+        if (pageNumber < 0) throw new BadRequestException("Page index must be >= 0");
+        Pageable pageable = PageRequest.of(pageSize, pageNumber);
+        Page<ProductResponse> productResponses = productRepository.searchByCategory(category, pageable);
+
+        return PageResponse.of(productResponses);
     }
 
     //========== PRIVATE METHOD ==========//

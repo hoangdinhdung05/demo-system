@@ -496,16 +496,16 @@ public class JasperReportGenerator {
         columnHeader.setHeight(25);
 
         int x = 0;
-        columnHeader.addElement(createHeaderCell("ID", x, 40));            x += 40;
-        columnHeader.addElement(createHeaderCell("Order #", x, 80));      x += 80;
-        columnHeader.addElement(createHeaderCell("Customer", x, 100));     x += 100;
-        columnHeader.addElement(createHeaderCell("Receiver", x, 100));     x += 100;
-        columnHeader.addElement(createHeaderCell("Phone", x, 90));         x += 90;
-        columnHeader.addElement(createHeaderCell("Amount", x, 80));        x += 80;
-        columnHeader.addElement(createHeaderCell("Status", x, 80));        x += 80;
-        columnHeader.addElement(createHeaderCell("Payment", x, 80));       x += 80;
-        columnHeader.addElement(createHeaderCell("P.Status", x, 72));      x += 72;
-        columnHeader.addElement(createHeaderCell("Created", x, 80));
+        columnHeader.addElement(createHeaderCell("ID", x, 35));            x += 35;
+        columnHeader.addElement(createHeaderCell("Order #", x, 140));      x += 140;
+        columnHeader.addElement(createHeaderCell("Customer", x, 90));     x += 90;
+        columnHeader.addElement(createHeaderCell("Receiver", x, 90));     x += 90;
+        columnHeader.addElement(createHeaderCell("Phone", x, 85));         x += 85;
+        columnHeader.addElement(createHeaderCell("Amount", x, 75));        x += 75;
+        columnHeader.addElement(createHeaderCell("Status", x, 75));        x += 75;
+        columnHeader.addElement(createHeaderCell("Payment", x, 75));       x += 75;
+        columnHeader.addElement(createHeaderCell("P.Status", x, 67));      x += 67;
+        columnHeader.addElement(createHeaderCell("Created", x, 70));
         jasperDesign.setColumnHeader(columnHeader);
 
         // ====== Detail ======
@@ -513,31 +513,31 @@ public class JasperReportGenerator {
         detailBand.setHeight(20);
 
         int dx = 0;
-        detailBand.addElement(createDetailCell("String.valueOf($F{id})", dx, 40)); dx += 40;
-        detailBand.addElement(createDetailCell("$F{orderNumber}", dx, 80)); dx += 80;
-        detailBand.addElement(createDetailCell("($F{username} == null) ? \"—\" : $F{username}", dx, 100)); dx += 100;
-        detailBand.addElement(createDetailCell("($F{receiverName} == null) ? \"—\" : $F{receiverName}", dx, 100)); dx += 100;
-        detailBand.addElement(createDetailCell("($F{phoneNumber} == null) ? \"—\" : $F{phoneNumber}", dx, 90)); dx += 90;
-        detailBand.addElement(createDetailCell("($F{totalAmount} == null) ? \"—\" : \"$\" + String.format(\"%.2f\", $F{totalAmount})", dx, 80)); dx += 80;
+        detailBand.addElement(createDetailCell("($F{id} == null) ? \"—\" : String.valueOf($F{id})", dx, 35)); dx += 35;
+        detailBand.addElement(createDetailCell("($F{orderNumber} == null) ? \"—\" : $F{orderNumber}", dx, 140)); dx += 140;
+        detailBand.addElement(createDetailCell("($F{username} == null) ? \"—\" : $F{username}", dx, 90)); dx += 90;
+        detailBand.addElement(createDetailCell("($F{receiverName} == null) ? \"—\" : $F{receiverName}", dx, 90)); dx += 90;
+        detailBand.addElement(createDetailCell("($F{phoneNumber} == null) ? \"—\" : $F{phoneNumber}", dx, 85)); dx += 85;
+        detailBand.addElement(createDetailCell("($F{totalAmount} == null) ? \"—\" : \"$\" + String.format(\"%.2f\", $F{totalAmount}.doubleValue())", dx, 75)); dx += 75;
 
         // Order Status with conditional color
-        JRDesignTextField orderStatusField = createDetailCell("$F{status}", dx, 80);
+        JRDesignTextField orderStatusField = createDetailCell("($F{status} == null) ? \"—\" : $F{status}", dx, 75);
         applyConditionalOrderStatusColor(jasperDesign, orderStatusField);
         detailBand.addElement(orderStatusField);
-        dx += 80;
+        dx += 75;
 
-        detailBand.addElement(createDetailCell("($F{paymentMethod} == null) ? \"—\" : $F{paymentMethod}", dx, 80)); dx += 80;
+        detailBand.addElement(createDetailCell("($F{paymentMethod} == null) ? \"—\" : $F{paymentMethod}", dx, 75)); dx += 75;
 
         // Payment Status with conditional color
-        JRDesignTextField paymentStatusField = createDetailCell("($F{paymentStatus} == null) ? \"—\" : $F{paymentStatus}", dx, 72);
+        JRDesignTextField paymentStatusField = createDetailCell("($F{paymentStatus} == null) ? \"—\" : $F{paymentStatus}", dx, 67);
         applyConditionalPaymentStatusColor(jasperDesign, paymentStatusField);
         detailBand.addElement(paymentStatusField);
-        dx += 72;
+        dx += 67;
 
         // Created Date
         detailBand.addElement(createDetailCell(
                 "($F{createdAt} == null) ? \"—\" : $F{createdAt}.format(java.time.format.DateTimeFormatter.ofPattern(\"dd/MM/yyyy\"))",
-                dx, 80));
+                dx, 70));
 
         ((JRDesignSection) jasperDesign.getDetailSection()).addBand(detailBand);
 
@@ -637,8 +637,8 @@ public class JasperReportGenerator {
         detailBand.setHeight(20);
 
         int dx = 0;
-        detailBand.addElement(createDetailCell("String.valueOf($F{id})", dx, 40)); dx += 40;
-        detailBand.addElement(createDetailCell("String.valueOf($F{orderId})", dx, 60)); dx += 60;
+        detailBand.addElement(createDetailCell("($F{id} == null) ? \"—\" : String.valueOf($F{id})", dx, 40)); dx += 40;
+        detailBand.addElement(createDetailCell("($F{orderId} == null) ? \"—\" : String.valueOf($F{orderId})", dx, 60)); dx += 60;
         detailBand.addElement(createDetailCell("($F{orderNumber} == null) ? \"—\" : $F{orderNumber}", dx, 90)); dx += 90;
         detailBand.addElement(createDetailCell("($F{username} == null) ? \"—\" : $F{username}", dx, 120)); dx += 120;
         detailBand.addElement(createDetailCell("($F{paymentMethod} == null) ? \"—\" : $F{paymentMethod}", dx, 100)); dx += 100;

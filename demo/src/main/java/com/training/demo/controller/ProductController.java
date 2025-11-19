@@ -2,7 +2,9 @@ package com.training.demo.controller;
 
 import com.training.demo.dto.request.Product.ProductCreateRequest;
 import com.training.demo.dto.request.Product.ProductRequest;
+import com.training.demo.dto.response.Product.ProductResponse;
 import com.training.demo.dto.response.System.BaseResponse;
+import com.training.demo.dto.response.System.PageResponse;
 import com.training.demo.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -133,9 +135,19 @@ public class ProductController {
         return ResponseEntity.ok(BaseResponse.success(productService.findByName(name)));
     }
 
+    /**
+     * Search products by category name with pagination
+     * @param name category name
+     * @param pageNumber page number
+     * @param pageSize page size
+     * @return paginated product responses matching the category name
+     */
     @PostMapping("/search-category")
-    public ResponseEntity<?> searchByCategory(@RequestParam String name) {
+    public ResponseEntity<?> searchByCategory(@RequestParam String name,
+                                              @RequestParam(defaultValue = "0") int pageNumber,
+                                              @RequestParam(defaultValue = "12") int pageSize) {
         log.info("[Product] Search products by category");
-        return ResponseEntity.ok(BaseResponse.success(productService.findByCategory(name)));
+        PageResponse<ProductResponse> response = productService.findByCategory(name, pageNumber, pageSize);
+        return ResponseEntity.ok(BaseResponse.success(response));
     }
 }

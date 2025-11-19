@@ -104,8 +104,7 @@ public class ReportController {
     public ResponseEntity<?> exportOrdersAsync(
             @RequestParam(required = false) String orderNumber,
             @RequestParam(required = false) String username,
-            @RequestParam(required = false) OrderStatus status
-    ) {
+            @RequestParam(required = false) OrderStatus status) {
         log.info("[ReportController] Request to generate orders report asynchronously, orderNumber={}, username={}, status={}",
                 orderNumber, username, status);
 

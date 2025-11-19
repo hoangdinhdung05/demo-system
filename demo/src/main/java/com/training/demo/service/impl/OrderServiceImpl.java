@@ -108,18 +108,18 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalAmount(totalAmount);
         order = orderRepository.save(order);
 
-        // Tạo Payment record ngay sau khi tạo Order (để admin có thể tracking và confirm)
-        Payment payment = Payment.builder()
-                .order(order)
-                .paymentMethod(order.getPaymentMethod())
-                .amount(order.getTotalAmount())
-                .transactionId(generateTransactionId())
-                .status(PaymentStatus.PENDING)
-                .paymentInfo(getPaymentInfoMessage(order.getPaymentMethod()))
-                .build();
-        paymentRepository.save(payment);
-        log.info("[OrderService] Created payment record for order: {} with method: {}, transactionId: {}", 
-                order.getOrderNumber(), order.getPaymentMethod(), payment.getTransactionId());
+        // Tạo Payment record cho COD (để tracking)
+        if (order.getPaymentMethod() == PaymentMethod.COD) {
+            Payment payment = Payment.builder()
+                    .order(order)
+                    .paymentMethod(PaymentMethod.COD)
+                    .amount(order.getTotalAmount())
+                    .status(PaymentStatus.PENDING)
+                    .paymentInfo("Cash on Delivery - Payment will be collected upon delivery")
+                    .build();
+            paymentRepository.save(payment);
+            log.info("[OrderService] Created COD payment record for order: {}", order.getOrderNumber());
+        }
 
         log.info("[OrderService] Order created successfully: {}", order.getOrderNumber());
 
@@ -219,18 +219,18 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalAmount(totalAmount);
         order = orderRepository.save(order);
 
-        // Tạo Payment record ngay sau khi tạo Order (để admin có thể tracking và confirm)
-        Payment payment = Payment.builder()
-                .order(order)
-                .paymentMethod(order.getPaymentMethod())
-                .amount(order.getTotalAmount())
-                .transactionId(generateTransactionId())
-                .status(PaymentStatus.PENDING)
-                .paymentInfo(getPaymentInfoMessage(order.getPaymentMethod()))
-                .build();
-        paymentRepository.save(payment);
-        log.info("[OrderService] Created payment record for order: {} with method: {}, transactionId: {}", 
-                order.getOrderNumber(), order.getPaymentMethod(), payment.getTransactionId());
+        // Tạo Payment record cho COD (để tracking)
+        if (order.getPaymentMethod() == PaymentMethod.COD) {
+            Payment payment = Payment.builder()
+                    .order(order)
+                    .paymentMethod(PaymentMethod.COD)
+                    .amount(order.getTotalAmount())
+                    .status(PaymentStatus.PENDING)
+                    .paymentInfo("Cash on Delivery - Payment will be collected upon delivery")
+                    .build();
+            paymentRepository.save(payment);
+            log.info("[OrderService] Created COD payment record for order: {}", order.getOrderNumber());
+        }
 
         // Clear cart after successful checkout
         cart.clearItems();
@@ -407,7 +407,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public PageResponse<OrderResponse> getAllOrders(OrderStatus status, Pageable pageable) {
-            log.info("[OrderService] Getting all orders, status: {}", status);
+        log.info("[OrderService] Getting all orders, status: {}", status);
 
         Page<Order> orderPage;
         if (status != null) {
@@ -470,33 +470,6 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return orderNumber;
-    }
-
-    /**
-     * Get payment info message based on payment method
-     */
-    private String getPaymentInfoMessage(PaymentMethod method) {
-        return switch (method) {
-            case COD -> "Cash on Delivery - Payment will be collected upon delivery";
-            case VNPAY -> "VNPay - Waiting for payment confirmation";
-            case CREDIT_CARD -> "Credit Card - Pending payment processing";
-            case MOMO -> "MoMo - Waiting for payment confirmation";
-            case BANK_TRANSFER -> "Bank Transfer - Pending payment verification";
-        };
-    }
-
-    /**
-     * Generate unique transaction ID for payment
-     */
-    private String generateTransactionId() {
-        String txnId = "TXN-" + java.util.UUID.randomUUID().toString().substring(0, 18).toUpperCase();
-        
-        // Check uniqueness
-        while (paymentRepository.existsByTransactionId(txnId)) {
-            txnId = "TXN-" + java.util.UUID.randomUUID().toString().substring(0, 18).toUpperCase();
-        }
-        
-        return txnId;
     }
 
     /**
